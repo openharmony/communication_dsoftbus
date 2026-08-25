@@ -70,6 +70,7 @@ ohos_fuzztest("SoftBusNegotiateMessageFuzzTest") {
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
+  deps += dsoftbus_log_label_deps
 
   external_deps = [
     "c_utils:utils",

@@ -57,6 +57,7 @@ if (!defined(ohos_lite)) {
     include_dirs = bt_test_inc
     deps = bt_test_deps
     external_deps = bt_test_external_deps
+    deps += dsoftbus_log_label_deps
   }
 
   ohos_unittest("AdapterBleGattClientTest") {
@@ -77,6 +78,7 @@ if (!defined(ohos_lite)) {
     include_dirs = bt_test_inc
     deps = bt_test_deps
     external_deps = bt_test_external_deps
+    deps += dsoftbus_log_label_deps
   }
 
   group("unittest") {

@@ -36,25 +36,11 @@ typedef enum {
     CONN_EVENT,
     CONN_PROXY,
     CONN_TEST,
+    CONN_LABEL_MAX,
 } ConnLogLabelEnum;
 
 /* Keep consistent with labels 0xd005760 - 0xd00577f*/
-static const SoftBusLogLabel CONN_LABELS[MODULE_DOMAIN_MAX_LEN] = {
-    {CONN_INIT,         0xd005760,      "ConnInit"},
-    {CONN_BLE,          0xd005761,      "ConnBle"},
-    {CONN_BR,           0xd005762,      "ConnBr"},
-    {CONN_COMMON,       0xd005763,      "ConnCommon"},
-    {CONN_WIFI_DIRECT,  0xd005764,      "ConnWD"},
-    {CONN_NEARBY,       0xd005765,      "ConnNearby"},
-    {CONN_BLE_DIRECT,   0xd005766,      "ConnBD"},
-    {CONN_BROADCAST,    0xd005767,      "ConnBC"},
-    {CONN_NEWIP,        0xd005768,      "ConnNewIp"},
-    {CONN_ACTION,       0xd005769,      "ConnAction"},
-    {CONN_SLE,          0xd005761,      "ConnSle"},
-    {CONN_EVENT,        0xd00576a,      "ConnEvent"},
-    {CONN_PROXY,        0xd005762,      "ConnProxy"},
-    {CONN_TEST,         DOMAIN_ID_TEST, "ConnTest"},
-};
+extern const SoftBusLogLabel CONN_LABELS[CONN_LABEL_MAX];
 
 #if defined(SOFTBUS_LITEOS_M)
 #define CONN_LOGF(label, fmt, ...) SOFTBUS_LOGF_INNER(label, fmt, ##__VA_ARGS__)

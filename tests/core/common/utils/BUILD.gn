@@ -74,6 +74,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common:softbus_utils"
     ]
     external_deps = [ "hilog:libhilog" ]
+    deps += dsoftbus_log_label_deps
   }
 
   group("unittest") {

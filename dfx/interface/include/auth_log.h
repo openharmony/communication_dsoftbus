@@ -28,17 +28,11 @@ typedef enum {
     AUTH_FSM,
     AUTH_KEY,
     AUTH_TEST,
+    AUTH_LABEL_MAX,
 } AuthLogLabelEnum;
 
 /* Keep consistent with labels */
-static const SoftBusLogLabel AUTH_LABELS[MODULE_DOMAIN_MAX_LEN] = {
-    { AUTH_INIT,    0xd005720,      "AuthInit"    },
-    { AUTH_HICHAIN, 0xd005721,      "AuthHiChain" },
-    { AUTH_CONN,    0xd005722,      "AuthConn"    },
-    { AUTH_FSM,     0xd005723,      "AuthFsm"     },
-    { AUTH_KEY,     0xd005724,      "AuthKey"     },
-    { AUTH_TEST,    DOMAIN_ID_TEST, "AuthTest"    },
-};
+extern const SoftBusLogLabel AUTH_LABELS[AUTH_LABEL_MAX];
 
 #if defined(SOFTBUS_LITEOS_M)
 #define AUTH_LOGF(label, fmt, ...) SOFTBUS_LOGF_INNER(label, fmt, ##__VA_ARGS__)

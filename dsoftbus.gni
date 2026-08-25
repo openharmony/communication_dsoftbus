@@ -31,6 +31,8 @@ dsoftbus_test_path = "${dsoftbus_root_path}/tests"
 dsoftbus_test_dfx_path = "${dsoftbus_test_path}/dfx"
 dsoftbus_fuzz_out_path = "dsoftbus/soft_bus"
 
+dsoftbus_log_label_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
+
 import("adapter/feature_config/external_deps_feature/external_deps_feature.gni")
 import("adapter/feature_config/inner_feature/conn_inner_feature.gni")
 import("adapter/feature_config/inner_feature/disc_inner_feature.gni")

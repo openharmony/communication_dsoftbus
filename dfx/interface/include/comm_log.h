@@ -32,21 +32,11 @@ typedef enum {
     COMM_UTILS,
     COMM_ADAPTER,
     COMM_TEST,
+    COMM_LABEL_MAX,
 } CommLogLabelEnum;
 
 /* Keep consistent with labels */
-static const SoftBusLogLabel COMM_LABELS[MODULE_DOMAIN_MAX_LEN] = {
-    { COMM_SDK,     0xd005700,      "CommSdk"    },
-    { COMM_SVC,     0xd005701,      "CommSvc"    },
-    { COMM_INIT,    0xd005702,      "CommInit"   },
-    { COMM_DFX,     0xd005703,      "CommDfx"    },
-    { COMM_EVENT,   0xd005704,      "CommEvent"  },
-    { COMM_VERIFY,  0xd005705,      "CommVerify" },
-    { COMM_PERM,    0xd005706,      "CommPerm"   },
-    { COMM_UTILS,   0xd005707,      "CommUtils"  },
-    { COMM_ADAPTER, 0xd005708,      "CommAdapter"},
-    { COMM_TEST,    DOMAIN_ID_TEST, "CommTest"   },
-};
+extern const SoftBusLogLabel COMM_LABELS[COMM_LABEL_MAX];
 
 #if defined(SOFTBUS_LITEOS_M)
 #define COMM_LOGF(label, fmt, ...) SOFTBUS_LOGF_INNER(label, fmt, ##__VA_ARGS__)

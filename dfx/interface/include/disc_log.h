@@ -39,28 +39,11 @@ typedef enum {
     DISC_VIRLINK,
     DISC_NFC,
     DISC_TEST,
+    DISC_LABEL_MAX,
 } DiscLogLabelEnum;
 
 /* Keep consistent with labels */
-static const SoftBusLogLabel DISC_LABELS[MODULE_DOMAIN_MAX_LEN] = {
-    { DISC_INIT,        0xd0057a0,      "DiscInit"      },
-    { DISC_CONTROL,     0xd0057a1,      "DiscControl"   },
-    { DISC_LNN,         0xd0057a2,      "DiscLnn"       },
-    { DISC_BLE,         0xd0057a3,      "DiscBle"       },
-    { DISC_BLE_ADAPTER, 0xd0057a4,      "DiscAdp"       },
-    { DISC_COAP,        0xd0057a5,      "DiscCoap"      },
-    { DISC_DFINDER,     0xd0057a6,      "DiscDfinder"   },
-    { DISC_ABILITY,     0xd0057a7,      "DiscAbility"   },
-    { DISC_USB,         0xd0057a8,      "DiscUsb"       },
-    { DISC_USB_ADAPTER, 0xd0057a9,      "DiscUsbAdapter"},
-    { DISC_SDK,         0xd0057aa,      "DiscSdk"       },
-    { DISC_BROADCAST,   0xd0057ab,      "DiscBC"        },
-    { DISC_ACTION,      0xd0057ac,      "DiscAction"    },
-    { DISC_EVENT,       0xd0057ad,      "DiscEvent"     },
-    { DISC_VIRLINK,     0xd0057ae,      "DiscVirLink"   },
-    { DISC_NFC,         0xd0057a8,      "DiscNfc"       },
-    { DISC_TEST,        DOMAIN_ID_TEST, "DiscTest"      },
-};
+extern const SoftBusLogLabel DISC_LABELS[DISC_LABEL_MAX];
 
 #if defined(SOFTBUS_LITEOS_M)
 #define DISC_LOGF(label, fmt, ...) SOFTBUS_LOGF_INNER(label, fmt, ##__VA_ARGS__)
