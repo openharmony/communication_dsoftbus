@@ -48,18 +48,18 @@ int32_t PackUserInfoToJsonInner(cJSON *json, const UserInfo *userInfo)
     return SOFTBUS_OK;
 }
 
-static int32_t LnnMultiUserAllDataSyncToDB(NodeInfo *info, const UserInfo *userInfo, bool isAckSeq, char *peerudid)
+static int32_t LnnMultiUserAllDataSyncToDB(NodeInfo *info, UserInfo *userInfo, bool isAckSeq, char *peerudid)
 {
     if (info == NULL || userInfo == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (userInfo->accountId <= 0) {
+    if (userInfo->accountId == 0) {
         LNN_LOGI(LNN_LEDGER, "multi user ledger accountId is null, all data no need sync to cloud");
         return SOFTBUS_KV_CLOUD_DISABLED;
     }
     bool isMainScreenUserId = (userInfo->displayId == MAIN_SCREEN_USER_TYPE) ? true : false;
-    int32_t ret = SyncLedgerInfoToCloud(info, userInfo, isAckSeq, peerudid, isMainScreenUserId);
+    int32_t ret = LnnSyncLedgerMultiInfoToCloud(info, userInfo, isAckSeq, peerudid, isMainScreenUserId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "sync foreground user to cloud failed, userId=%{public}d", userInfo->userId);
         return ret;
@@ -74,7 +74,7 @@ static void ProcessMultiforegroundUserSyncToDB(void *para)
     SoftBusFree(userSyncInfo);
 }
 
-static int32_t LnnAsyncCallMultiUserLedgerSync(const NodeInfo *info, const UserInfo *userInfo)
+static int32_t LnnAsyncCallMultiUserLedgerSync(NodeInfo *info, const UserInfo *userInfo)
 {
     if (info == NULL || userInfo == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
@@ -95,7 +95,7 @@ static int32_t LnnAsyncCallMultiUserLedgerSync(const NodeInfo *info, const UserI
     return rc;
 }
 
-int32_t LnnAsyncCallMultiUserAllDataSyncToDB(const NodeInfo *info)
+int32_t LnnAsyncCallMultiUserAllDataSyncToDB(NodeInfo *info)
 {
     if (info == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
@@ -135,21 +135,62 @@ int32_t LnnAsyncCallMultiUserAllDataSyncToDB(const NodeInfo *info)
     return SOFTBUS_OK;
 }
 
+int32_t HbTryHandleMultiUserCloudSync()
+{
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetLocalNodeInfoSafe(&info) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get local device info fail");
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
+    }
+    const SoftBusList *localUserList = LnnGetLocalUserLedger();
+    if (localUserList == NULL) {
+        LNN_LOGE(LNN_LEDGER, "local user list is null, please check user list");
+        return SOFTBUS_NETWORK_GET_LOCAL_LEDGER_FAILED;
+    }
+    if (SoftBusMutexLock(&localUserList->lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "lock local user list failed, please check lock");
+        return SOFTBUS_LOCK_ERR;
+    }
+    UserInfo usersToSync[FOREGROUND_ACCOUNT_MAX_SIZE] = {0};
+    uint32_t syncCount = 0;
+    UserStorageInfo *user = NULL;
+    UserStorageInfo *userNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(user, userNext, &localUserList->list, UserStorageInfo, node) {
+        if (syncCount >= FOREGROUND_ACCOUNT_MAX_SIZE) {
+            LNN_LOGW(LNN_LEDGER, "user count exceed");
+            continue;
+        }
+        if (memcpy_s(&usersToSync[syncCount], sizeof(UserInfo), &user->info,
+            sizeof(UserInfo)) == EOK) {
+            syncCount++;
+        } else {
+            LNN_LOGE(LNN_LEDGER, "copy user info failed, please check user info");
+        }
+    }
+    (void)SoftBusMutexUnlock(&localUserList->lock);
+    for (uint32_t i = 0; i < syncCount; i++) {
+        if (LnnMultiUserAllDataSyncToDB(&info, &usersToSync[i], false, NULL) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "sync to cloud failed");
+        }
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t ProcessSingleUser(int32_t userId, int32_t mainScreenUserId, const NodeInfo *nodeInfo)
 {
     int64_t accountId = 0;
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
     int32_t ret = LnnGetAccountIdByUserId(userId, &accountId, accountHash, SHA_256_HASH_LEN);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "get accountId failed, userId=%{public}d, please check userId", userId);
+    if (ret != SOFTBUS_OK || accountId == 0) {
+        LNN_LOGE(LNN_LEDGER, "invalid accountId, userId=%{public}d, please check userId", userId);
         return ret;
     }
     UserInfo existUser;
     (void)memset_s(&existUser, sizeof(UserInfo), 0, sizeof(UserInfo));
     ret = LnnGetUserInfoSafe(userId, &existUser);
     if (ret == SOFTBUS_OK && existUser.accountId != 0) {
-        LNN_LOGI(LNN_LEDGER, "user already exists in local ledger, skip, userId=%{public}d", userId);
-        return SOFTBUS_ALREADY_EXISTED;
+        LNN_LOGD(LNN_LEDGER, "user already exists in local ledger, userId=%{public}d", userId);
     }
     uint64_t displayId = (userId == mainScreenUserId) ? MAIN_SCREEN_USER_TYPE : OTHER_SCREEN_USER_TYPE;
     UserInfo userInfo = {
@@ -202,9 +243,6 @@ int32_t HbMultiUserHandleLogin(void)
     }
     for (uint32_t i = 0; i < userIdsLen; i++) {
         int32_t ret = ProcessSingleUser(userIds[i], mainScreenUserId, &nodeInfo);
-        if (ret == SOFTBUS_ALREADY_EXISTED) {
-            continue;
-        }
         if (ret != SOFTBUS_OK) {
             LNN_LOGW(LNN_LEDGER, "process single user failed, userId=%{public}d, ret=%{public}d", userIds[i], ret);
         }

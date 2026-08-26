@@ -24,7 +24,8 @@ extern "C" {
 #endif
 
 int32_t PackUserInfoToJsonInner(cJSON *json, const UserInfo *userInfo);
-int32_t LnnAsyncCallMultiUserAllDataSyncToDB(const NodeInfo *info);
+int32_t LnnAsyncCallMultiUserAllDataSyncToDB(NodeInfo *info);
+int32_t HbTryHandleMultiUserCloudSync();
 int32_t HbMultiUserHandleLogin(void);
 int32_t HbMultiUserHandleLogout(int32_t userId);
 void RestoreLocalUserInfo(void);
