@@ -42,11 +42,11 @@ void PrintOptionInfo(int32_t type, const StreamAttr &value)
 {
     switch (value.GetType()) {
         case INT_TYPE:
-            TRANS_LOGI(TRANS_STREAM,
+            TRANS_LOGD(TRANS_STREAM,
                 "Int option: type=%{public}d, value=%{public}d", type, value.GetIntValue());
             break;
         case BOOL_TYPE:
-            TRANS_LOGI(TRANS_STREAM,
+            TRANS_LOGD(TRANS_STREAM,
                 "Bool option: type=%{public}d, value=%{public}d", type, value.GetBoolValue());
             break;
         case STRING_TYPE:
@@ -104,7 +104,7 @@ void VtpStreamSocket::RemoveStreamSocketLock(int32_t fd)
     std::lock_guard<std::mutex> guard(g_streamSocketLockMapLock_);
     if (g_streamSocketLockMap.find(fd) != g_streamSocketLockMap.end()) {
         g_streamSocketLockMap.erase(fd);
-        TRANS_LOGI(TRANS_STREAM, "Remove streamsocketlock for the fd success. fd=%{public}d", fd);
+        TRANS_LOGI(TRANS_STREAM, "Remove streamsocket for the fd success. fd=%{public}d", fd);
     } else {
         TRANS_LOGE(TRANS_STREAM,
             "Streamsocketlock for the fd not exist in the map. fd=%{public}d", fd);
@@ -116,7 +116,6 @@ void VtpStreamSocket::RemoveStreamSocketListener(int32_t fd)
     std::lock_guard<std::mutex> guard(g_streamSocketMapLock_);
     if (g_streamSocketMap.find(fd) != g_streamSocketMap.end()) {
         g_streamSocketMap.erase(fd);
-        TRANS_LOGI(TRANS_STREAM, "Remove streamreceiver for the fd success. fd=%{public}d", fd);
     } else {
         TRANS_LOGE(TRANS_STREAM, "Streamreceiver for the fd not exist in the map. fd=%{public}d", fd);
     }
@@ -427,8 +426,7 @@ void VtpStreamSocket::FillpAppStatistics()
             TRANS_LOGE(TRANS_STREAM, "StreamReceiver for the streamFd is empty. streamFd=%{public}d", streamFd_);
         }
     } else {
-        TRANS_LOGE(TRANS_STREAM,
-            "Fail to get fillp statistics information for the streamfd. streamfd=%{public}d, errno=%{public}d",
+        TRANS_LOGE(TRANS_STREAM, "fillp stats unavailable, streamfd=%{public}d, errno=%{public}d",
             streamFd_, FtGetErrno());
     }
 }
@@ -860,12 +858,10 @@ bool VtpStreamSocket::EnableJitterDetectionAlgo(int32_t streamFd) const
     int32_t  enableCQE = FILLP_CQE_ENABLE;
     auto errCQE = FtSetSockOpt(streamFd, IPPROTO_FILLP, FILLP_SOCK_CQE_ALGO, &enableCQE, sizeof(enableCQE));
     if (errCQE < 0) {
-        TRANS_LOGE(TRANS_STREAM,
-            "Fail to enable CQE algorithm for streamFd=%{public}d, errno=%{public}d", streamFd, FtGetErrno());
+        TRANS_LOGE(TRANS_STREAM, "CQE enable fail, fd=%{public}d, err=%{public}d", streamFd, FtGetErrno());
         return true;
     } else {
-        TRANS_LOGE(TRANS_STREAM,
-            "Success to enable CQE algorithm for streamFd=%{public}d", streamFd);
+        TRANS_LOGE(TRANS_STREAM, "Success to enable CQE algorithm for streamFd=%{public}d", streamFd);
         return false;
     }
 #else
@@ -914,20 +910,16 @@ void VtpStreamSocket::RegisterMetricCallback(bool isServer)
     TRANS_LOGD(TRANS_STREAM, "FtSetSockOpt start success");
     if (isServer) {
         if (regStatisticsRet == 0) {
-            TRANS_LOGI(TRANS_STREAM,
-                "Success to register the stream callback function at server side. streamFd=%{public}d", streamFd_);
+            TRANS_LOGI(TRANS_STREAM, "reg stream cb server. streamFd=%{public}d", streamFd_);
         } else {
-            TRANS_LOGE(TRANS_STREAM,
-                "Fail to register the stream callback function at server side. streamFd=%{public}d, errno=%{public}d",
+            TRANS_LOGE(TRANS_STREAM, "Fail to reg stream cb server. streamFd=%{public}d, errno=%{public}d",
                 streamFd_, regStatisticsRet);
         }
     } else {
         if (regStatisticsRet == 0) {
-            TRANS_LOGI(TRANS_STREAM,
-                "Success to register the stream callback function at client side. streamFd=%{public}d", streamFd_);
+            TRANS_LOGI(TRANS_STREAM, "reg stream cb client. streamFd=%{public}d", streamFd_);
         } else {
-            TRANS_LOGE(TRANS_STREAM,
-                "Fail to register the stream callback function at client side. streamFd=%{public}d, errno=%{public}d",
+            TRANS_LOGE(TRANS_STREAM, "Fail to reg stream cb client. streamFd=%{public}d, errno=%{public}d",
                 streamFd_, regStatisticsRet);
         }
     }

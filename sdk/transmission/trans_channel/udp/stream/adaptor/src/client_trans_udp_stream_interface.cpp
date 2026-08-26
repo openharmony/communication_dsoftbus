@@ -256,7 +256,6 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
 
 int32_t CloseVtpStreamChannel(int32_t channelId, const char *pkgName)
 {
-    TRANS_LOGI(TRANS_STREAM, "close stream channelId=%{public}d", channelId);
     std::shared_ptr<StreamAdaptor> adaptor = nullptr;
 
     if (channelId < 0 || pkgName == nullptr) {
