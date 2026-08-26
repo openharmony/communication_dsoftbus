@@ -328,9 +328,9 @@ int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, co
     return GetAuthMangerIf()->AuthSessionProcessDevInfoDataByConnId(connId, isServer, data, len);
 }
 
-int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uint8_t *data, uint32_t len)
+int32_t AuthSessionProcessCloseAck(uint64_t connId, int64_t authSeq, const uint8_t *data, uint32_t len)
 {
-    return GetAuthMangerIf()->AuthSessionProcessCloseAck(authSeq, data, len);
+    return GetAuthMangerIf()->AuthSessionProcessCloseAck(connId, authSeq, data, len);
 }
 
 int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len)

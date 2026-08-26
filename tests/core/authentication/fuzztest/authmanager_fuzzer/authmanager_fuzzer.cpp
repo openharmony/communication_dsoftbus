@@ -94,6 +94,7 @@ static void ProcessAuthBleInfo(FuzzedDataProvider &provider, AuthConnInfo connIn
 
     AuthDataHead head;
     (void)memset_s(&head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
+    uint64_t connId = provider.ConsumeIntegral<uint64_t>();
     int64_t authSeq = provider.ConsumeIntegral<int64_t>();
     uint32_t dataType = provider.ConsumeIntegral<uint32_t>();
     uint32_t len = provider.ConsumeIntegral<uint32_t>();
@@ -103,7 +104,7 @@ static void ProcessAuthBleInfo(FuzzedDataProvider &provider, AuthConnInfo connIn
     head.len = data.size();
     TryAuthSessionProcessDevIdData(&head, data.data(), &connInfo);
     DfxRecordServerRecvPassiveConnTime(&connInfo, &head);
-    HandleAuthData(&connInfo, &head, data.data());
+    HandleAuthData(connId, &connInfo, &head, data.data());
     DeviceMessageParse messageParse;
     (void)memset_s(&messageParse, sizeof(DeviceMessageParse), 0, sizeof(DeviceMessageParse));
     messageParse.messageType = provider.ConsumeIntegral<int32_t>();
