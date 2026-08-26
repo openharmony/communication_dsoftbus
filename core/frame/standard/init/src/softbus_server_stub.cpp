@@ -2594,7 +2594,7 @@ int32_t SoftBusServerStub::SoftbusRegisterBrProxyServiceInner(MessageParcel &dat
         return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
     }
     const char *pkgName = data.ReadCString();
-    if (pkgName == nullptr) {
+    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
         COMM_LOGE(COMM_SVC, "SoftbusRegisterServiceInner read pkgName failed!");
         return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
     }
