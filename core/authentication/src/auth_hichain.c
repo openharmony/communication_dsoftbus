@@ -406,7 +406,11 @@ static int32_t ParseGroupInfo(const char *groupInfoStr, GroupInfo *groupInfo)
     }
     groupInfo->groupType = (GroupType)groupType;
     groupInfo->userId = 0;
-    (void)GetJsonObjectInt32Item(msg, "osAccountId", &groupInfo->userId);
+    if (!GetJsonObjectInt32Item(msg, "osAccountId", &groupInfo->userId)) {
+        AUTH_LOGE(AUTH_HICHAIN, "get osAccountId fail");
+        cJSON_Delete(msg);
+        return SOFTBUS_AUTH_GET_GROUP_TYPE_FAIL; 
+    }
     cJSON_Delete(msg);
     return SOFTBUS_OK;
 }
