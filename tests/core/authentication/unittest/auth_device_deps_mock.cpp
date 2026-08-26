@@ -214,6 +214,31 @@ void LnnMapDelete(Map *map)
     return GetAuthDeviceDepsIf()->LnnMapDelete(map);
 }
 
+uint32_t MapGetSize(Map *map)
+{
+    return GetAuthDeviceDepsIf()->MapGetSize(map);
+}
+
+MapIterator *LnnMapInitIterator(Map *map)
+{
+    return GetAuthDeviceDepsIf()->LnnMapInitIterator(map);
+}
+
+bool LnnMapHasNext(MapIterator *it)
+{
+    return GetAuthDeviceDepsIf()->LnnMapHasNext(it);
+}
+
+MapIterator *LnnMapNext(MapIterator *it)
+{
+    return GetAuthDeviceDepsIf()->LnnMapNext(it);
+}
+
+void LnnMapDeinitIterator(MapIterator *it)
+{
+    return GetAuthDeviceDepsIf()->LnnMapDeinitIterator(it);
+}
+
 int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len)
 {
     return GetAuthDeviceDepsIf()->LnnGetNetworkIdByUdid(udid, buf, len);

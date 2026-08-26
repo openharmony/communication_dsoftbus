@@ -1601,4 +1601,117 @@ HWTEST_F(AuthDeviceTest, VERIFY_DEVICE_TEST_001, TestSize.Level1)
     int32_t ret = VerifyDevice(&request);
     EXPECT_EQ(ret, SOFTBUS_AUTH_INIT_FAIL);
 }
+
+/*
+ * @tc.name: INSERT_TO_AUTH_LIMIT_MAP_TEST_001
+ * @tc.desc: Test InsertToAuthLimitMap refreshes existing key without cap check or sweep
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(AuthDeviceTest, INSERT_TO_AUTH_LIMIT_MAP_TEST_001, TestSize.Level1)
+{
+    NiceMock<AuthDeviceDepsInterfaceMock> mock;
+    AuthMapInit();
+    uint64_t existTime = TEST_CURRENT_TIME;
+    EXPECT_CALL(mock, LnnMapGet).WillOnce(Return((void *)&existTime));
+    EXPECT_CALL(mock, MapGetSize).Times(0);
+    EXPECT_CALL(mock, LnnMapInitIterator).Times(0);
+    EXPECT_CALL(mock, LnnMapErase).Times(0);
+    EXPECT_CALL(mock, LnnMapSet).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(InsertToAuthLimitMap("refresh000000000", TEST_CURRENT_TIME + 1000));
+}
+
+/*
+ * @tc.name: INSERT_TO_AUTH_LIMIT_MAP_TEST_002
+ * @tc.desc: Test InsertToAuthLimitMap inserts new key directly when not full
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(AuthDeviceTest, INSERT_TO_AUTH_LIMIT_MAP_TEST_002, TestSize.Level1)
+{
+    NiceMock<AuthDeviceDepsInterfaceMock> mock;
+    AuthMapInit();
+    EXPECT_CALL(mock, LnnMapGet).WillOnce(Return(nullptr));
+    EXPECT_CALL(mock, MapGetSize).WillRepeatedly(Return(MAX_AUTH_LIMIT_MAP_SIZE - 1));
+    EXPECT_CALL(mock, LnnMapInitIterator).Times(0);
+    EXPECT_CALL(mock, LnnMapErase).Times(0);
+    EXPECT_CALL(mock, LnnMapSet).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(InsertToAuthLimitMap("newkey0000000000", TEST_CURRENT_TIME));
+}
+
+/*
+ * @tc.name: INSERT_TO_AUTH_LIMIT_MAP_TEST_003
+ * @tc.desc: Test InsertToAuthLimitMap evicts one expired node then inserts when full
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(AuthDeviceTest, INSERT_TO_AUTH_LIMIT_MAP_TEST_003, TestSize.Level1)
+{
+    NiceMock<AuthDeviceDepsInterfaceMock> mock;
+    AuthMapInit();
+    char freshKey[SHORT_UDID_HASH_HEX_LEN + 1] = "fresh_key";
+    char expiredKey[SHORT_UDID_HASH_HEX_LEN + 1] = "expired_k";
+    uint64_t currentTime = TEST_CURRENT_TIME;
+    uint64_t freshTime = currentTime;
+    uint64_t expiredTime = currentTime - DELAY_AUTH_TIME;
+    MapNode freshNode = {0};
+    freshNode.key = freshKey;
+    freshNode.value = &freshTime;
+    MapNode expiredNode = {0};
+    expiredNode.key = expiredKey;
+    expiredNode.value = &expiredTime;
+    MapIterator it = {0};
+    it.map = &g_authLimitMap;
+
+    EXPECT_CALL(mock, LnnMapGet).WillOnce(Return(nullptr));
+    EXPECT_CALL(mock, MapGetSize).WillOnce(Return(MAX_AUTH_LIMIT_MAP_SIZE));
+    EXPECT_CALL(mock, LnnMapInitIterator).WillOnce(Return(&it));
+    EXPECT_CALL(mock, LnnMapHasNext).WillOnce(Return(true)).WillOnce(Return(true)).WillRepeatedly(Return(false));
+    EXPECT_CALL(mock, LnnMapNext)
+        .WillOnce(Invoke([&freshNode](MapIterator *i) -> MapIterator * {
+            i->node = &freshNode;
+            return i;
+        }))
+        .WillOnce(Invoke([&expiredNode](MapIterator *i) -> MapIterator * {
+            i->node = &expiredNode;
+            return i;
+        }));
+    EXPECT_CALL(mock, LnnMapDeinitIterator).Times(1);
+    EXPECT_CALL(mock, LnnMapErase(_, StrEq(expiredKey))).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnMapSet).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(InsertToAuthLimitMap("newkey0000000000", currentTime));
+}
+
+/*
+ * @tc.name: INSERT_TO_AUTH_LIMIT_MAP_TEST_004
+ * @tc.desc: Test InsertToAuthLimitMap skips insert when full and no expired node
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(AuthDeviceTest, INSERT_TO_AUTH_LIMIT_MAP_TEST_004, TestSize.Level1)
+{
+    NiceMock<AuthDeviceDepsInterfaceMock> mock;
+    AuthMapInit();
+    char freshKey[SHORT_UDID_HASH_HEX_LEN + 1] = "fresh_key";
+    uint64_t currentTime = TEST_CURRENT_TIME;
+    uint64_t freshTime = currentTime;
+    MapNode freshNode = {0};
+    freshNode.key = freshKey;
+    freshNode.value = &freshTime;
+    MapIterator it = {0};
+    it.map = &g_authLimitMap;
+
+    EXPECT_CALL(mock, LnnMapGet).WillOnce(Return(nullptr));
+    EXPECT_CALL(mock, MapGetSize).WillOnce(Return(MAX_AUTH_LIMIT_MAP_SIZE));
+    EXPECT_CALL(mock, LnnMapInitIterator).WillOnce(Return(&it));
+    EXPECT_CALL(mock, LnnMapHasNext).WillOnce(Return(true)).WillRepeatedly(Return(false));
+    EXPECT_CALL(mock, LnnMapNext).WillOnce(Invoke([&freshNode](MapIterator *i) -> MapIterator * {
+        i->node = &freshNode;
+        return i;
+    }));
+    EXPECT_CALL(mock, LnnMapDeinitIterator).Times(1);
+    EXPECT_CALL(mock, LnnMapErase).Times(0);
+    EXPECT_CALL(mock, LnnMapSet).Times(0);
+    EXPECT_NO_FATAL_FAILURE(InsertToAuthLimitMap("newkey0000000000", currentTime));
+}
 } // namespace OHOS
