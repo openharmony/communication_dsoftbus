@@ -83,6 +83,12 @@ void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
     return GetManagerInterface()->DestroyClientSessionByNetworkId(server, networkId, type, destroyList);
 }
 
+void DestroyClientSessionByServiceIds(
+    SessionInfo *sessionNode, const ClientSessionServer *server, ListNode *destroyList)
+{
+    return GetManagerInterface()->DestroyClientSessionByServiceIds(sessionNode, server, destroyList);
+}
+
 void ClientDestroySession(const ListNode *destroyList, ShutdownReason reason)
 {
     return GetManagerInterface()->ClientDestroySession(destroyList, reason);

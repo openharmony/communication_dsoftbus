@@ -31,6 +31,7 @@ extern "C" {
 #define MES_FLAG_REPLY 1
 #define TRAFFIC_LEN 32
 #define UNKNOW_OS_TYPE 1 /* peer osType unknow */
+#define SERVICE_ID_MAX_COUNT 5000
 
 typedef struct {
     const char *sessionName;
@@ -116,6 +117,11 @@ typedef struct {
     const char *networkId;
     int32_t routeType;
 } LinkDownInfo;
+
+typedef struct {
+    const int64_t *serviceIds;
+    int32_t serviceIdCount;
+} ProfileDeletedInfo;
 
 #ifdef __cplusplus
 }

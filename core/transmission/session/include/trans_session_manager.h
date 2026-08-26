@@ -81,6 +81,8 @@ int32_t GetTokenTypeBySessionName(const char *sessionName, int32_t *tokenType);
 int32_t TransGetAclInfoBySessionName(const char *sessionName, uint64_t *tokenId, int32_t *pid, int32_t *userId);
 
 int32_t CheckAndUpdateTimeBySessionName(const char *sessionName, uint64_t timestamp);
+
+void TransOnProfileDeleted(const int64_t *peerServiceIds, int32_t serviceIdCount);
 #ifdef __cplusplus
 }
 #endif

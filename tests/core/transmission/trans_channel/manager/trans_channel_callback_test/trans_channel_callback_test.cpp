@@ -23,6 +23,9 @@ namespace OHOS {
 #define TEST_SESSION_NAME "com.softbus.transmission.test"
 #define TEST_PKG_NAME "com.test.trans.demo.pkgname"
 #define TEST_PID 5520
+#define TEST_SERVICE_ID_1 1001
+#define TEST_SERVICE_ID_2 1002
+#define TEST_SERVICE_ID_COUNT 2
 
 class TransChannelCallbackTest : public testing::Test {
 public:
@@ -229,5 +232,44 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelBind001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransServerOnChannelBind(TEST_PKG_NAME, TEST_PID, 1, 2);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_REMOTE_NULL, ret);
+}
+
+/*
+ * @tc.name: TransServerOnProfileDeleted001
+ * @tc.desc: TransServerOnProfileDeleted with null pkgName or null info
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelCallbackTest, TransServerOnProfileDeleted001, TestSize.Level1)
+{
+    int32_t pid = TEST_PID;
+    int64_t serviceIds[] = {TEST_SERVICE_ID_1, TEST_SERVICE_ID_2};
+    ProfileDeletedInfo info = {
+        .serviceIds = serviceIds,
+        .serviceIdCount = TEST_SERVICE_ID_COUNT
+    };
+    int32_t ret = TransServerOnProfileDeleted(nullptr, pid, &info);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransServerOnProfileDeleted(TEST_PKG_NAME, pid, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+ * @tc.name: TransServerOnProfileDeleted002
+ * @tc.desc: TransServerOnProfileDeleted, when client proxy not available
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelCallbackTest, TransServerOnProfileDeleted002, TestSize.Level1)
+{
+    int32_t pid = TEST_PID;
+    int64_t serviceIds[] = {TEST_SERVICE_ID_1, TEST_SERVICE_ID_2};
+    ProfileDeletedInfo info = {
+        .serviceIds = serviceIds,
+        .serviceIdCount = TEST_SERVICE_ID_COUNT
+    };
+    int32_t ret = TransServerOnProfileDeleted(TEST_PKG_NAME, pid, &info);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 } // OHOS

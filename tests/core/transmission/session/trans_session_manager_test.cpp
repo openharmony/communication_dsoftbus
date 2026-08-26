@@ -34,6 +34,13 @@
 #define MAX_SESSION_SERVER_NUM 100
 #define TEST_UID 488
 #define TEST_PID 1335
+#define TEST_SERVICE_ID_1 1001
+#define TEST_SERVICE_ID_2 1002
+#define TEST_NON_MATCH_SERVICE_ID 9999
+#define TEST_SERVICE_ID_COUNT 2
+#define TEST_INVALID_COUNT_0 0
+#define TEST_INVALID_COUNT_NEG (-1)
+#define TEST_VALID_COUNT 1
 
 using namespace testing::ext;
 
@@ -961,6 +968,83 @@ HWTEST_F(TransSessionManagerTest, CheckUidAndPidTest003, TestSize.Level1)
     bool result = CheckUidAndPid(g_sessionName, TEST_UID, TEST_PID + 1);
     EXPECT_FALSE(result);
     TransSessionServerDelItem(g_sessionName, 1);
+    TransSessionMgrDeinit();
+}
+
+/*
+ * @tc.name: TransOnProfileDeletedTest001
+ * @tc.desc: TransOnProfileDeleted with invalid parameters returns early
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, TransOnProfileDeletedTest001, TestSize.Level1)
+{
+    int32_t ret = TransSessionMgrInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int64_t serviceIds[] = {TEST_SERVICE_ID_1};
+    TransOnProfileDeleted(nullptr, TEST_VALID_COUNT);
+    TransOnProfileDeleted(nullptr, TEST_INVALID_COUNT_0);
+    TransOnProfileDeleted(serviceIds, TEST_INVALID_COUNT_0);
+    TransOnProfileDeleted(serviceIds, TEST_INVALID_COUNT_NEG);
+
+    TransSessionMgrDeinit();
+}
+
+/*
+ * @tc.name: TransOnProfileDeletedTest002
+ * @tc.desc: TransOnProfileDeleted with session server whose name does not contain serviceId, no notification sent
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, TransOnProfileDeletedTest002, TestSize.Level1)
+{
+    int32_t ret = TransSessionMgrInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SessionServer *sessionServer = BuildSessionServer();
+    EXPECT_TRUE(sessionServer != nullptr);
+    sessionServer->pid = TRANS_TEST_INVALID_PID;
+    sessionServer->uid = TRANS_TEST_INVALID_UID;
+    ret = TransSessionServerAddItem(sessionServer);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int64_t serviceIds[] = {TEST_SERVICE_ID_1};
+    TransOnProfileDeleted(serviceIds, TEST_VALID_COUNT);
+
+    ret = TransSessionServerDelItem(g_sessionName, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    TransSessionMgrDeinit();
+}
+
+/*
+ * @tc.name: TransOnProfileDeletedTest003
+ * @tc.desc: TransOnProfileDeleted with session server containing serviceId pattern in sessionName
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, TransOnProfileDeletedTest003, TestSize.Level1)
+{
+    int32_t ret = TransSessionMgrInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SessionServer *sessionServer = reinterpret_cast<SessionServer *>(SoftBusCalloc(sizeof(SessionServer)));
+    ASSERT_TRUE(sessionServer != nullptr);
+    (void)memset_s(sessionServer, sizeof(SessionServer), 0, sizeof(SessionServer));
+    ret = strcpy_s(sessionServer->sessionName, sizeof(sessionServer->sessionName), "serviceId_1001");
+    EXPECT_EQ(ret, EOK);
+    ret = strcpy_s(sessionServer->pkgName, sizeof(sessionServer->pkgName), g_pkgName);
+    EXPECT_EQ(ret, EOK);
+    sessionServer->pid = TRANS_TEST_INVALID_PID;
+    sessionServer->uid = TRANS_TEST_INVALID_UID;
+    ret = TransSessionServerAddItem(sessionServer);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int64_t serviceIds[] = {TEST_SERVICE_ID_1, TEST_SERVICE_ID_2};
+    TransOnProfileDeleted(serviceIds, TEST_SERVICE_ID_COUNT);
+
+    ret = TransSessionServerDelItem("serviceId_1001", 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     TransSessionMgrDeinit();
 }
 }

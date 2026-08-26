@@ -2510,6 +2510,20 @@ static int32_t TransProxyManagerInitInner(const IServerChannelCallBack *cb)
     return SOFTBUS_OK;
 }
 
+static void TransNotifyProfileDeleted(const LnnEventBasicInfo *info)
+{
+    if (info == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "info is nullptr");
+        return;
+    }
+    if (info->event != LNN_EVENT_ACCOUNT_ACL_CHANGE) {
+        TRANS_LOGE(TRANS_CTRL, "invalid info->type=%{public}d", info->event);
+        return;
+    }
+    LnnAccountAclChangeEvent *profileEvent = (LnnAccountAclChangeEvent *)info;
+    TransOnProfileDeleted(profileEvent->serviceIdList, profileEvent->serviceIdCount);
+}
+
 int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
 {
     int32_t ret = TransProxyManagerInitInner(cb);
@@ -2544,6 +2558,9 @@ int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
 
     ret = LnnRegisterEventHandler(LNN_EVENT_CONSTRAINT_ENABLE, TransNotifyBlockModeEnable);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "register user switch event failed.");
+
+    ret = LnnRegisterEventHandler(LNN_EVENT_ACCOUNT_ACL_CHANGE, TransNotifyProfileDeleted);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "register user profile deleted event failed.");
 
     TRANS_LOGI(TRANS_INIT, "proxy channel init ok");
     return SOFTBUS_OK;

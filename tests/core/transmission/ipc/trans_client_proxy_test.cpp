@@ -37,6 +37,11 @@ namespace OHOS {
 #define TEST_REMOTE_TYPE 0
 #define TEST_EVENT_ID 2
 #define TEST_COUNT 2
+#define TEST_SERVICE_ID_1 1001
+#define TEST_SERVICE_ID_2 1002
+#define TEST_SERVICE_ID_COUNT 2
+#define TEST_INVALID_COUNT_0 0
+#define TEST_INVALID_COUNT_NEG (-1)
 
 const char *g_pkgName = "dms";
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
@@ -722,5 +727,48 @@ HWTEST_F(TransClientProxyTest, ClientIpcQueryPermissionTest001, TestSize.Level1)
     bool isEmpowered = true;
     ret = ClientIpcQueryPermission(pkgName, bundleName, &isEmpowered);
     EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+ * @tc.name: ClientIpcOnProfileDeletedTest001
+ * @tc.desc: ClientIpcOnProfileDeleted with invalid parameters returns SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcOnProfileDeletedTest001, TestSize.Level1)
+{
+    int64_t serviceIds[] = {TEST_SERVICE_ID_1, TEST_SERVICE_ID_2};
+    int32_t ret = ClientIpcOnProfileDeleted(nullptr, serviceIds, TEST_SERVICE_ID_COUNT);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ChannelMsg *data = reinterpret_cast<ChannelMsg *>(SoftBusCalloc(sizeof(ChannelMsg)));
+    ASSERT_NE(nullptr, data);
+    BuildChannelMsg(data);
+    ret = ClientIpcOnProfileDeleted(data, nullptr, TEST_SERVICE_ID_COUNT);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientIpcOnProfileDeleted(data, serviceIds, TEST_INVALID_COUNT_0);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientIpcOnProfileDeleted(data, serviceIds, TEST_INVALID_COUNT_NEG);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    SoftBusFree(data);
+}
+
+/*
+ * @tc.name: ClientIpcOnProfileDeletedTest002
+ * @tc.desc: ClientIpcOnProfileDeleted when client proxy not available returns SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcOnProfileDeletedTest002, TestSize.Level1)
+{
+    int64_t serviceIds[] = {TEST_SERVICE_ID_1, TEST_SERVICE_ID_2};
+    ChannelMsg *data = reinterpret_cast<ChannelMsg *>(SoftBusCalloc(sizeof(ChannelMsg)));
+    ASSERT_NE(nullptr, data);
+    BuildChannelMsg(data);
+    int32_t ret = ClientIpcOnProfileDeleted(data, serviceIds, TEST_SERVICE_ID_COUNT);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(data);
 }
 } // namespace OHOS

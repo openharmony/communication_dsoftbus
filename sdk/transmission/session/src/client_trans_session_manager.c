@@ -4178,3 +4178,60 @@ int32_t TransGetKeyTypeBySocketId(int32_t socket, int32_t *keyType)
     TRANS_LOGI(TRANS_SDK, "socketId=%{public}d get keyType=%{public}d", socket, *keyType);
     return SOFTBUS_OK;
 }
+
+static bool IsSessionMatchedByServiceId(const SessionInfo *session, const int64_t *serviceIds, int32_t serviceIdCount)
+{
+    if (session == NULL || serviceIds == NULL || serviceIdCount <= 0) {
+        return false;
+    }
+    if (!CheckNameContainServiceId(session->info.peerSessionName)) {
+        return false;
+    }
+    int64_t peerServiceId = 0;
+    if (!SplitToGetServiceId(session->info.peerSessionName, &peerServiceId)) {
+        return false;
+    }
+    for (int32_t i = 0; i < serviceIdCount; i++) {
+        if (serviceIds[i] == peerServiceId) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static void CollectMatchedSessionsForDeletion(ClientSessionServer *server, const int64_t *serviceIds,
+    int32_t serviceIdCount, ListNode *destroyList)
+{
+    if (server == NULL || serviceIds == NULL || serviceIdCount <= 0 || destroyList == NULL) {
+        return;
+    }
+    SessionInfo *sessionNode = NULL;
+    SessionInfo *sessionNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(server->sessionList), SessionInfo, node) {
+        if (IsSessionMatchedByServiceId(sessionNode, serviceIds, serviceIdCount)) {
+            DestroyClientSessionByServiceIds(sessionNode, server, destroyList);
+        }
+    }
+}
+
+void ClientTransOnProfileDeleted(const int64_t *serviceIds, int32_t serviceIdCount)
+{
+    TRANS_LOGI(TRANS_SDK, "start");
+    if (serviceIds == NULL || serviceIdCount <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return;
+    }
+    if (LockClientSessionServerList() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return;
+    }
+    TRANS_LOGI(TRANS_SDK, "recv profile deleted event, serviceIdCount=%{public}d", serviceIdCount);
+    ListNode destroyList;
+    ListInit(&destroyList);
+    ClientSessionServer *serverNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        CollectMatchedSessionsForDeletion(serverNode, serviceIds, serviceIdCount, &destroyList);
+    }
+    UnlockClientSessionServerList();
+    (void)ClientDestroySession(&destroyList, SHUTDOWN_REASON_PROFILE_DELETED);
+}
