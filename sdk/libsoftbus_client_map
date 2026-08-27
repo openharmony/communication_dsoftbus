@@ -260,6 +260,11 @@
         "PostConversationData";
         "RegisterConversationListener";
         "UnregisterConversationListener";
+        "RegisterMetaPluginListener";
+        "UnRegisterMetaPluginListener";
+        "EnableMetaPlugin";
+        "DisableMetaPlugin";
+        "GetMetaPluginState";
     local:
         *;
 };

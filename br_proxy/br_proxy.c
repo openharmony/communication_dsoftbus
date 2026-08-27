@@ -407,6 +407,8 @@ EXIT:
 
 static int32_t ClientRecordListenerState(int32_t channelId, ListenerType type, bool isEnable)
 {
+    TRANS_LOGI(TRANS_SDK, "[br_proxy] update listen state, channelId=%{public}d, type=%{public}d, isEnable=%{public}d",
+        channelId, type, isEnable);
     if (g_clientList == NULL) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] not init");
         return SOFTBUS_NO_INIT;
@@ -626,7 +628,8 @@ int32_t ClientTransBrProxyDataReceived(int32_t channelId, const uint8_t *data, u
     if (info.enableDataRecv && info.listener.onDataReceived != NULL) {
         info.listener.onDataReceived(channelId, (const char *)data, len);
     } else {
-        TRANS_LOGE(TRANS_SDK, "[br_proxy] receiveData is off, listener is null");
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] onDataReceived enable=%{public}d, isNull=%{public}d",
+            info.enableDataRecv, (info.listener.onDataReceived != NULL));
     }
     return SOFTBUS_OK;
 }

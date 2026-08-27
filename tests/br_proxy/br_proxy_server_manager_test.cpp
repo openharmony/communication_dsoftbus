@@ -544,63 +544,58 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest023, TestSize.Level1)
 
 /**
  * @tc.name: BrProxyServerManagerTest024
- * @tc.desc: BrProxyServerManagerTest024
+ * @tc.desc: BrProxyServerManagerTest024 - Test RefreshChannel parameter validation
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest024, TestSize.Level1)
 {
-    const char *mac = "11:33:44:22:33:56";
-    const char *uuid = "testuuid";
-    int32_t channelId = 1;
-    int32_t appIndex = 1;
-    int32_t arr = GetChannelId(NULL, uuid, &channelId, appIndex);
-    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
-    arr = GetChannelId(mac, NULL, &channelId, appIndex);
-    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
+    ProxyChannelParam param = { 0 };
+    bool isRefresh = false;
+    uint32_t requestId = 1;
+
+    int32_t ret = RefreshChannel(NULL, &isRefresh, requestId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = RefreshChannel(&param, NULL, requestId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
     g_proxyList = NULL;
-    arr = GetChannelId(mac, uuid, &channelId, appIndex);
-    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
-    int32_t ret = BrProxyServerInit();
-    ASSERT_EQ(ret, SOFTBUS_OK);
-    arr = GetChannelId(mac, uuid, NULL, appIndex);
-    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
-    arr = GetChannelId(NULL, NULL, &channelId, appIndex);
-    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
-    arr = GetChannelId(NULL, NULL, &channelId, appIndex);
-    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
-    arr = GetChannelId(NULL, NULL, &channelId, appIndex);
-    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
-    arr = GetChannelId(NULL, NULL, NULL, appIndex);
-    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
+    ret = RefreshChannel(&param, &isRefresh, requestId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    int32_t initRet = BrProxyServerInit();
+    ASSERT_EQ(initRet, SOFTBUS_OK);
+
+    ret = RefreshChannel(NULL, &isRefresh, requestId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = RefreshChannel(&param, NULL, requestId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /**
  * @tc.name: BrProxyServerManagerTest025
- * @tc.desc: BrProxyServerManagerTest025
+ * @tc.desc: BrProxyServerManagerTest025 - Test RefreshChannel with valid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest025, TestSize.Level1)
 {
-    const char *mac = "11:33:44:22:33:56";
-    const char *uuid = "testuuid";
-    int32_t channelId = 1;
-    int32_t appIndex = 1;
-    int32_t arr = GetChannelId(NULL, uuid, &channelId, appIndex);
-    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
-    arr = GetChannelId(mac, NULL, &channelId, appIndex);
-    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
-    arr = GetChannelId(mac, uuid, NULL, appIndex);
-    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
-    arr = GetChannelId(NULL, NULL, &channelId, appIndex);
-    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
-    arr = GetChannelId(mac, NULL, NULL, appIndex);
-    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
-    arr = GetChannelId(NULL, NULL, NULL, appIndex);
-    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
-    arr = GetChannelId(NULL, uuid, NULL, appIndex);
-    EXPECT_EQ(arr, SOFTBUS_INVALID_PARAM);
+    int32_t ret = BrProxyServerInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    ProxyChannelParam param = { 0 };
+    bool isRefresh = false;
+    uint32_t requestId = 1;
+
+    (void)strcpy_s(param.brMac, sizeof(param.brMac), "11:33:44:22:33:56");
+    (void)strcpy_s(param.uuid, sizeof(param.uuid), "testuuid");
+    param.timeoutMs = BR_PROXY_MAX_WAIT_TIME_MS;
+
+    ret = RefreshChannel(&param, &isRefresh, requestId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isRefresh, false);
 }
 
 /**
@@ -1207,6 +1202,50 @@ static void DummyCloseChannel(struct ProxyChannel *channel, bool isClearReconnec
 {
     (void)channel;
     (void)isClearReconnectEvent;
+}
+
+/**
+ * @tc.name: BrProxyServerManagerTest048
+ * @tc.desc: Test RefreshChannel with invalid g_proxyList
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest048, TestSize.Level1)
+{
+    int32_t ret = BrProxyServerInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    g_proxyList = NULL;
+    ProxyChannelParam param = { 0 };
+    bool isRefresh = false;
+    uint32_t requestId = 1;
+
+    ret = RefreshChannel(&param, &isRefresh, requestId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: BrProxyServerManagerTest049
+ * @tc.desc: Test RefreshChannel with non-existent brMac and uuid
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest049, TestSize.Level1)
+{
+    int32_t ret = BrProxyServerInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+
+    ProxyChannelParam param = { 0 };
+    bool isRefresh = false;
+    uint32_t requestId = 1;
+
+    (void)strcpy_s(param.brMac, sizeof(param.brMac), "FF:FF:FF:FF:FF:FF");
+    (void)strcpy_s(param.uuid, sizeof(param.uuid), "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF");
+    param.timeoutMs = BR_PROXY_MAX_WAIT_TIME_MS;
+
+    ret = RefreshChannel(&param, &isRefresh, requestId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(isRefresh, false);
 }
 
 /**

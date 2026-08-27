@@ -134,7 +134,7 @@ HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest000, TestSize.L
 
 /**
  * @tc.name: BrProxyServerManagerExtTest001
- * @tc.desc: BrProxyServerManagerExtTest001, use the wrong parameter.
+ * @tc.desc: BrProxyServerManagerExtTest001, use the wrong parameter for channel and proxy operations.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -149,7 +149,11 @@ HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest001, TestSize.L
     ret = GetChannelInfo(nullptr, nullptr, CHANNEL_ID, 0, nullptr);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
     OnOpenSuccess(0, nullptr);
-    ret = GetChannelId(nullptr, nullptr, nullptr, DEFAULT_APPINDEX);
+    ProxyChannelParam param = { 0 };
+    bool isRefresh = false;
+    ret = RefreshChannel(nullptr, &isRefresh, DEFAULT_APPINDEX);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = RefreshChannel(&param, nullptr, DEFAULT_APPINDEX);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransOpenBrProxy(nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -164,18 +168,31 @@ HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest001, TestSize.L
     GetDataFromList(nullptr, nullptr, nullptr, nullptr);
     bool ret1 = IsProcExist(nullptr, 0);
     EXPECT_EQ(false, ret1);
-    DealDataWhenForeground(nullptr, nullptr, 0, 0);
-    DealWithDataRecv(nullptr, nullptr, 0, 0);
-    OnDataReceived(nullptr, nullptr, 0);
-    OnDisconnected(nullptr, 0);
-    OnReconnected(nullptr, nullptr);
-    SendDataIfExistsInList(CHANNEL_ID);
-    TransSetListenerState(CHANNEL_ID, 0, false);
-    ServerDeleteChannelByPid(0);
-    BrProxyClientDeathClearResource(0);
-    ret1 = CheckSessionExistByUid(0);
+    EXPECT_NO_FATAL_FAILURE(DealDataWhenForeground(nullptr, nullptr, 0, 0));
+    EXPECT_NO_FATAL_FAILURE(DealWithDataRecv(nullptr, nullptr, 0, 0));
+    EXPECT_NO_FATAL_FAILURE(OnDataReceived(nullptr, nullptr, 0));
+    EXPECT_NO_FATAL_FAILURE(OnDisconnected(nullptr, 0));
+    EXPECT_NO_FATAL_FAILURE(OnReconnected(nullptr, nullptr));
+    EXPECT_NO_FATAL_FAILURE(SendDataIfExistsInList(CHANNEL_ID));
+    EXPECT_NO_FATAL_FAILURE(TransSetListenerState(CHANNEL_ID, 0, false));
+    EXPECT_NO_FATAL_FAILURE(ServerDeleteChannelByPid(0));
+    EXPECT_NO_FATAL_FAILURE(BrProxyClientDeathClearResource(0));
+    EXPECT_NO_FATAL_FAILURE(TransRegisterPushHook());
+}
+
+/**
+ * @tc.name: BrProxyServerManagerExtTest002
+ * @tc.desc: BrProxyServerManagerExtTest002, use the wrong parameter for retry and session operations.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest002, TestSize.Level1)
+{
+    NiceMock<BrProxyExtInterfaceMock> brProxyExtMock;
+    EXPECT_CALL(brProxyExtMock, CreateSoftBusList).WillRepeatedly(Return(nullptr));
+    bool ret1 = CheckSessionExistByUid(0);
     EXPECT_EQ(false, ret1);
-    ret = RetryListInit();
+    int32_t ret = RetryListInit();
     EXPECT_EQ(SOFTBUS_CREATE_LIST_ERR, ret);
     ret1 = IsUidExist(0);
     EXPECT_EQ(false, ret1);
@@ -186,7 +203,6 @@ HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest001, TestSize.L
     ClearCountInRetryList(0);
     ret1 = TransIsProxyChannelEnabled(0);
     EXPECT_EQ(false, ret1);
-    TransRegisterPushHook();
 }
 
 /**
