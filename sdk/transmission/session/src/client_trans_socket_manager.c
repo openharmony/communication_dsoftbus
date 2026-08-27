@@ -562,6 +562,36 @@ void DestroyClientSessionByNetworkId(
     }
 }
 
+void DestroyClientSessionByServiceIds(
+    SessionInfo *sessionNode, const ClientSessionServer *server, ListNode *destroyList)
+{
+    if (sessionNode == NULL || server == NULL || destroyList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return;
+    }
+    char *tmpName = NULL;
+    char *tmpPeerName = NULL;
+    Anonymize(server->sessionName, &tmpName);
+    Anonymize(sessionNode->info.peerSessionName, &tmpPeerName);
+    TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s, peerSessionName=%{public}s, channelId=%{public}d, "
+        "channelType=%{public}d, routeType=%{public}d", AnonymizeWrapper(tmpName),
+        AnonymizeWrapper(tmpPeerName), sessionNode->channelId, sessionNode->channelType,
+        sessionNode->routeType);
+    AnonymizeFree(tmpName);
+    AnonymizeFree(tmpPeerName);
+    DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server, NOT_MULTIPATH);
+    if (destroyNode == NULL) {
+        return;
+    }
+    if (sessionNode->channelType == CHANNEL_TYPE_UDP && sessionNode->businessType == BUSINESS_TYPE_FILE) {
+        ClientEmitFileEvent(sessionNode->channelId);
+    }
+    DestroySessionId();
+    ListDelete(&sessionNode->node);
+    ListAdd(destroyList, &(destroyNode->node));
+    SoftBusFree(sessionNode);
+}
+
 SessionServerInfo *CreateSessionServerInfoNode(const ClientSessionServer *clientSessionServer)
 {
     if (clientSessionServer == NULL) {

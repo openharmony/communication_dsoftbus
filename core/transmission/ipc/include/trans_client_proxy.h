@@ -56,6 +56,7 @@ int32_t ClientIpcBrProxyReceivedData(int32_t pid, int32_t channelId, const uint8
 int32_t ClientIpcBrProxyStateChanged(int32_t pid, int32_t channelId, int32_t channelState);
 int32_t ClientIpcQueryPermission(const char *pkgName, const char *bundleName, bool *isEmpowered);
 int32_t BrProxyRemoveObject(const char *pkgName, int32_t pid);
+int32_t ClientIpcOnProfileDeleted(const ChannelMsg *data, const int64_t *serviceIds, int32_t serviceIdCount);
 
 #ifdef __cplusplus
 }

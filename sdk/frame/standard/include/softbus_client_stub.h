@@ -120,6 +120,7 @@ private:
     int32_t OnErrorAuthResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnServerStoppedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnConversationRecvMsgInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnProfileDeletedInner(MessageParcel &data, MessageParcel &reply);
     using SoftBusClientStubFunc =
         int32_t (SoftBusClientStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, SoftBusClientStubFunc> memberFuncMap_;

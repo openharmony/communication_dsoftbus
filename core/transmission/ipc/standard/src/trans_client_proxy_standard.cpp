@@ -799,4 +799,30 @@ void TransClientProxy::OnErrorAuthResult(
     COMM_LOGI(COMM_EVENT, "ipc default impl");
     return;
 }
+
+int32_t TransClientProxy::OnProfileDeleted(const int64_t *serviceIds, int32_t serviceIdCount)
+{
+    sptr<IRemoteObject> remote = Remote();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(remote != nullptr,
+        SOFTBUS_TRANS_PROXY_REMOTE_NULL, TRANS_CTRL, "remote is nullptr");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(serviceIds != nullptr && serviceIdCount > 0,
+        SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid parameters");
+
+    MessageParcel data;
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInterfaceToken(GetDescriptor()),
+        SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED, TRANS_CTRL, "write InterfaceToken failed!");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(serviceIdCount),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write serviceIdCount failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteRawData(serviceIds, serviceIdCount),
+        SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED, TRANS_CTRL, "write serviceIds failed");
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    int32_t ret = remote->SendRequest(CLIENT_ON_PROFILE_DELETED, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "OnProfileDeleted send request failed, ret=%{public}d", ret);
+        return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
+    }
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

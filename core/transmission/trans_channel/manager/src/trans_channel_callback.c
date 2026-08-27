@@ -286,3 +286,21 @@ int32_t TransServerOnChannelLinkDown(const char *pkgName, int32_t pid, const Lin
     return SOFTBUS_OK;
 }
 
+int32_t TransServerOnProfileDeleted(const char *pkgName, int32_t pid, const ProfileDeletedInfo *info)
+{
+    if (pkgName == NULL || info == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    TRANS_LOGD(TRANS_CTRL, "pkgName=%{public}s", pkgName);
+
+    ChannelMsg data = {
+        .msgPid = pid,
+        .msgPkgName = pkgName,
+    };
+    if (ClientIpcOnProfileDeleted(&data, info->serviceIds, info->serviceIdCount) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "client ipc on profile deleted fail");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}

@@ -72,6 +72,7 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_ON_ERROR_AUTH_RESULT] = &SoftBusClientStub::OnErrorAuthResultInner;
     memberFuncMap_[CLIENT_GENERAL_SERVER_STOPPED] = &SoftBusClientStub::OnServerStoppedInner;
     memberFuncMap_[CLIENT_ON_CONVERSATION_RECV_MSG] = &SoftBusClientStub::OnConversationRecvMsgInner;
+    memberFuncMap_[CLIENT_ON_PROFILE_DELETED] = &SoftBusClientStub::OnProfileDeletedInner;
 }
 
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
@@ -1302,5 +1303,23 @@ void SoftBusClientStub::OnConversationRecvMsg(const ConversationBusiness *info, 
 {
     COMM_LOGI(COMM_SDK, "OnConversationRecvMsg");
     LnnConversationRecvMsg(info, deviceId, data, length);
+}
+
+int32_t SoftBusClientStub::OnProfileDeletedInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t serviceIdCount;
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        data.ReadInt32(serviceIdCount), SOFTBUS_TRANS_PROXY_READINT_FAILED, COMM_SDK, "read serviceIdCount failed");
+    if (serviceIdCount <= 0) {
+        COMM_LOGE(COMM_SDK, "invalid serviceIdCount=%{public}d", serviceIdCount);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    const int64_t *serviceIds = reinterpret_cast<const int64_t *>(data.ReadRawData(serviceIdCount));
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        serviceIds != nullptr, SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED, COMM_SDK, "read serviceIds failed");
+
+    ClientTransOnProfileDeleted(serviceIds, serviceIdCount);
+    return SOFTBUS_OK;
 }
 } // namespace OHOS

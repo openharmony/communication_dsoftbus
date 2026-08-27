@@ -1886,4 +1886,107 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnConversationRecvMsgInnerTest003, TestSiz
     data.WriteRawData(msg.c_str(), msg.size() + 1);
     EXPECT_EQ(g_stub->OnConversationRecvMsgInner(data, reply), SOFTBUS_OK);
 }
+
+/**
+ * @tc.name: OnProfileDeletedInnerTest001
+ * @tc.desc: OnProfileDeletedInner, ReadInt32 serviceIdCount fails returns SOFTBUS_TRANS_PROXY_READINT_FAILED
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnProfileDeletedInnerTest001, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(g_stub->OnProfileDeletedInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+}
+
+/**
+ * @tc.name: OnProfileDeletedInnerTest002
+ * @tc.desc: OnProfileDeletedInner, serviceIdCount <= 0 returns SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnProfileDeletedInnerTest002, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(0);
+    EXPECT_EQ(g_stub->OnProfileDeletedInner(data, reply), SOFTBUS_INVALID_PARAM);
+
+    MessageParcel data2;
+    MessageParcel reply2;
+    data2.WriteInt32(-1);
+    EXPECT_EQ(g_stub->OnProfileDeletedInner(data2, reply2), SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: OnProfileDeletedInnerTest003
+ * @tc.desc: OnProfileDeletedInner, ReadInt64 serviceId fails returns SOFTBUS_TRANS_PROXY_READINT_FAILED
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnProfileDeletedInnerTest003, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(2);
+    data.WriteInt64(1001);
+    EXPECT_EQ(g_stub->OnProfileDeletedInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+}
+
+/**
+ * @tc.name: OnProfileDeletedInnerTest004
+ * @tc.desc: OnProfileDeletedInner, all fields are valid returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnProfileDeletedInnerTest004, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(2);
+    data.WriteInt64(1001);
+    data.WriteInt64(1002);
+    EXPECT_EQ(g_stub->OnProfileDeletedInner(data, reply), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: OnRemoteRequestProfileDeletedTest001
+ * @tc.desc: OnRemoteRequest with CLIENT_ON_PROFILE_DELETED, invalid token returns
+ *          SOFTBUS_TRANS_PROXY_READTOKEN_FAILED
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnRemoteRequestProfileDeletedTest001, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    uint32_t code = CLIENT_ON_PROFILE_DELETED;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    EXPECT_EQ(g_stub->OnRemoteRequest(code, data, reply, option), SOFTBUS_TRANS_PROXY_READTOKEN_FAILED);
+}
+
+/**
+ * @tc.name: OnRemoteRequestProfileDeletedTest002
+ * @tc.desc: OnRemoteRequest with CLIENT_ON_PROFILE_DELETED, valid token and data returns SOFTBUS_OK
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusServerProxyFrameTest, OnRemoteRequestProfileDeletedTest002, TestSize.Level1)
+{
+    ASSERT_TRUE(g_stub != nullptr);
+    uint32_t code = CLIENT_ON_PROFILE_DELETED;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(g_stub->GetDescriptor());
+    data.WriteInt32(1);
+    data.WriteInt64(1001);
+    EXPECT_EQ(g_stub->OnRemoteRequest(code, data, reply, option), SOFTBUS_OK);
+}
 } // namespace OHOS

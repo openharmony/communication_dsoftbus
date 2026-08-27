@@ -370,3 +370,18 @@ int32_t BrProxyRemoveObject(const char *pkgName, int32_t pid)
     TRANS_LOGI(TRANS_SDK, "[br_proxy] pid=%{public}d, ret=%{public}d", pid, ret);
     return SOFTBUS_OK;
 }
+
+int32_t ClientIpcOnProfileDeleted(const ChannelMsg *data, const int64_t *serviceIds, int32_t serviceIdCount)
+{
+    if (data == nullptr || serviceIds == nullptr || serviceIdCount <= 0) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    sptr<TransClientProxy> clientProxy = GetClientProxy(data->msgPkgName, data->msgPid);
+    if (clientProxy == nullptr) {
+        TRANS_LOGE(TRANS_CTRL, "softbus client proxy is nullptr!");
+        return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
+    }
+    return clientProxy->OnProfileDeleted(serviceIds, serviceIdCount);
+}

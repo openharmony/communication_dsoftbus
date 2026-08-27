@@ -40,6 +40,8 @@ public:
     virtual void ClientCleanUpWaitTimeoutSocket(int32_t waitOutSocket[], uint32_t waitOutNum) = 0;
     virtual void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
         const char *networkId, int32_t type, ListNode *destroyList) = 0;
+    virtual void DestroyClientSessionByServiceIds(
+        SessionInfo *sessionNode, const ClientSessionServer *server, ListNode *destroyList) = 0;
     virtual void ClientDestroySession(const ListNode *destroyList, ShutdownReason reason) = 0;
 };
 
@@ -60,6 +62,8 @@ public:
     MOCK_METHOD2(ClientCleanUpWaitTimeoutSocket, void(int32_t waitOutSocket[], uint32_t waitOutNum));
     MOCK_METHOD4(DestroyClientSessionByNetworkId, void(const ClientSessionServer *server,
         const char *networkId, int32_t type, ListNode *destroyList));
+    MOCK_METHOD3(DestroyClientSessionByServiceIds, void(
+        SessionInfo *sessionNode, const ClientSessionServer *server, ListNode *destroyList));
     MOCK_METHOD2(ClientDestroySession, void(const ListNode *destroyList, ShutdownReason reason));
 };
 

@@ -127,6 +127,9 @@ void DestroyPagingId(void);
 
 int32_t ClientDeletePagingSession(int32_t sessionId);
 
+void DestroyClientSessionByServiceIds(
+    SessionInfo *sessionNode, const ClientSessionServer *server, ListNode *destroyList);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* __cplusplus */

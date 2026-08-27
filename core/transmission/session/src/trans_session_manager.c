@@ -29,6 +29,7 @@
 #include "trans_channel_callback.h"
 #include "trans_client_proxy.h"
 #include "trans_log.h"
+#include "trans_split_serviceid.h"
 
 #define MAX_SESSION_SERVER_NUM 100
 #define CMD_REGISTED_SESSION_LIST "registed_sessionlist"
@@ -422,10 +423,10 @@ static int32_t TransListCopy(ListNode *sessionServerList)
     return SOFTBUS_OK;
 }
 
-void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, const char *peerIp, int32_t type)
-{
 #define USER_SWITCH_OFFSET 10
 #define BLOCK_MODE_OFFSET 12
+void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, const char *peerIp, int32_t type)
+{
     if (networkId == NULL || g_sessionServerList == NULL) {
         return;
     }
@@ -435,11 +436,9 @@ void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, 
     bool isBlockMode = (bool)(((uint32_t)(type) >> BLOCK_MODE_OFFSET) & 0xff);
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
-    TRANS_LOGI(TRANS_CTRL,
-        "routeType=%{public}d, networkId=%{public}s connType=%{public}d", routeType,
-            AnonymizeWrapper(anonyNetworkId), connType);
+    TRANS_LOGI(TRANS_CTRL, "routeType=%{public}d, networkId=%{public}s connType=%{public}d", routeType,
+        AnonymizeWrapper(anonyNetworkId), connType);
     AnonymizeFree(anonyNetworkId);
-
     ListNode sessionServerList = {0};
     ListInit(&sessionServerList);
     int32_t ret = TransListCopy(&sessionServerList);
@@ -447,7 +446,6 @@ void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, 
         TRANS_LOGE(TRANS_CTRL, "copy list failed");
         return;
     }
-
     SessionServer *pos = NULL;
     SessionServer *tmp = NULL;
     LinkDownInfo info = {
@@ -457,18 +455,22 @@ void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, 
         .networkId = networkId,
         .routeType = type
     };
-
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &sessionServerList, SessionServer, node) {
         if ((isUserSwitchEvent && pos->callerType != CALLER_TYPE_FEATURE_ABILITY) && !isBlockMode) {
             continue;
         }
-        (void)TransServerOnChannelLinkDown(pos->pkgName, pos->pid, &info);
+        LinkDownInfo itemInfo = info;
+        if (!CheckNameContainServiceId(pos->sessionName)) {
+            itemInfo.networkId = udid;
+            continue;
+        } else {
+            itemInfo.networkId = networkId;
+        }
+        (void)TransServerOnChannelLinkDown(pos->pkgName, pos->pid, &itemInfo);
     }
-
     if (isBlockMode) {
         TransCloseAllD2DChannelPacked(networkId, uuid, udid, peerIp, type);
     }
-
     if (routeType == WIFI_P2P) {
         LaneDeleteP2pAddress(networkId, true);
     }
@@ -726,4 +728,31 @@ int32_t TransGetAclInfoBySessionName(const char *sessionName, uint64_t *tokenId,
     TRANS_LOGE(TRANS_CTRL, "sessionName=%{public}s not found.", AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
     return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
+}
+
+void TransOnProfileDeleted(const int64_t *peerServiceIds, int32_t serviceIdCount)
+{
+    TRANS_LOGI(TRANS_CTRL, "Start, serviceIdCount=%{public}d", serviceIdCount);
+    if (peerServiceIds == NULL || serviceIdCount <= 0  || serviceIdCount > SERVICE_ID_MAX_COUNT ||
+        g_sessionServerList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return;
+    }
+
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
+        return;
+    }
+    ProfileDeletedInfo info = {
+        .serviceIds = peerServiceIds,
+        .serviceIdCount = serviceIdCount
+    };
+    SessionServer *pos = NULL;
+    LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
+        if (!CheckNameContainServiceId(pos->sessionName)) {
+            continue;
+        }
+        (void)TransServerOnProfileDeleted(pos->pkgName, pos->pid, &info);
+    }
+    (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
 }

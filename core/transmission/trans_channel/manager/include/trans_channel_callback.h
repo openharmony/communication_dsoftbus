@@ -43,6 +43,8 @@ IServerChannelCallBack *TransServerGetChannelCb(void);
 
 int32_t TransServerOnChannelLinkDown(const char *pkgName, int32_t pid, const LinkDownInfo *info);
 
+int32_t TransServerOnProfileDeleted(const char *pkgName, int32_t pid, const ProfileDeletedInfo *info);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

@@ -2060,4 +2060,270 @@ HWTEST_F(TransClientSessionManagerTest, IsMultiPathSessionInvalidParamTest001, T
     ret = IsMultiPathSession(g_sessionName, nullptr);
     EXPECT_FALSE(ret);
 }
+
+/*
+ * @tc.name: ClientTransOnProfileDeletedTest001
+ * @tc.desc: ClientTransOnProfileDeleted with invalid parameters returns early without crash
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientTransOnProfileDeletedTest001, TestSize.Level1)
+{
+    int64_t serviceIds[] = {1001};
+    EXPECT_NO_FATAL_FAILURE(ClientTransOnProfileDeleted(nullptr, 1));
+    EXPECT_NO_FATAL_FAILURE(ClientTransOnProfileDeleted(nullptr, 0));
+    EXPECT_NO_FATAL_FAILURE(ClientTransOnProfileDeleted(serviceIds, 0));
+    EXPECT_NO_FATAL_FAILURE(ClientTransOnProfileDeleted(serviceIds, -1));
+}
+
+/*
+ * @tc.name: ClientTransOnProfileDeletedTest002
+ * @tc.desc: ClientTransOnProfileDeleted with no session server does not crash
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientTransOnProfileDeletedTest002, TestSize.Level1)
+{
+    int32_t ret = TransClientInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    int64_t serviceIds[] = {1001};
+    EXPECT_NO_FATAL_FAILURE(ClientTransOnProfileDeleted(serviceIds, 1));
+}
+
+/*
+ * @tc.name: DestroyClientSessionByServiceIdsTest001
+ * @tc.desc: DestroyClientSessionByServiceIds with invalid parameters returns early without crash
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, DestroyClientSessionByServiceIdsTest001, TestSize.Level1)
+{
+    ListNode destroyList;
+    ListInit(&destroyList);
+    ClientSessionServer server;
+    SessionInfo sessionNode;
+    (void)memset_s(&server, sizeof(server), 0, sizeof(server));
+    (void)memset_s(&sessionNode, sizeof(sessionNode), 0, sizeof(sessionNode));
+    EXPECT_NO_FATAL_FAILURE(DestroyClientSessionByServiceIds(nullptr, &server, &destroyList));
+    EXPECT_NO_FATAL_FAILURE(DestroyClientSessionByServiceIds(&sessionNode, nullptr, &destroyList));
+    EXPECT_NO_FATAL_FAILURE(DestroyClientSessionByServiceIds(&sessionNode, &server, nullptr));
+}
+
+/*
+ * @tc.name: ClientTransOnProfileDeletedTest003
+ * @tc.desc: ClientTransOnProfileDeleted deletes session when serviceId matches
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientTransOnProfileDeletedTest003, TestSize.Level1)
+{
+    int32_t ret = TransClientInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    uint64_t timestamp = 0;
+    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SessionParam *sessionParam = reinterpret_cast<SessionParam *>(SoftBusCalloc(sizeof(SessionParam)));
+    ASSERT_TRUE(sessionParam != nullptr);
+    sessionParam->sessionName = g_sessionName;
+    sessionParam->peerSessionName = "serviceId_1001";
+    sessionParam->peerDeviceId = g_deviceId;
+    sessionParam->groupId = g_groupid;
+    sessionParam->attr = &g_sessionAttr;
+    SessionInfo *session = GenerateSession(sessionParam);
+    ASSERT_TRUE(session != nullptr);
+    ret = ClientAddNewSession(g_sessionName, session);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int64_t serviceIds[] = {1001};
+    EXPECT_NO_FATAL_FAILURE(ClientTransOnProfileDeleted(serviceIds, 1));
+
+    int32_t sessionId = 0;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
+    ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftBusFree(sessionParam);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ClientTransOnProfileDeletedTest004
+ * @tc.desc: ClientTransOnProfileDeleted does not delete session when serviceId does not match
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientTransOnProfileDeletedTest004, TestSize.Level1)
+{
+    int32_t ret = TransClientInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    uint64_t timestamp = 0;
+    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SessionParam *sessionParam = reinterpret_cast<SessionParam *>(SoftBusCalloc(sizeof(SessionParam)));
+    ASSERT_TRUE(sessionParam != nullptr);
+    sessionParam->sessionName = g_sessionName;
+    sessionParam->peerSessionName = "serviceId_2002";
+    sessionParam->peerDeviceId = g_deviceId;
+    sessionParam->groupId = g_groupid;
+    sessionParam->attr = &g_sessionAttr;
+    SessionInfo *session = GenerateSession(sessionParam);
+    ASSERT_TRUE(session != nullptr);
+    ret = ClientAddNewSession(g_sessionName, session);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int64_t serviceIds[] = {1001};
+    EXPECT_NO_FATAL_FAILURE(ClientTransOnProfileDeleted(serviceIds, 1));
+
+    int32_t sessionId = 0;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
+    ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_REPEATED);
+
+    SoftBusFree(sessionParam);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ClientTransOnProfileDeletedTest005
+ * @tc.desc: ClientTransOnProfileDeleted does not delete session without serviceId prefix
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientTransOnProfileDeletedTest005, TestSize.Level1)
+{
+    int32_t ret = TransClientInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    uint64_t timestamp = 0;
+    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SessionParam *sessionParam = reinterpret_cast<SessionParam *>(SoftBusCalloc(sizeof(SessionParam)));
+    ASSERT_TRUE(sessionParam != nullptr);
+    sessionParam->sessionName = g_sessionName;
+    sessionParam->peerSessionName = "regular_session_name";
+    sessionParam->peerDeviceId = g_deviceId;
+    sessionParam->groupId = g_groupid;
+    sessionParam->attr = &g_sessionAttr;
+    SessionInfo *session = GenerateSession(sessionParam);
+    ASSERT_TRUE(session != nullptr);
+    ret = ClientAddNewSession(g_sessionName, session);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int64_t serviceIds[] = {1001};
+    EXPECT_NO_FATAL_FAILURE(ClientTransOnProfileDeleted(serviceIds, 1));
+
+    int32_t sessionId = 0;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
+    ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_REPEATED);
+
+    SoftBusFree(sessionParam);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ClientTransOnProfileDeletedTest006
+ * @tc.desc: ClientTransOnProfileDeleted matches one of multiple serviceIds
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientTransOnProfileDeletedTest006, TestSize.Level1)
+{
+    int32_t ret = TransClientInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    uint64_t timestamp = 0;
+    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SessionParam *sessionParam = reinterpret_cast<SessionParam *>(SoftBusCalloc(sizeof(SessionParam)));
+    ASSERT_TRUE(sessionParam != nullptr);
+    sessionParam->sessionName = g_sessionName;
+    sessionParam->peerSessionName = "serviceId_3003";
+    sessionParam->peerDeviceId = g_deviceId;
+    sessionParam->groupId = g_groupid;
+    sessionParam->attr = &g_sessionAttr;
+    SessionInfo *session = GenerateSession(sessionParam);
+    ASSERT_TRUE(session != nullptr);
+    ret = ClientAddNewSession(g_sessionName, session);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int64_t serviceIds[] = {1001, 2002, 3003};
+    EXPECT_NO_FATAL_FAILURE(ClientTransOnProfileDeleted(serviceIds, 3));
+
+    int32_t sessionId = 0;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
+    ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftBusFree(sessionParam);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: ClientTransOnProfileDeletedTest007
+ * @tc.desc: ClientTransOnProfileDeleted handles multiple sessions with different serviceIds
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientTransOnProfileDeletedTest007, TestSize.Level1)
+{
+    int32_t ret = TransClientInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    uint64_t timestamp = 0;
+    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SessionParam *sessionParam1 = reinterpret_cast<SessionParam *>(SoftBusCalloc(sizeof(SessionParam)));
+    ASSERT_TRUE(sessionParam1 != nullptr);
+    sessionParam1->sessionName = g_sessionName;
+    sessionParam1->peerSessionName = "serviceId_1001";
+    sessionParam1->peerDeviceId = g_deviceId;
+    sessionParam1->groupId = g_groupid;
+    sessionParam1->attr = &g_sessionAttr;
+    SessionInfo *session1 = GenerateSession(sessionParam1);
+    ASSERT_TRUE(session1 != nullptr);
+    ret = ClientAddNewSession(g_sessionName, session1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SessionParam *sessionParam2 = reinterpret_cast<SessionParam *>(SoftBusCalloc(sizeof(SessionParam)));
+    ASSERT_TRUE(sessionParam2 != nullptr);
+    sessionParam2->sessionName = g_sessionName;
+    sessionParam2->peerSessionName = "serviceId_2002";
+    sessionParam2->peerDeviceId = g_deviceId;
+    sessionParam2->groupId = g_groupid;
+    sessionParam2->attr = &g_sessionAttr;
+    SessionInfo *session2 = GenerateSession(sessionParam2);
+    ASSERT_TRUE(session2 != nullptr);
+    ret = ClientAddNewSession(g_sessionName, session2);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int64_t serviceIds[] = {1001};
+    EXPECT_NO_FATAL_FAILURE(ClientTransOnProfileDeleted(serviceIds, 1));
+
+    int32_t sessionId1 = 0;
+    SessionEnableStatus isEnabled1 = ENABLE_STATUS_INIT;
+    ret = ClientAddSession(sessionParam1, &sessionId1, &isEnabled1);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int32_t sessionId2 = 0;
+    SessionEnableStatus isEnabled2 = ENABLE_STATUS_INIT;
+    ret = ClientAddSession(sessionParam2, &sessionId2, &isEnabled2);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_REPEATED);
+
+    SoftBusFree(sessionParam1);
+    SoftBusFree(sessionParam2);
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
 } // namespace OHOS
