@@ -92,9 +92,9 @@ int32_t LnnDeleteSyncToDB(int32_t userId, int64_t accountId, bool isMainScreenUs
     return HeartBeatCtrlStaticInterface()->LnnDeleteSyncToDB(userId, accountId, isMainScreenUserId);
 }
 
-void LnnOnOhosAccountLogout(void)
+void LnnOnOhosAccountLogout(int32_t userId)
 {
-    HeartBeatCtrlStaticInterface()->LnnOnOhosAccountLogout();
+    HeartBeatCtrlStaticInterface()->LnnOnOhosAccountLogout(userId);
 }
 
 void LnnUpdateOhosAccount(UpdateAccountReason reason)

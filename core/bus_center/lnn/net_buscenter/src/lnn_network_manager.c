@@ -640,26 +640,27 @@ void RestartCoapDiscovery(void)
     }
 }
 
-static void OnGroupCreated(const char *groupId, int32_t groupType)
+static void OnGroupCreated(const char *groupId, int32_t groupType, int32_t userId)
 {
     (void)groupId;
-    LNN_LOGI(LNN_BUILDER, "OnGroupCreated, groupType=%{public}d", groupType);
+    LNN_LOGI(LNN_BUILDER, "OnGroupCreated, groupType=%{public}d, userId=%{public}d", groupType, userId);
     LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
     LnnHbOnTrustedRelationIncreased(groupType);
     if (groupType == AUTH_IDENTICAL_ACCOUNT_GROUP) {
-        LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN, JudgeDeviceTypeAndGetOsAccountIds());
+        int32_t notifyUserId = (userId > 0) ? userId : JudgeDeviceTypeAndGetOsAccountIds();
+        LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN, notifyUserId);
     }
     RestartCoapDiscovery();
     DfxRecordWifiTriggerTimestamp(WIFI_GROUP_CREATED);
     EhLoginEventHandlerPacked();
 }
 
-static void OnGroupDeleted(const char *groupId, int32_t groupType)
+static void OnGroupDeleted(const char *groupId, int32_t groupType, int32_t userId)
 {
     (void)groupId;
-    LNN_LOGD(LNN_BUILDER, "wifi handle OnGroupDeleted");
+    LNN_LOGI(LNN_BUILDER, "OnGroupDeleted, groupType=%{public}d, userId=%{public}d", groupType, userId);
     if (groupType == AUTH_IDENTICAL_ACCOUNT_GROUP) {
-        LnnOnOhosAccountLogout();
+        LnnOnOhosAccountLogout(userId);
     }
     LnnHbOnTrustedRelationReduced();
 }

@@ -24,6 +24,8 @@
 #include "auth_request.h"
 #include "auth_session_key.c"
 
+#define DEFAULT_MAIN_SCREEN_USER_ID 100
+
 namespace OHOS {
 using namespace testing::ext;
 const uint64_t CONN_ID = 10 | ((uint64_t)AUTH_LINK_TYPE_WIFI << INT32_BIT_NUM);
@@ -423,8 +425,8 @@ HWTEST_F(AuthManagerTest, RETRY_REG_TRUST_DATA_CHANGE_LISTENER_TEST_001, TestSiz
     EXPECT_NO_FATAL_FAILURE(AuthNotifyDeviceVerifyPassed(authHandle, &nodeInfo));
     EXPECT_NO_FATAL_FAILURE(AuthNotifyDeviceDisconnect(authHandle));
     EXPECT_NO_FATAL_FAILURE(OnDeviceNotTrusted(UDID_TEST, DEFAULT_USERID, HICHAIN_DEVICE));
-    EXPECT_NO_FATAL_FAILURE(OnGroupCreated("myId", GROUP_TYPE));
-    EXPECT_NO_FATAL_FAILURE(OnGroupDeleted("myId", GROUP_TYPE));
+    EXPECT_NO_FATAL_FAILURE(OnGroupCreated("myId", GROUP_TYPE, DEFAULT_MAIN_SCREEN_USER_ID));
+    EXPECT_NO_FATAL_FAILURE(OnGroupDeleted("myId", GROUP_TYPE, DEFAULT_MAIN_SCREEN_USER_ID));
     EXPECT_NO_FATAL_FAILURE(OnDeviceBound(UDID_TEST, "groupInfo"));
     EXPECT_EQ(RetryRegTrustDataChangeListener(), SOFTBUS_AUTH_REG_DATA_FAIL);
     EXPECT_NO_FATAL_FAILURE(RemoveNotPassedAuthManagerByUdid(nullptr));

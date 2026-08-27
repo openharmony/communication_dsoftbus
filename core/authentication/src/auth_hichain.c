@@ -55,6 +55,7 @@
 typedef struct {
     char groupId[GROUPID_BUF_LEN];
     GroupType groupType;
+    int32_t userId;
 } GroupInfo;
 
 typedef struct {
@@ -404,6 +405,8 @@ static int32_t ParseGroupInfo(const char *groupInfoStr, GroupInfo *groupInfo)
         return SOFTBUS_AUTH_GET_GROUP_TYPE_FAIL;
     }
     groupInfo->groupType = (GroupType)groupType;
+    groupInfo->userId = 0;
+    (void)GetJsonObjectInt32Item(msg, "osAccountId", &groupInfo->userId);
     cJSON_Delete(msg);
     return SOFTBUS_OK;
 }
@@ -419,9 +422,9 @@ static void OnGroupCreated(const char *groupInfo)
     if (ParseGroupInfo(groupInfo, &info) != SOFTBUS_OK) {
         return;
     }
-    AUTH_LOGI(AUTH_HICHAIN, "hichain OnGroupCreated, type=%{public}d", info.groupType);
+    AUTH_LOGI(AUTH_HICHAIN, "hichain OnGroupCreated, type=%{public}d, userId=%{public}d", info.groupType, info.userId);
     if (g_dataChangeListener.onGroupCreated != NULL) {
-        g_dataChangeListener.onGroupCreated(info.groupId, (int32_t)info.groupType);
+        g_dataChangeListener.onGroupCreated(info.groupId, (int32_t)info.groupType, info.userId);
     }
 }
 
@@ -468,9 +471,9 @@ static void OnGroupDeleted(const char *groupInfo)
     if (ParseGroupInfo(groupInfo, &info) != SOFTBUS_OK) {
         return;
     }
-    AUTH_LOGI(AUTH_HICHAIN, "hichain OnGroupDeleted, type=%{public}d", info.groupType);
+    AUTH_LOGI(AUTH_HICHAIN, "hichain OnGroupDeleted, type=%{public}d, userId=%{public}d", info.groupType, info.userId);
     if (g_dataChangeListener.onGroupDeleted != NULL) {
-        g_dataChangeListener.onGroupDeleted(info.groupId, info.groupType);
+        g_dataChangeListener.onGroupDeleted(info.groupId, info.groupType, info.userId);
     }
 }
 

@@ -630,9 +630,9 @@ void LnnOnOhosAccountChanged(void)
     GetLnnOhosAccountInterface()->LnnOnOhosAccountChanged();
 }
 
-void LnnOnOhosAccountLogout(void)
+void LnnOnOhosAccountLogout(int32_t userId)
 {
-    GetLnnOhosAccountInterface()->LnnOnOhosAccountLogout();
+    GetLnnOhosAccountInterface()->LnnOnOhosAccountLogout(userId);
 }
 
 void LnnSetUnlockState(void)

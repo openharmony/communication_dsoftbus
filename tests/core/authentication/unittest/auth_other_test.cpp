@@ -114,10 +114,11 @@ void OnDeviceDisconnectTest(int64_t authId)
     (void)authId;
 }
 
-void OnGroupCreatedTest(const char *groupId, int32_t groupType)
+void OnGroupCreatedTest(const char *groupId, int32_t groupType, int32_t userId)
 {
     (void)groupId;
     (void)groupType;
+    (void)userId;
 }
 
 void OnGroupDeletedTest(const char *groupId)

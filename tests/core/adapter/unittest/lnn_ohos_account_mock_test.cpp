@@ -270,7 +270,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_ON_OHOS_ACCOUNT_LOGOUT_001, TestSize.Level1
     NiceMock<LnnOhosAccountInterfaceMock> mocker;
     ON_CALL(mocker, SoftBusGenerateStrHash)
         .WillByDefault(Return(SOFTBUS_INVALID_PARAM));
-    LnnOnOhosAccountLogout();
+    LnnOnOhosAccountLogout(0);
     bool ret = LnnIsDefaultOhosAccount();
     EXPECT_FALSE(ret);
 }
@@ -301,7 +301,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_ON_OHOS_ACCOUNT_LOGOUT_002, TestSize.Level1
         .WillByDefault(Return());
     ON_CALL(mocker, LnnUpdateHeartbeatInfo(_))
         .WillByDefault(Return());
-    LnnOnOhosAccountLogout();
+    LnnOnOhosAccountLogout(0);
 }
 
 /*
@@ -317,7 +317,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_ON_OHOS_ACCOUNT_LOGOUT_003, TestSize.Level1
         .WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(mocker, SoftBusGenerateStrHash(_, _, _))
         .WillByDefault(Return(SOFTBUS_INVALID_PARAM));
-    LnnOnOhosAccountLogout();
+    LnnOnOhosAccountLogout(0);
 }
 
 /*
@@ -345,7 +345,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_ON_OHOS_ACCOUNT_LOGOUT_004, TestSize.Level1
         .WillByDefault(Return());
     ON_CALL(mocker, LnnUpdateHeartbeatInfo(_))
         .WillByDefault(Return());
-    LnnOnOhosAccountLogout();
+    LnnOnOhosAccountLogout(0);
 }
 
 /*

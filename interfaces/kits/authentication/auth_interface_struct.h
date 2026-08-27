@@ -158,8 +158,8 @@ typedef struct {
 } AuthKeyInfo;
 
 typedef struct {
-    void (*onGroupCreated)(const char *groupId, int32_t groupType);
-    void (*onGroupDeleted)(const char *groupId, int32_t groupType);
+    void (*onGroupCreated)(const char *groupId, int32_t groupType, int32_t userId);
+    void (*onGroupDeleted)(const char *groupId, int32_t groupType, int32_t userId);
     void (*onDeviceBound)(const char *udid, const char *groupInfo);
 } GroupChangeListener;
 

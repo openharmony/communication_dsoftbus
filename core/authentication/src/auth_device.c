@@ -466,17 +466,17 @@ void UnregAuthVerifyListener(void)
     (void)memset_s(&g_verifyListener, sizeof(AuthVerifyListener), 0, sizeof(AuthVerifyListener));
 }
 
-static void OnGroupCreated(const char *groupId, int32_t groupType)
+static void OnGroupCreated(const char *groupId, int32_t groupType, int32_t userId)
 {
     if (g_groupChangeListener.onGroupCreated != NULL) {
-        g_groupChangeListener.onGroupCreated(groupId, groupType);
+        g_groupChangeListener.onGroupCreated(groupId, groupType, userId);
     }
 }
 
-static void OnGroupDeleted(const char *groupId, int32_t groupType)
+static void OnGroupDeleted(const char *groupId, int32_t groupType, int32_t userId)
 {
     if (g_groupChangeListener.onGroupDeleted != NULL) {
-        g_groupChangeListener.onGroupDeleted(groupId, groupType);
+        g_groupChangeListener.onGroupDeleted(groupId, groupType, userId);
     }
 }
 

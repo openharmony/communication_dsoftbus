@@ -413,9 +413,9 @@ void LnnUpdateOhosAccount(UpdateAccountReason reason)
     return GetLocalLedgerDepsInterface()->LnnUpdateOhosAccount(reason);
 }
 
-void LnnOnOhosAccountLogout(void)
+void LnnOnOhosAccountLogout(int32_t userId)
 {
-    return GetLocalLedgerDepsInterface()->LnnOnOhosAccountLogout();
+    return GetLocalLedgerDepsInterface()->LnnOnOhosAccountLogout(userId);
 }
 
 void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state)
