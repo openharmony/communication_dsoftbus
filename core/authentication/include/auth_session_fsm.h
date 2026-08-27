@@ -39,13 +39,12 @@ int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *con
 int32_t AuthSessionProcessDevIdData(int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionPostAuthData(int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len);
-int32_t AuthSessionProcessAuthDataByconnId(uint64_t connId, int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionGetUdid(int64_t authSeq, char *udid, uint32_t size);
 int32_t AuthSessionSaveSessionKey(int64_t authSeq, const uint8_t *key, uint32_t len);
 int32_t AuthSessionHandleAuthFinish(int64_t authSeq, AclWriteState aclState);
 int32_t AuthSessionHandleAuthError(int64_t authSeq, int32_t reason);
 int32_t AuthSessionProcessDevInfoData(int64_t authSeq, const uint8_t *data, uint32_t len);
-int32_t AuthSessionProcessCloseAck(uint64_t connId, int64_t authSeq, const uint8_t *data, uint32_t len);
+int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer, const uint8_t *data, uint32_t len);
 int32_t AuthSessionProcessCancelAuthByConnId(uint64_t connId, bool isConnectServer, const uint8_t *data, uint32_t len);

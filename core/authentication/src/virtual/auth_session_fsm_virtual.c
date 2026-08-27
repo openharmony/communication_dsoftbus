@@ -95,15 +95,6 @@ int32_t AuthSessionProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t AuthSessionProcessAuthDataByconnId(uint64_t connId, int64_t authSeq, const uint8_t *data, uint32_t len)
-{
-    (void)connId;
-    (void)authSeq;
-    (void)data;
-    (void)len;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
 int32_t AuthSessionProcessCancelAuthByConnId(uint64_t connId, bool isConnectServer, const uint8_t *data, uint32_t len)
 {
     (void)connId;
@@ -113,9 +104,8 @@ int32_t AuthSessionProcessCancelAuthByConnId(uint64_t connId, bool isConnectServ
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t AuthSessionProcessCloseAck(uint64_t connId, int64_t authSeq, const uint8_t *data, uint32_t len)
+int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
-    (void)connId;
     (void)authSeq;
     (void)data;
     (void)len;

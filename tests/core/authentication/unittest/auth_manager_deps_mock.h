@@ -115,7 +115,7 @@ public:
         const uint8_t *data, bool isServer, DeviceMessageParse *messageParse) = 0;
     virtual int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer,
         const uint8_t *data, uint32_t len) = 0;
-    virtual int32_t AuthSessionProcessCloseAck(uint64_t connId, int64_t authSeq, const uint8_t *data, uint32_t len) = 0;
+    virtual int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uint8_t *data, uint32_t len) = 0;
     virtual int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer,
         const uint8_t *data, uint32_t len) = 0;
     virtual uint32_t AuthGetUkDecryptSize(uint32_t inLen) = 0;
@@ -225,7 +225,7 @@ public:
     MOCK_METHOD5(IsDeviceMessagePacket, bool (const AuthConnInfo *, const AuthDataHead *,
         const uint8_t *, bool, DeviceMessageParse *));
     MOCK_METHOD4(AuthSessionProcessDevInfoDataByConnId, int32_t (uint64_t, bool, const uint8_t *, uint32_t));
-    MOCK_METHOD4(AuthSessionProcessCloseAck, int32_t (uint64_t, int64_t, const uint8_t *, uint32_t));
+    MOCK_METHOD3(AuthSessionProcessCloseAck, int32_t (int64_t, const uint8_t *, uint32_t));
     MOCK_METHOD4(AuthSessionProcessCloseAckByConnId, int32_t (uint64_t, bool, const uint8_t *, uint32_t));
     MOCK_METHOD1(AuthGetUkDecryptSize, uint32_t (uint32_t));
     MOCK_METHOD5(AuthDecryptByUkId, int32_t (int32_t, const uint8_t *, uint32_t, uint8_t *, uint32_t *));

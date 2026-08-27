@@ -578,11 +578,10 @@ HWTEST_F(AuthManagerTest, TRY_GET_BR_CONN_INFO_TEST_001, TestSize.Level1)
     AuthConnInfo connInfo;
     AuthDataHead head;
     uint8_t data[] = "testdata";
-    uint64_t connId = 1;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     (void)memset_s(&head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
     DeviceMessageParse messageParse = { CODE_VERIFY_DEVICE, DEFAULT_FREQ_CYCLE };
-    EXPECT_NO_FATAL_FAILURE(HandleAuthData(connId, &connInfo, &head, data));
+    EXPECT_NO_FATAL_FAILURE(HandleAuthData(&connInfo, &head, data));
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_WIFI;
     ASSERT_TRUE(memcpy_s(connInfo.info.ipInfo.ip, IP_LEN, INVALID_IP_TEST, strlen(INVALID_IP_TEST)) == EOK);
