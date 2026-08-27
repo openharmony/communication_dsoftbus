@@ -128,9 +128,9 @@ ERR_EXIT:
 
 int32_t TransAuthWithParaDelLaneReqById(uint32_t laneReqId)
 {
-    TRANS_LOGD(TRANS_SVC, "TransAuthWithParaDelLaneReqById laneReqId=%{public}u", laneReqId);
+    TRANS_LOGD(TRANS_SVC, "laneReqId=%{public}u", laneReqId);
     if (g_authWithParaAsyncReqLaneList == NULL) {
-        TRANS_LOGE(TRANS_SVC, "TransAuthWithParaDelLaneReqById: g_authWithParaAsyncReqLaneList no init.");
+        TRANS_LOGE(TRANS_SVC, "g_authWithParaAsyncReqLaneList no init.");
         return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&(g_authWithParaAsyncReqLaneList->lock)) != SOFTBUS_OK) {
@@ -154,7 +154,7 @@ int32_t TransAuthWithParaDelLaneReqById(uint32_t laneReqId)
         }
     }
     (void)SoftBusMutexUnlock(&(g_authWithParaAsyncReqLaneList->lock));
-    TRANS_LOGE(TRANS_SVC, "TransAuthWithParaDelLaneReqById not found, laneReqId=%{public}u", laneReqId);
+    TRANS_LOGE(TRANS_SVC, "laneReqId not found, laneReqId=%{public}u", laneReqId);
     return SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND;
 }
 
@@ -193,7 +193,7 @@ int32_t TransUpdateAuthWithParaLaneConnInfo(uint32_t laneHandle, bool bSucc, con
 int32_t TransAuthWithParaGetLaneReqByLaneReqId(uint32_t laneReqId, TransAuthWithParaNode *paraNode)
 {
     if (paraNode == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "TransAuthWithParaGetLaneReqByLaneReqId: invalid paraNode");
+        TRANS_LOGE(TRANS_CTRL, "invalid paraNode");
         return SOFTBUS_INVALID_PARAM;
     }
     if (g_authWithParaAsyncReqLaneList == NULL) {
@@ -218,6 +218,6 @@ int32_t TransAuthWithParaGetLaneReqByLaneReqId(uint32_t laneReqId, TransAuthWith
         }
     }
     (void)SoftBusMutexUnlock(&(g_authWithParaAsyncReqLaneList->lock));
-    TRANS_LOGE(TRANS_SVC, "TransAuthWithParaGetLaneReqByLaneReqId not found. laneReqId=%{public}u", laneReqId);
+    TRANS_LOGE(TRANS_SVC, "laneReqId not found. laneReqId=%{public}u", laneReqId);
     return SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND;
 }

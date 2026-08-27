@@ -1073,11 +1073,11 @@ static void FillAndReportEventEnd(int32_t authId, TransEventExtra *extra)
 static bool CheckForAuthWithParam(const char *sessionName, const LaneConnInfo *connInfo, const int32_t *channelId)
 {
     if (sessionName == NULL || connInfo == NULL || channelId == NULL) {
-        TRANS_LOGE(TRANS_SVC, "CheckForAuthWithParam invalid param");
+        TRANS_LOGE(TRANS_SVC, "invalid param");
         return false;
     }
     if (g_authChannelList == NULL) {
-        TRANS_LOGE(TRANS_SVC, "CheckForAuthWithParam g_authChannelList is null");
+        TRANS_LOGE(TRANS_SVC, "g_authChannelList is null");
         return false;
     }
     if (connInfo->type != LANE_HML_RAW) {

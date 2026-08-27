@@ -980,7 +980,7 @@ int32_t ClientGetenableMultipathBySocket(int32_t socket, bool *enableMultipath)
     }
 
     *enableMultipath = sessionNode->enableMultipath;
-    TRANS_LOGI(TRANS_SDK, "ClientGetenableMultipathBySocket socket=%{public}d, enableMultipath=%{public}d",
+    TRANS_LOGI(TRANS_SDK, "socket=%{public}d, enableMultipath=%{public}d",
         socket, *enableMultipath);
     UnlockClientSessionServerList();
     return SOFTBUS_OK;
@@ -1836,7 +1836,7 @@ int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const ch
     if (g_clientSessionServerList->cnt >= MAX_SESSION_SERVER_NUMBER) {
         ShowClientSessionServer();
         UnlockClientSessionServerList();
-        TRANS_LOGE(TRANS_SDK, "ClientAddSocketServer: client server num reach max");
+        TRANS_LOGE(TRANS_SDK, "client server num reach max");
         return SOFTBUS_INVALID_NUM;
     }
 

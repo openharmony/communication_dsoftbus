@@ -1610,7 +1610,7 @@ int32_t ClientTransProxyOnDataReceived(int32_t channelId, const void *data, uint
 {
     (void)type;
     if (data == NULL) {
-        TRANS_LOGE(TRANS_SDK, "ClientTransProxyOnDataReceived data null. channelId=%{public}d", channelId);
+        TRANS_LOGE(TRANS_SDK, "data is null. channelId=%{public}d", channelId);
         return SOFTBUS_INVALID_PARAM;
     }
 
