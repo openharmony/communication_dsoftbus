@@ -93,13 +93,6 @@ void P2pDestroyGroupState::OnP2pConnectionChangeEvent(
 {
     P2pEntity::GetInstance().Lock();
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
-    // When the GC is disconnected, the GO side will receive an event with ConnectionState=1 and clientDeviceSize=0
-    // This event does not need to be processed
-    if (info.connectState != P2pConnectionState::P2P_DISCONNECTED) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "no handle");
-        P2pEntity::GetInstance().Unlock();
-        return;
-    }
     if (operation_ == nullptr) {
         CONN_LOGE(CONN_WIFI_DIRECT, "operation is null");
         P2pEntity::GetInstance().Unlock();
