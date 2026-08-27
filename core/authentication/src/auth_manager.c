@@ -1346,9 +1346,9 @@ static void HandleDeviceIdData(
     TryAuthSessionProcessDevIdData(head, data, connInfo);
 }
 
-static void HandleAuthData(const AuthConnInfo *connInfo, const AuthDataHead *head, const uint8_t *data)
+static void HandleAuthData(uint64_t connId, const AuthConnInfo *connInfo, const AuthDataHead *head, const uint8_t *data)
 {
-    int32_t ret = AuthSessionProcessAuthData(head->seq, data, head->len);
+    int32_t ret = AuthSessionProcessAuthDataByconnId(connId, head->seq, data, head->len);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM,
             "perform auth session recv authData fail. seq=%{public}" PRId64 ", ret=%{public}d", head->seq, ret);
@@ -1420,7 +1420,7 @@ static void HandleDeviceInfoData(
         return;
     }
 
-    if (AuthSessionProcessDevInfoData(head->seq, data, head->len) != SOFTBUS_OK) {
+    if (AuthSessionProcessDevInfoDataByAuthSeqAndConnId(connId, head->seq, data, head->len) != SOFTBUS_OK) {
         /* To be compatible with ohos-3.1 and early. */
         AUTH_LOGI(AUTH_FSM,
             "auth processDeviceInfo. type=0x%{public}x, module=%{public}d, seq=%{public}" PRId64 ", "
@@ -1450,7 +1450,7 @@ static void HandleCloseAckData(
 {
     int32_t ret;
     if (head->seq != 0) {
-        ret = AuthSessionProcessCloseAck(head->seq, data, head->len);
+        ret = AuthSessionProcessCloseAck(connId, head->seq, data, head->len);
     } else {
         /* To be compatible with nearby. */
         ret = AuthSessionProcessCloseAckByConnId(connId, !fromServer, data, head->len);
@@ -1700,7 +1700,7 @@ static void OnDataReceived(
             HandleDeviceIdData(connId, connInfo, fromServer, head, data);
             break;
         case DATA_TYPE_AUTH:
-            HandleAuthData(connInfo, head, data);
+            HandleAuthData(connId, connInfo, head, data);
             break;
         case DATA_TYPE_DEVICE_INFO:
             HandleDeviceInfoData(connId, connInfo, fromServer, head, data);

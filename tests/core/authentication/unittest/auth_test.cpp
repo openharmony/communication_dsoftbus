@@ -337,8 +337,8 @@ HWTEST_F(AuthTest, AUTH_SESSION_PROCESS_CLOSE_ACK_Test_001, TestSize.Level1)
     int64_t authSeq = 0;
     uint32_t len = 1;
     int32_t ret;
-
-    ret = AuthSessionProcessCloseAck(authSeq, nullptr, len);
+    uint64_t connId = 1;
+    ret = AuthSessionProcessCloseAck(connId, authSeq, nullptr, len);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
