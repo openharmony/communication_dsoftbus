@@ -645,6 +645,7 @@ int32_t SoftBusServer::CreateServer(const char *pkgName, const char *name)
 
 int32_t SoftBusServer::RemoveServer(const char *pkgName, const char *name)
 {
+    (void)pkgName;
     GeneralConnectionParam param = {0};
     int32_t ret = SOFTBUS_OK;
 #ifdef SUPPORT_BUNDLENAME

@@ -2590,19 +2590,19 @@ int32_t SoftBusServerStub::SoftbusRegisterBrProxyServiceInner(MessageParcel &dat
     COMM_LOGD(COMM_SVC, "enter");
     auto remote = data.ReadRemoteObject();
     if (remote == nullptr) {
-        COMM_LOGE(COMM_SVC, "SoftbusRegisterServiceInner read systemAbilityId failed!");
+        COMM_LOGE(COMM_SVC, "read systemAbilityId failed!");
         return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
     }
     const char *pkgName = data.ReadCString();
-    if (pkgName == nullptr) {
-        COMM_LOGE(COMM_SVC, "SoftbusRegisterServiceInner read pkgName failed!");
+    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read pkgName failed!");
         return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
     }
     uint32_t code = MANAGE_REGISTER_BR_PROXY_SERVICE;
     SoftbusRecordCalledApiInfo(pkgName, code);
     int32_t retReply = SoftbusRegisterService(pkgName, remote, OHOS_PERMISSION_ACCESS_BLUETOOTH);
     if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SVC, "SoftbusRegisterServiceInner write reply failed!");
+        COMM_LOGE(COMM_SVC, "write reply failed!");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }
     return SOFTBUS_OK;

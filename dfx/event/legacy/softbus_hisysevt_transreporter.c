@@ -938,6 +938,8 @@ int32_t InitTransStatisticSysEvt(void)
     }
     g_calledApiCntlist = CreateSoftBusList();
     if (g_calledApiCntlist == NULL) {
+        DestroySoftBusList(g_calledApiInfoList);
+        g_calledApiInfoList = NULL;
         COMM_LOGE(COMM_EVENT, "Create g_calledApiCntlist failed.");
         return SOFTBUS_CREATE_LIST_ERR;
     }
