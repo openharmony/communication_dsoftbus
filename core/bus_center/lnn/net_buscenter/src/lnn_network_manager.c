@@ -24,7 +24,6 @@
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_ctrl.h"
-#include "lnn_multi_user_process.h"
 #include "lnn_ohos_account.h"
 #include "lnn_ohos_account_adapter.h"
 #include "lnn_physical_subnet_manager.h"
@@ -661,14 +660,7 @@ static void OnGroupDeleted(const char *groupId, int32_t groupType, int32_t userI
     (void)groupId;
     LNN_LOGI(LNN_BUILDER, "OnGroupDeleted, groupType=%{public}d, userId=%{public}d", groupType, userId);
     if (groupType == AUTH_IDENTICAL_ACCOUNT_GROUP) {
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-        (void)HbMultiUserHandleLogout(userId);
-        if (userId > 0 && userId != JudgeDeviceTypeAndGetOsAccountIds()) {
-            LnnHbOnTrustedRelationReduced();
-            return;
-        }
-#endif
-        LnnOnOhosAccountLogout();
+        LnnOnOhosAccountLogout(userId);
     }
     LnnHbOnTrustedRelationReduced();
 }

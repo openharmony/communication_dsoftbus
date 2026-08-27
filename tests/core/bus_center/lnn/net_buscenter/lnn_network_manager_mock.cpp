@@ -108,9 +108,9 @@ void LnnUpdateOhosAccount(UpdateAccountReason reason)
     return GetNetworkManagerInterface()->LnnUpdateOhosAccount(reason);
 }
 
-void LnnOnOhosAccountLogout(void)
+void LnnOnOhosAccountLogout(int32_t userId)
 {
-    return GetNetworkManagerInterface()->LnnOnOhosAccountLogout();
+    return GetNetworkManagerInterface()->LnnOnOhosAccountLogout(userId);
 }
 
 int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)

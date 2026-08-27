@@ -23,6 +23,7 @@
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_decision_db.h"
 #include "lnn_heartbeat_ctrl.h"
+#include "lnn_multi_user_process.h"
 #include "lnn_log.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_init_monitor.h"
@@ -139,11 +140,6 @@ int32_t LnnGetAccountIdByUserId(int32_t userId, int64_t *accountId, uint8_t *acc
         return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
     }
     *accountId = strtoll(accountInfo, nullptr, ACCOUNT_STRTOLL_BASE);
-    if (*accountId == 0) {
-        SoftBusFree(accountInfo);
-        LNN_LOGE(LNN_STATE, "strtoll accountInfo fail");
-        return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED;
-    }
     SoftBusFree(accountInfo);
     return SOFTBUS_OK;
 }
@@ -275,8 +271,19 @@ void LnnUpdateOhosAccount(UpdateAccountReason reason)
     AccountUpdateProcess(localAccountHash, accountHash, accountId, reason);
 }
 
-void LnnOnOhosAccountLogout(void)
+void LnnOnOhosAccountLogout(int32_t userId)
 {
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    if (!IsForegroundUserId(userId)) {
+        LNN_LOGE(LNN_STATE, "OnAccountChanged userId invalid, userid=%{public}d", userId);
+        return;
+    }
+    (void)HbMultiUserHandleLogout(userId);
+    if (userId != JudgeDeviceTypeAndGetOsAccountIds()) {
+        LNN_LOGI(LNN_STATE, "OnAccountChanged non-main screen logout, no need handle, userId=%{public}d", userId);
+        return;
+    }
+#endif
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
     char accountUid[ACCOUNT_UID_STR_LEN] = {0};
     uint32_t size = 0;

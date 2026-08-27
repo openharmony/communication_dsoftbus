@@ -80,10 +80,9 @@ int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t LnnSetCloudAbility(const bool isEnableCloud, uint32_t filterMode)
+int32_t LnnSetCloudAbility(const bool isEnableCloud)
 {
     (void)isEnableCloud;
-    (void)filterMode;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -94,7 +93,7 @@ int32_t LnnDeleteDevInfoSyncToDB(const char *udid, int64_t accountId)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t SyncLedgerInfoToCloud(NodeInfo *info, const UserInfo *userInfo, bool isAckSeq, char *peerudid,
+int32_t LnnSyncLedgerMultiInfoToCloud(NodeInfo *info, UserInfo *userInfo, bool isAckSeq, char *peerudid,
     bool isMainScreenUserId)
 {
     (void)info;

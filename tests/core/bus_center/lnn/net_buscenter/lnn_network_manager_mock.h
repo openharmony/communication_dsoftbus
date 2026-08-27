@@ -47,7 +47,7 @@ public:
     virtual void LnnStopPublish(void) = 0;
     virtual int32_t LnnStartPublish(void) = 0;
     virtual void LnnUpdateOhosAccount(UpdateAccountReason reason) = 0;
-    virtual void LnnOnOhosAccountLogout(void) = 0;
+    virtual void LnnOnOhosAccountLogout(int32_t userId) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
     virtual int32_t LnnNotifyDiscoveryDevice(
         const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect) = 0;
@@ -80,7 +80,7 @@ public:
     MOCK_METHOD0(LnnStopPublish, void(void));
     MOCK_METHOD0(LnnStartPublish, int32_t(void));
     MOCK_METHOD1(LnnUpdateOhosAccount, void(UpdateAccountReason));
-    MOCK_METHOD0(LnnOnOhosAccountLogout, void(void));
+    MOCK_METHOD1(LnnOnOhosAccountLogout, void(int32_t));
     MOCK_METHOD2(LnnGetOnlineStateById, bool(const char *, IdCategory));
     MOCK_METHOD3(LnnNotifyDiscoveryDevice, int32_t(const ConnectionAddr *, const LnnDfxDeviceInfoReport *, bool));
     MOCK_METHOD3(LnnRequestLeaveByAddrType, int32_t(const bool *, uint32_t, bool));

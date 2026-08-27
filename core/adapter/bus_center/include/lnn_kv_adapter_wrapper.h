@@ -23,7 +23,7 @@ extern "C" {
 #endif
 int32_t LnnCreateKvAdapter(int32_t *dbId, const char *appId, int32_t appIdLen, const char *storeId, int32_t storeIdLen);
 int32_t LnnDestroyKvAdapter(int32_t dbId);
-void LnnRegisterDataChangeListener(int32_t dbId, const char *appId, int32_t appIdLen, const char *storeId,
+int32_t LnnRegisterDataChangeListener(int32_t dbId, const char *appId, int32_t appIdLen, const char *storeId,
     int32_t storeIdLen);
 void LnnUnRegisterDataChangeListener(int32_t dbId);
 int32_t LnnPutDBData(int32_t dbId, const char *key, int32_t keyLen, const char *value, int32_t valueLen);
@@ -32,7 +32,7 @@ int32_t LnnDeleteDBDataByPrefix(int32_t dbId, const char *keyPrefix, int32_t key
 // *value need to be free by caller
 int32_t LnnGetDBData(int32_t dbId, const char *key, int32_t keyLen, char **value);
 int32_t LnnCloudSync(int32_t dbId);
-int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud, uint32_t filterMode);
+int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud);
 void LnnClearRedundancyCache(void);
 int32_t LnnSubcribeKvStoreService(void);
 #ifdef __cplusplus

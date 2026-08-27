@@ -179,9 +179,8 @@ static void RestoreDeviceInfoIfUnlocked(void)
     RestoreLocalDeviceInfo();
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     RestoreLocalUserInfo();
-#else
-    RestoreRemoteUserInfo();
 #endif
+    RestoreRemoteUserInfo();
 }
 
 static int32_t BusCenterServerInitFirstStep(void)
@@ -237,9 +236,8 @@ static void RestoreMultiUserInfo(void)
 {
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
     RestoreLocalUserInfo();
-#else
-    RestoreRemoteUserInfo();
 #endif
+    RestoreRemoteUserInfo();
 }
 
 static int32_t BusCenterServerInitSecondStep(void)

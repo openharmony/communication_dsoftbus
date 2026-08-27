@@ -30,13 +30,13 @@ public:
     virtual int32_t LnnCreateKvAdapter(
         int32_t *dbId, const char *appId, int32_t appIdLen, const char *storeId, int32_t storeIdLen);
     virtual int32_t LnnDestroyKvAdapter(int32_t dbId);
-    virtual void LnnRegisterDataChangeListener(
+    virtual int32_t LnnRegisterDataChangeListener(
         int32_t dbId, const char *appId, int32_t appIdLen, const char *storeId, int32_t storeIdLen);
     virtual void LnnUnRegisterDataChangeListener(int32_t dbId);
     virtual int32_t LnnPutDBData(int32_t dbId, const char *key, int32_t keyLen, const char *value, int32_t valueLen);
     virtual int32_t LnnDeleteDBDataByPrefix(int32_t dbId, const char *keyPrefix, int32_t keyPrefixLen);
     virtual int32_t LnnCloudSync(int32_t dbId);
-    virtual int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud, uint32_t filterMode);
+    virtual int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud);
 };
 
 class LnnKvAdapterInterfaceMock : public LnnKvAdapterInterface {
@@ -46,12 +46,12 @@ public:
 
     MOCK_METHOD5(LnnCreateKvAdapter, int32_t(int32_t *, const char *, int32_t, const char *, int32_t));
     MOCK_METHOD1(LnnDestroyKvAdapter, int32_t(int32_t));
-    MOCK_METHOD5(LnnRegisterDataChangeListener, void(int32_t, const char *, int32_t, const char *, int32_t));
+    MOCK_METHOD5(LnnRegisterDataChangeListener, int32_t(int32_t, const char *, int32_t, const char *, int32_t));
     MOCK_METHOD1(LnnUnRegisterDataChangeListener, void(int32_t));
     MOCK_METHOD5(LnnPutDBData, int32_t(int32_t, const char *, int32_t, const char *, int32_t));
     MOCK_METHOD3(LnnDeleteDBDataByPrefix, int32_t(int32_t, const char *, int32_t));
     MOCK_METHOD1(LnnCloudSync, int32_t(int32_t));
-    MOCK_METHOD3(LnnSetCloudAbilityInner, int32_t(int32_t, const bool, uint32_t));
+    MOCK_METHOD2(LnnSetCloudAbilityInner, int32_t(int32_t, const bool));
 };
 } // namespace OHOS
 #endif // LNN_KV_ADAPTER_WRAPPER_MOCK_H

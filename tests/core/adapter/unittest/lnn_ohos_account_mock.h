@@ -181,7 +181,7 @@ public:
     virtual void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state);
     virtual void LnnNotifyPhysicalSubnetStatusChanged(const char *ifName, ProtocolType protocolType, void *status);
     virtual void LnnOnOhosAccountChanged(void);
-    virtual void LnnOnOhosAccountLogout(void);
+    virtual void LnnOnOhosAccountLogout(int32_t userId) = 0;
     virtual void LnnSetUnlockState(void);
     virtual void LnnStopDiscovery(void);
     virtual void LnnStopPublish(void);
@@ -234,7 +234,7 @@ public:
     MOCK_METHOD0(LnnIsAutoNetWorkingEnabled, bool(void));
     MOCK_METHOD0(LnnNotifyHBRepeat, void(void));
     MOCK_METHOD0(LnnOnOhosAccountChanged, void(void));
-    MOCK_METHOD0(LnnOnOhosAccountLogout, void(void));
+    MOCK_METHOD1(LnnOnOhosAccountLogout, void(int32_t));
     MOCK_METHOD0(LnnSetUnlockState, void());
     MOCK_METHOD0(LnnStartDiscovery, int32_t(void));
     MOCK_METHOD0(LnnStartPublish, int32_t(void));

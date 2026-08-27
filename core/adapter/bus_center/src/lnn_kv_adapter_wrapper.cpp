@@ -233,35 +233,42 @@ int32_t LnnCloudSync(int32_t dbId)
     return (kvAdapter->CloudSync());
 }
 
-void LnnRegisterDataChangeListener(int32_t dbId, const char *appId, int32_t appIdLen, const char *storeId,
+int32_t LnnRegisterDataChangeListener(int32_t dbId, const char *appId, int32_t appIdLen, const char *storeId,
     int32_t storeIdLen)
 {
     std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
-    if (dbId < MIN_DBID_COUNT || dbId >= g_dbId || appId == nullptr || appIdLen < MIN_STRING_LEN ||
-        appIdLen > MAX_STRING_LEN || storeId == nullptr || storeIdLen < MIN_STRING_LEN ||
-        storeIdLen > MAX_STRING_LEN) {
-        LNN_LOGE(LNN_LEDGER, "invalid param");
-        return;
+    if (dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
+        LNN_LOGE(LNN_LEDGER, "invalid param, dbId=%{public}d", dbId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (appId == nullptr || appIdLen < MIN_STRING_LEN || appIdLen > MAX_STRING_LEN) {
+        LNN_LOGE(LNN_LEDGER, "appId is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (storeId == nullptr || storeIdLen < MIN_STRING_LEN || storeIdLen > MAX_STRING_LEN) {
+        LNN_LOGE(LNN_LEDGER, "storeId is invalid");
+        return SOFTBUS_INVALID_PARAM;
     }
     if (g_isSubscribed) {
         LNN_LOGI(LNN_LEDGER, "DataChangeListener is already registered");
-        return;
+        return SOFTBUS_KV_DATA_LISTENER_ALREADY_REGISTER;
     }
     std::string appIdStr(appId, appIdLen);
     std::string storeIdStr(storeId, storeIdLen);
     auto kvAdapter = FindKvStorePtr(dbId);
     if (kvAdapter == nullptr) {
         LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId=%{public}d", dbId);
-        return;
+        return SOFTBUS_NOT_FIND;
     }
     int32_t status = kvAdapter->RegisterDataChangeListener(std::make_shared<KvDataChangeListener>(appIdStr,
         storeIdStr));
     if (status != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "RegisterDataChangeListener failed");
-        return;
+        return SOFTBUS_KV_REGISTER_DATA_LISTENER_FAILED;
     }
     g_isSubscribed = true;
     LNN_LOGI(LNN_LEDGER, "RegisterDataChangeListener success");
+    return SOFTBUS_OK;
 }
 
 void LnnUnRegisterDataChangeListener(int32_t dbId)
@@ -305,7 +312,7 @@ int32_t LnnSubcribeKvStoreService(void)
     return SOFTBUS_OK;
 }
 
-int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud, uint32_t filterMode)
+int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud)
 {
     std::lock_guard<std::mutex> lock(g_kvAdapterWrapperMutex);
     if (dbId < MIN_DBID_COUNT || dbId >= g_dbId) {
@@ -317,5 +324,5 @@ int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud, uint32_t
         LNN_LOGE(LNN_LEDGER, "kvAdapter is not exist, dbId=%{public}d", dbId);
         return SOFTBUS_NOT_FIND;
     }
-    return (kvAdapter->SetCloudAbility(isEnableCloud, filterMode));
+    return (kvAdapter->SetCloudAbility(isEnableCloud));
 }

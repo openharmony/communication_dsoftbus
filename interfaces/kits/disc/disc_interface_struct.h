@@ -64,13 +64,6 @@ typedef struct {
     uint64_t nowTimes;
 } RaiseHandDeviceInfo;
 
-typedef enum {
-    DISC_SCREEN_CENTER = 0,
-    DISC_SCREEN_PASSENGER = 1,
-    DISC_SCREEN_REAR = 2,
-    DISC_SCREEN_TYPE_BUTT,
-} DiscScreenType;
-
 #ifdef __cplusplus
 }
 #endif

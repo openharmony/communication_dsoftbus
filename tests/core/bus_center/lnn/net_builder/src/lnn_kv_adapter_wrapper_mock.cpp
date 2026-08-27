@@ -46,7 +46,7 @@ int32_t LnnDestroyKvAdapter(int32_t dbId)
     return GetKvAdapterInterface()->LnnDestroyKvAdapter(dbId);
 }
 
-void LnnRegisterDataChangeListener(
+int32_t LnnRegisterDataChangeListener(
     int32_t dbId, const char *appId, int32_t appIdLen, const char *storeId, int32_t storeIdLen)
 {
     return GetKvAdapterInterface()->LnnRegisterDataChangeListener(dbId, appId, appIdLen, storeId, storeIdLen);
@@ -72,9 +72,9 @@ int32_t LnnCloudSync(int32_t dbId)
     return GetKvAdapterInterface()->LnnCloudSync(dbId);
 }
 
-int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud, uint32_t filterMode)
+int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud)
 {
-    return GetKvAdapterInterface()->LnnSetCloudAbilityInner(dbId, isEnableCloud, filterMode);
+    return GetKvAdapterInterface()->LnnSetCloudAbilityInner(dbId, isEnableCloud);
 }
 }
 } // namespace OHOS

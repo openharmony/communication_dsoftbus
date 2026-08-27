@@ -301,8 +301,8 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type, boo
         if (LnnGetRemoteNodeInfoById(netInfo[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
             continue;
         }
-        if (nodeInfo.deviceInfo.deviceTypeId == TYPE_WATCH_ID
-            && nodeInfo.deviceInfo.osType == OH_OS_TYPE && isWifiRoaming) {
+        if (nodeInfo.deviceInfo.deviceTypeId == TYPE_WATCH_ID &&
+            nodeInfo.deviceInfo.osType == OH_OS_TYPE && isWifiRoaming) {
             continue;
         }
         if (!isSyncSle) {

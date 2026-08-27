@@ -82,9 +82,9 @@ int32_t LnnAsyncCallbackDelayHelper(
     return HeartBeatCtrlStaticInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
 }
 
-int32_t LnnSetCloudAbility(const bool isEnableCloud, uint32_t filterMode)
+int32_t LnnSetCloudAbility(const bool isEnableCloud)
 {
-    return HeartBeatCtrlStaticInterface()->LnnSetCloudAbility(isEnableCloud, filterMode);
+    return HeartBeatCtrlStaticInterface()->LnnSetCloudAbility(isEnableCloud);
 }
 
 int32_t LnnDeleteSyncToDB(int32_t userId, int64_t accountId, bool isMainScreenUserId)
@@ -92,9 +92,9 @@ int32_t LnnDeleteSyncToDB(int32_t userId, int64_t accountId, bool isMainScreenUs
     return HeartBeatCtrlStaticInterface()->LnnDeleteSyncToDB(userId, accountId, isMainScreenUserId);
 }
 
-void LnnOnOhosAccountLogout(void)
+void LnnOnOhosAccountLogout(int32_t userId)
 {
-    HeartBeatCtrlStaticInterface()->LnnOnOhosAccountLogout();
+    HeartBeatCtrlStaticInterface()->LnnOnOhosAccountLogout(userId);
 }
 
 void LnnUpdateOhosAccount(UpdateAccountReason reason)

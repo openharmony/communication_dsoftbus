@@ -663,8 +663,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnSetCloudAbilityInner_Dbid_LessThanMin, TestSiz
 {
     int32_t dbId = MIN_DBID_COUNT - 1;
     const bool isEnableCloud = true;
-    const uint32_t filterMode = 1;
-    int32_t ret = LnnSetCloudAbilityInner(dbId, isEnableCloud, filterMode);
+    int32_t ret = LnnSetCloudAbilityInner(dbId, isEnableCloud);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 

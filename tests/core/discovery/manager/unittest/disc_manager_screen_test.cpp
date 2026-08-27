@@ -90,15 +90,14 @@ public:
 
 /*
  * @tc.name: DiscOnScreenStatusChanged001
- * @tc.desc: test DiscOnScreenStatusChanged with invalid screenType
+ * @tc.desc: test DiscOnScreenStatusChanged with invalid screenId
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(DiscManagerScreenTest, DiscOnScreenStatusChanged001, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscOnScreenStatusChanged001 begin ----");
-    EXPECT_NO_FATAL_FAILURE(DiscOnScreenStatusChanged(static_cast<DiscScreenType>(-1), true));
-    EXPECT_NO_FATAL_FAILURE(DiscOnScreenStatusChanged(DISC_SCREEN_TYPE_BUTT, true));
+    EXPECT_NO_FATAL_FAILURE(DiscOnScreenStatusChanged(-1, true));
     DISC_LOGI(DISC_TEST, "DiscOnScreenStatusChanged001 end ----");
 }
 
@@ -130,27 +129,27 @@ HWTEST_F(DiscManagerScreenTest, DiscOnScreenStatusChanged003, TestSize.Level1)
 
 /*
  * @tc.name: DiscOnScreenStatusChanged004
- * @tc.desc: test DiscOnScreenStatusChanged screen on for DISC_SCREEN_PASSENGER
+ * @tc.desc: test DiscOnScreenStatusChanged screen on for passenger screen
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(DiscManagerScreenTest, DiscOnScreenStatusChanged004, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscOnScreenStatusChanged004 begin ----");
-    EXPECT_NO_FATAL_FAILURE(DiscOnScreenStatusChanged(DISC_SCREEN_PASSENGER, true));
+    EXPECT_NO_FATAL_FAILURE(DiscOnScreenStatusChanged(1, true));
     DISC_LOGI(DISC_TEST, "DiscOnScreenStatusChanged004 end ----");
 }
 
 /*
  * @tc.name: DiscOnScreenStatusChanged005
- * @tc.desc: test DiscOnScreenStatusChanged screen off for DISC_SCREEN_PASSENGER
+ * @tc.desc: test DiscOnScreenStatusChanged screen off for passenger screen
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(DiscManagerScreenTest, DiscOnScreenStatusChanged005, TestSize.Level1)
 {
     DISC_LOGI(DISC_TEST, "DiscOnScreenStatusChanged005 begin ----");
-    EXPECT_NO_FATAL_FAILURE(DiscOnScreenStatusChanged(DISC_SCREEN_PASSENGER, false));
+    EXPECT_NO_FATAL_FAILURE(DiscOnScreenStatusChanged(1, false));
     DISC_LOGI(DISC_TEST, "DiscOnScreenStatusChanged005 end ----");
 }
 

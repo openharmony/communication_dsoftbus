@@ -49,9 +49,9 @@ public:
     virtual int32_t LnnUpdateSendInfoStrategy(LnnHeartbeatUpdateInfoType type) = 0;
     virtual int32_t LnnAsyncCallbackDelayHelper(
         SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis) = 0;
-    virtual int32_t LnnSetCloudAbility(const bool isEnableCloud, uint32_t filterMode) = 0;
+    virtual int32_t LnnSetCloudAbility(const bool isEnableCloud) = 0;
     virtual int32_t LnnDeleteSyncToDB(int32_t userId, int64_t accountId, bool isMainScreenUserId) = 0;
-    virtual void LnnOnOhosAccountLogout(void) = 0;
+    virtual void LnnOnOhosAccountLogout(int32_t userId) = 0;
     virtual void LnnUpdateOhosAccount(UpdateAccountReason reason) = 0;
     virtual TrustedReturnType AuthHasTrustedRelation(void) = 0;
     virtual bool IsEnableSoftBusHeartbeat(void) = 0;
@@ -108,9 +108,9 @@ public:
     MOCK_METHOD1(LnnSetHbAsMasterNodeState, int32_t(bool));
     MOCK_METHOD1(LnnUpdateSendInfoStrategy, int32_t(LnnHeartbeatUpdateInfoType));
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
-    MOCK_METHOD2(LnnSetCloudAbility, int32_t(const bool, uint32_t));
+    MOCK_METHOD1(LnnSetCloudAbility, int32_t(const bool));
     MOCK_METHOD3(LnnDeleteSyncToDB, int32_t(int32_t, int64_t, bool));
-    MOCK_METHOD0(LnnOnOhosAccountLogout, void(void));
+    MOCK_METHOD1(LnnOnOhosAccountLogout, void(int32_t));
     MOCK_METHOD1(LnnUpdateOhosAccount, void(UpdateAccountReason));
     MOCK_METHOD0(AuthHasTrustedRelation, TrustedReturnType(void));
     MOCK_METHOD0(IsEnableSoftBusHeartbeat, bool(void));

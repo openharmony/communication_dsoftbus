@@ -35,6 +35,7 @@
 #include "softbus_adapter_mem.h"
 
 #define DELAY_AUTH_TIME                    (8 * 1000L)
+#define MAX_AUTH_LIMIT_MAP_SIZE            500
 
 static AuthVerifyListener g_verifyListener = { 0 };
 static GroupChangeListener g_groupChangeListener = { 0 };
@@ -55,11 +56,49 @@ static bool AuthMapInit(void)
     return true;
 }
 
+static bool EvictOneExpiredAuthLimitNode(uint64_t currentTime)
+{
+    MapIterator *it = LnnMapInitIterator(&g_authLimitMap);
+    if (it == NULL) {
+        AUTH_LOGE(AUTH_FSM, "init iterator fail");
+        return false;
+    }
+    char key[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+    bool found = false;
+    while (LnnMapHasNext(it)) {
+        it = LnnMapNext(it);
+        if (it == NULL || it->node == NULL || it->node->value == NULL) {
+            break;
+        }
+        uint64_t storedTime = *(uint64_t *)it->node->value;
+        if (currentTime - storedTime >= DELAY_AUTH_TIME) {
+            if (strcpy_s(key, sizeof(key), (char *)it->node->key) == EOK) {
+                found = true;
+            }
+            break;
+        }
+    }
+    LnnMapDeinitIterator(it);
+    if (found) {
+        (void)LnnMapErase(&g_authLimitMap, key);
+        AUTH_LOGI(AUTH_FSM, "evict expired authLimit node");
+    }
+    return found;
+}
+
 static void InsertToAuthLimitMap(const char *udidHash, uint64_t currentTime)
 {
     if (SoftBusMutexLock(&g_authLimitMutex) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "SoftBusMutexLock fail");
         return;
+    }
+    if (LnnMapGet(&g_authLimitMap, udidHash) == NULL &&
+        MapGetSize(&g_authLimitMap) >= MAX_AUTH_LIMIT_MAP_SIZE) {
+        if (!EvictOneExpiredAuthLimitNode(currentTime)) {
+            AUTH_LOGW(AUTH_FSM, "authLimit map full, no expired node, skip insert");
+            (void)SoftBusMutexUnlock(&g_authLimitMutex);
+            return;
+        }
     }
     if (LnnMapSet(&g_authLimitMap, udidHash, (const void *)&currentTime, sizeof(uint64_t)) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "LnnMapSet fail");

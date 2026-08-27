@@ -47,6 +47,8 @@
 #define PUT_VALUE_MAX_LEN    156
 #define UDID_HASH_HEX_LEN    16
 #define SOFTBUS_STRTOLL_BASE 10
+#define MAX_KV_DATA_REGISTER_RETRY_COUNT 10
+#define KV_DATA_REGISTER_RETRY_DELAY_MS 1000
 
 static int32_t g_dbId = 0;
 
@@ -1334,68 +1336,46 @@ static int32_t PackBroadcastCipherKeyInner(cJSON *json, NodeInfo *info)
     return SOFTBUS_OK;
 }
 
-static int32_t BuildCloudSyncKey(char *putKey, NodeInfo *info, const UserInfo *userInfo, bool isMainScreenUserId)
+static int32_t BuildCloudSyncMultiUserKey(char *putKey, NodeInfo *info, const UserInfo *userInfo,
+    bool isMainScreenUserId)
 {
-    int64_t accountId = (userInfo != NULL) ? userInfo->accountId : info->accountId;
     if (isMainScreenUserId) {
-        if (sprintf_s(putKey, KEY_MAX_LEN, "%ld#%s", accountId, info->deviceInfo.deviceUdid) < 0) {
+        if (sprintf_s(putKey, KEY_MAX_LEN, "%ld#%s", userInfo->accountId, info->deviceInfo.deviceUdid) < 0) {
             LNN_LOGE(LNN_BUILDER, "convert putKey failed");
-            return SOFTBUS_MEM_ERR;
+            return SOFTBUS_SPRINTF_ERR;
         }
     } else {
-        int32_t userId = (userInfo != NULL) ? userInfo->userId : info->userId;
-        if (sprintf_s(putKey, KEY_MAX_LEN, "%ld#%s#%d", accountId, info->deviceInfo.deviceUdid, userId) < 0) {
+        if (sprintf_s(putKey, KEY_MAX_LEN, "%ld#%s#%d", userInfo->accountId, info->deviceInfo.deviceUdid,
+            userInfo->userId) < 0) {
             LNN_LOGE(LNN_BUILDER, "convert putKey failed, include userId");
-            return SOFTBUS_MEM_ERR;
+            return SOFTBUS_SPRINTF_ERR;
         }
     }
     return SOFTBUS_OK;
 }
 
-static int32_t PackCloudSyncJson(cJSON *json, NodeInfo *info, const UserInfo *userInfo, bool isAckSeq, char *peerudid)
+static int32_t PackCloudSyncJson(cJSON *json, NodeInfo *info, bool isAckSeq, char *peerUdid)
 {
     int32_t ret = PackBroadcastCipherKeyInner(json, info);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    if (isAckSeq && peerudid != NULL && (ret = LnnPackCloudSyncAckSeqPacked(json, peerudid)) != SOFTBUS_OK) {
+    if (isAckSeq && peerUdid != NULL && (ret = LnnPackCloudSyncAckSeqPacked(json, peerUdid)) != SOFTBUS_OK) {
         return ret;
     }
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-    if ((ret = PackUserInfoToJsonInner(json, userInfo)) != SOFTBUS_OK) {
-        return ret;
-    }
-#endif
     return SOFTBUS_OK;
 }
 
-int32_t SyncLedgerInfoToCloud(NodeInfo *info, const UserInfo *userInfo, bool isAckSeq, char *peerudid,
-    bool isMainScreenUserId)
+static int32_t PutCloudSyncData(const char *putKey, NodeInfo *info, cJSON *json)
 {
-    char putKey[KEY_MAX_LEN] = { 0 };
-    int32_t ret = BuildCloudSyncKey(putKey, info, userInfo, isMainScreenUserId);
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
-    info->updateTimestamp = SoftBusGetSysTimeMs();
-    cJSON *json = cJSON_CreateObject();
-    if (json == NULL) {
-        return SOFTBUS_CREATE_JSON_ERR;
-    }
-    ret = PackCloudSyncJson(json, info, userInfo, isAckSeq, peerudid);
-    if (ret != SOFTBUS_OK) {
-        cJSON_Delete(json);
-        return ret;
-    }
     char *putValue = cJSON_PrintUnformatted(json);
-    cJSON_Delete(json);
     if (putValue == NULL) {
         LNN_LOGE(LNN_BUILDER, "cJSON_PrintUnformatted fail");
         return SOFTBUS_CREATE_JSON_ERR;
     }
     int32_t dbId = g_dbId;
-    LnnSetCloudAbility(true, OPEN_FILTER_USERID_MODE);
-    ret = LnnPutDBData(dbId, putKey, strlen(putKey), putValue, strlen(putValue));
+    LnnSetCloudAbility(true);
+    int32_t ret = LnnPutDBData(dbId, putKey, strlen(putKey), putValue, strlen(putValue));
     cJSON_free(putValue);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "fail:data batch sync to DB fail, errorcode=%{public}d", ret);
@@ -1409,6 +1389,59 @@ int32_t SyncLedgerInfoToCloud(NodeInfo *info, const UserInfo *userInfo, bool isA
     return ret;
 }
 
+static int32_t SyncLedgerInfoToCloud(NodeInfo *info, bool isAckSeq, char *peerudid)
+{
+    char putKey[KEY_MAX_LEN] = { 0 };
+    if (sprintf_s(putKey, KEY_MAX_LEN, "%ld#%s", info->accountId, info->deviceInfo.deviceUdid) < 0) {
+        LNN_LOGE(LNN_BUILDER, "convert putKey failed");
+        return SOFTBUS_SPRINTF_ERR;
+    }
+    info->updateTimestamp = SoftBusGetSysTimeMs();
+    cJSON *json = cJSON_CreateObject();
+    if (json == NULL) {
+        return SOFTBUS_CREATE_JSON_ERR;
+    }
+    int32_t ret = PackCloudSyncJson(json, info, isAckSeq, peerudid);
+    if (ret != SOFTBUS_OK) {
+        cJSON_Delete(json);
+        return ret;
+    }
+    ret = PutCloudSyncData(putKey, info, json);
+    cJSON_Delete(json);
+    return ret;
+}
+
+int32_t LnnSyncLedgerMultiInfoToCloud(NodeInfo *info, UserInfo *userInfo, bool isAckSeq, char *peerudid,
+    bool isMainScreenUserId)
+{
+    char putKey[KEY_MAX_LEN] = { 0 };
+    int32_t ret = BuildCloudSyncMultiUserKey(putKey, info, userInfo, isMainScreenUserId);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    info->updateTimestamp = SoftBusGetSysTimeMs();
+    userInfo->updateTimestamp = SoftBusGetSysTimeMs();
+    cJSON *json = cJSON_CreateObject();
+    if (json == NULL) {
+        return SOFTBUS_CREATE_JSON_ERR;
+    }
+    ret = PackCloudSyncJson(json, info, isAckSeq, peerudid);
+    if (ret != SOFTBUS_OK) {
+        cJSON_Delete(json);
+        return ret;
+    }
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    ret = PackUserInfoToJsonInner(json, userInfo);
+    if (ret != SOFTBUS_OK) {
+        cJSON_Delete(json);
+        return ret;
+    }
+#endif
+    ret = PutCloudSyncData(putKey, info, json);
+    cJSON_Delete(json);
+    return ret;
+}
+
 int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info, bool isAckSeq, char *peerudid)
 {
     if (info == NULL) {
@@ -1419,7 +1452,7 @@ int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info, bool isAckSeq, char *peerudid)
         LNN_LOGI(LNN_BUILDER, "ledger accountId is null, all data no need sync to cloud");
         return SOFTBUS_KV_CLOUD_DISABLED;
     }
-    int32_t ret = SyncLedgerInfoToCloud(info, NULL, isAckSeq, peerudid, true);
+    int32_t ret = SyncLedgerInfoToCloud(info, isAckSeq, peerudid);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "sync ledger info to cloud failed");
     }
@@ -1522,12 +1555,12 @@ int32_t LnnDeleteDevInfoSyncToDB(const char *udid, int64_t accountId)
     return SOFTBUS_OK;
 }
 
-int32_t LnnSetCloudAbility(const bool isEnableCloud, uint32_t filterMode)
+int32_t LnnSetCloudAbility(const bool isEnableCloud)
 {
     LNN_LOGI(LNN_BUILDER, "enter.");
     int32_t dbId = 0;
     dbId = g_dbId;
-    int32_t ret = LnnSetCloudAbilityInner(dbId, isEnableCloud, filterMode);
+    int32_t ret = LnnSetCloudAbilityInner(dbId, isEnableCloud);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "set cloud ability fail");
         return ret;
@@ -1535,16 +1568,62 @@ int32_t LnnSetCloudAbility(const bool isEnableCloud, uint32_t filterMode)
     return SOFTBUS_OK;
 }
 
+static void KvDataRegisterRetryCallback(void *para)
+{
+    if (para == NULL) {
+        LNN_LOGE(LNN_BUILDER, "para is invalid");
+        return;
+    }
+    int32_t *retryCount = (int32_t *)para;
+    int32_t dbId = 0;
+    int32_t ret = LnnCreateKvAdapter(&dbId, APPID, strlen(APPID), STOREID, strlen(STOREID));
+    if (ret == SOFTBUS_OK) {
+        ret = LnnRegisterDataChangeListener(dbId, APPID, strlen(APPID), STOREID, strlen(STOREID));
+        if (ret == SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "register data change listener success after retry");
+            g_dbId = dbId;
+            SoftBusFree(retryCount);
+            return;
+        }
+    }
+    (*retryCount)++;
+    LNN_LOGW(LNN_BUILDER, "register data change listener failed, retry=%{public}d", *retryCount);
+    if (*retryCount >= MAX_KV_DATA_REGISTER_RETRY_COUNT) {
+        LNN_LOGE(LNN_BUILDER, "register data change listener failed after max retry");
+        SoftBusFree(retryCount);
+        return;
+    }
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), KvDataRegisterRetryCallback,
+        retryCount, KV_DATA_REGISTER_RETRY_DELAY_MS) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async retry register data change listener fail");
+        SoftBusFree(retryCount);
+    }
+}
+
 void LnnInitCloudSyncModule(void)
 {
     LNN_LOGI(LNN_BUILDER, "enter.");
     int32_t dbId = 0;
-    if (LnnCreateKvAdapter(&dbId, APPID, strlen(APPID), STOREID, strlen(STOREID)) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "Lnn Init Cloud Sync Module fail");
+    int32_t ret = LnnCreateKvAdapter(&dbId, APPID, strlen(APPID), STOREID, strlen(STOREID));
+    if (ret == SOFTBUS_OK) {
+        ret = LnnRegisterDataChangeListener(dbId, APPID, strlen(APPID), STOREID, strlen(STOREID));
+        if (ret == SOFTBUS_OK) {
+            g_dbId = dbId;
+            return;
+        }
+    }
+    LNN_LOGW(LNN_BUILDER, "init cloud sync module failed, start async retry, ret=%{public}d", ret);
+    int32_t *retryCount = (int32_t *)SoftBusCalloc(sizeof(int32_t));
+    if (retryCount == NULL) {
+        LNN_LOGE(LNN_BUILDER, "calloc retry count fail");
         return;
     }
-    LnnRegisterDataChangeListener(dbId, APPID, strlen(APPID), STOREID, strlen(STOREID));
-    g_dbId = dbId;
+    *retryCount = 0;
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), KvDataRegisterRetryCallback,
+        retryCount, KV_DATA_REGISTER_RETRY_DELAY_MS) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async retry init cloud sync module fail");
+        SoftBusFree(retryCount);
+    }
 }
 
 void LnnDeInitCloudSyncModule(void)
