@@ -510,6 +510,8 @@ typedef enum {
     NFC_SHARE_CAPABILITY_BITMAP,
     /**2mInterconnect capability */
     HA_INTERCONNECT_CAPABILITY_BITMAP,
+    /**Communication share capability */
+    COMM_SHARE_CAPABILITY_BITMAP,
     /**max of capability */
     MAX_CAPABILITY_BITMAP
 } DataBitMap;
@@ -553,7 +555,8 @@ static const CapabilityMap g_capabilityMap[] = {
     {RAISE_HAND_CAPABILITY_BITMAP, (char *)"raiseHand"},
     {PC_COLLABORATION_BITMAP, (char *)"pcCollaboration"},
     {NFC_SHARE_CAPABILITY_BITMAP, (char *)"nfc_share"},
-    {HA_INTERCONNECT_CAPABILITY_BITMAP, (char *)"2mInterconnect"}
+    {HA_INTERCONNECT_CAPABILITY_BITMAP, (char *)"2mInterconnect"},
+    {COMM_SHARE_CAPABILITY_BITMAP, (char *)"commShare"}
 };
 
 /**
