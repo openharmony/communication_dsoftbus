@@ -20,6 +20,7 @@
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_utils.h"
+#include "softbus_rc_collection.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,22 +29,24 @@ extern "C" {
 #define UUID_STRING_LEN 38
 // the length of the latter half of the hexString representing the sha256 hash value of mac address
 #define BT_MAC_MAX_LEN 33
-#define PROXY_BR_CONNECT_WAIT_CALLBACK_TIMEOUT_MAX_MILLIS      (500)
+#define PROXY_BR_CONNECT_WAIT_CALLBACK_TIMEOUT_MAX_MILLIS 500
 
 typedef struct {
     uint32_t requestId;
     char brMac[BT_MAC_MAX_LEN];
     char uuid[UUID_STRING_LEN];
+    bool isFirstConnect;
+    int32_t appIndex;
     uint64_t timeoutMs;
 } ProxyChannelParam;
 
-typedef enum {
-    PROXY_CHANNEL_CONNECTING,
-    PROXY_CHANNEL_CONNECTED,
-    PROXY_CHANNEL_DISCONNECTING,
-    PROXY_CHANNEL_DISCONNECTED,
-    PROXY_CHANNEL_MAX_STATE
-} ProxyChannelState;
+// Forward declaration
+struct ProxyChannel;
+
+typedef struct {
+    void (*onOpenSuccess)(uint32_t requestId, struct ProxyChannel *channel);
+    void (*onOpenFail)(uint32_t requestId, int32_t reason, const char *brMac);
+} OpenProxyChannelCallback;
 
 struct ProxyChannel {
     uint32_t requestId;
@@ -52,21 +55,7 @@ struct ProxyChannel {
     char uuid[UUID_STRING_LEN];
     int32_t (*send)(struct ProxyChannel *channel, const uint8_t *data, uint32_t dataLen);
     void (*close)(struct ProxyChannel *channel, bool isClearReconnectEvent);
-};
-
-struct ProxyConnection {
-    struct ProxyChannel proxyChannel;
-    char brMac[BT_MAC_LEN];
-    SoftBusMutex lock;
-    uint32_t channelId;
-    void (*reference)(struct ProxyConnection *proxyConnection);
-    void (*dereference)(struct ProxyConnection *proxyConnection);
-    uint32_t refCount;
-    ProxyChannelState state;
-    int32_t socketHandle;
-    ListNode node;
-    // connect process status
-    SoftBusList *connectProcessStatus;
+    void (*refresh)(struct ProxyChannel *channel, uint32_t newRequestId, const OpenProxyChannelCallback *callback);
 };
 
 typedef struct {
@@ -75,25 +64,7 @@ typedef struct {
     void (*onProxyChannelReconnected)(char *addr, struct ProxyChannel *channel);
 } ProxyConnectListener;
 
-typedef struct {
-    void (*onOpenSuccess)(uint32_t requestId, struct ProxyChannel *channel);
-    void (*onOpenFail)(uint32_t requestId, int32_t reason, const char *brMac);
-} OpenProxyChannelCallback;
-
-typedef struct {
-    uint32_t requestId;
-    bool isInnerRequest;
-    uint32_t innerRetryNum;
-    bool isRealMac;
-    char brMac[BT_MAC_LEN];
-    char brHashMac[BT_MAC_MAX_LEN];
-    char uuid[UUID_STRING_LEN];
-    uint64_t timeoutMs;
-    OpenProxyChannelCallback result;
-    bool isAclConnected;
-    bool isSupportHfp;
-    ListNode node;
-} ProxyConnectInfo;
+// ProxyConnection and ProxyConnectInfo are now defined in br/br_proxy_manager.h
 
 typedef struct {
     uint32_t (*generateRequestId)(void);
@@ -101,12 +72,9 @@ typedef struct {
     int32_t (*registerProxyChannelListener)(ProxyConnectListener *listener);
 
     // inner
-    SoftBusList *proxyConnectionList;
-    struct ProxyConnection *(*getConnectionById)(uint32_t channelId);
-    struct ProxyConnection *(*getProxyChannelByAddr)(char *addr);
-    // current process request info
-    ProxyConnectInfo *proxyChannelRequestInfo;
-    ListNode reconnectDeviceInfos;
+    SoftBusRcCollection proxyConnectionList;
+    uint32_t (*generateChannelId)(void);
+    void (*clearProxyInfo)(struct ProxyChannel *channel);
 } ProxyChannelManager;
 
 ProxyChannelManager *GetProxyChannelManager(void);

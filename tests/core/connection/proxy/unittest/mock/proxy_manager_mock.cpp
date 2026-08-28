@@ -137,21 +137,21 @@ int32_t ProxyChannelMock::ActionOfConnect(const char *uuid, const BT_ADDR mac, v
 
 int32_t ProxyChannelMock::ActionOfConnect1(const char *uuid, const BT_ADDR mac, void *connectCallback)
 {
-    SoftBusFree(GetProxyChannelManager()->proxyChannelRequestInfo);
-    GetProxyChannelManager()->proxyChannelRequestInfo = nullptr;
+    SoftBusFree(GetBrProxyChannelManager()->proxyChannelRequestInfo);
+    GetBrProxyChannelManager()->proxyChannelRequestInfo = nullptr;
     sleep(1);
     return UNDERLAYER_HANDLE;
 }
 
 int32_t ProxyChannelMock::ActionOfConnect2(const char *uuid, const BT_ADDR mac, void *connectCallback)
 {
-    SoftBusFree(GetProxyChannelManager()->proxyChannelRequestInfo);
-    GetProxyChannelManager()->proxyChannelRequestInfo = nullptr;
+    SoftBusFree(GetBrProxyChannelManager()->proxyChannelRequestInfo);
+    GetBrProxyChannelManager()->proxyChannelRequestInfo = nullptr;
     ProxyConnectInfo *connectInfo = (ProxyConnectInfo *)SoftBusCalloc(sizeof(ProxyConnectInfo));
     if (connectInfo == nullptr || strcpy_s(connectInfo->brMac, BT_MAC_LEN, "00:22:33:44:55:66") != EOK) {
         SoftBusFree(connectInfo);
     }
-    GetProxyChannelManager()->proxyChannelRequestInfo = connectInfo;
+    GetBrProxyChannelManager()->proxyChannelRequestInfo = connectInfo;
     sleep(1);
     return UNDERLAYER_HANDLE;
 }

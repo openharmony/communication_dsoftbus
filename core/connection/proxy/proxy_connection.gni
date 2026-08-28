@@ -32,10 +32,13 @@ if (!support_bluetooth) {
     ]
   } else {
     proxy_connection_src += [
-      "$dsoftbus_root_path/core/connection/proxy/proxy_config.c",
-      "$dsoftbus_root_path/core/connection/proxy/proxy_connection.c",
+      "$dsoftbus_root_path/core/connection/proxy/br/proxy_config.c",
+      "$dsoftbus_root_path/core/connection/proxy/br/proxy_connection.c",
       "$dsoftbus_root_path/core/connection/proxy/proxy_manager.c",
-      "$dsoftbus_root_path/core/connection/proxy/proxy_observer.cpp",
+      "$dsoftbus_root_path/core/connection/proxy/br/proxy_observer.cpp",
+      "$dsoftbus_root_path/core/connection/proxy/br/br_proxy_manager.c",
+      "$dsoftbus_root_path/core/connection/proxy/far_field/far_field_proxy_adapter.c",
+      "$dsoftbus_root_path/core/connection/proxy/far_field/far_field_proxy_manager.c",
     ]
   }
 }

@@ -16,6 +16,7 @@
 
 #include "c_header/ohos_bt_def.h"
 #include "c_header/ohos_bt_socket.h"
+#include "br_proxy_manager.h"
 #include "conn_event.h"
 #include "conn_event_form.h"
 #include "conn_log.h"
@@ -99,7 +100,7 @@ static void BrConnectCallback(const BdAddr *bdAddr, BtUuid uuid, int32_t status,
     char anomizeAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, copyMac, BT_MAC_LEN);
 
-    struct ProxyConnection *connection = GetProxyChannelManager()->getProxyChannelByAddr(copyMac);
+    struct ProxyConnection *connection = GetBrProxyChannelManager()->getProxyChannelByAddr(copyMac);
     CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_PROXY, "connection not exist, mac=%{public}s", anomizeAddress);
     if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "lock failed, mac=%{public}s", anomizeAddress);
@@ -182,7 +183,7 @@ static void *ProxyBrClientConnect(void *data)
         "onConnectSuccess is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(callback.onConnectFail != NULL, NULL, CONN_PROXY,
         "onConnectFail is null");
-    struct ProxyConnection *connection = GetProxyChannelManager()->getConnectionById(channelId);
+    struct ProxyConnection *connection = GetBrProxyChannelManager()->getConnectionById(channelId);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         connection != NULL, NULL, CONN_PROXY, "connection is null, channelId=%{public}u", channelId);
     char anomizeAddress[BT_MAC_LEN] = { 0 };
@@ -288,7 +289,7 @@ static int32_t Send(struct ProxyConnection *connection, const uint8_t *data, uin
     uint64_t costTime = 0;
     int32_t waitWriteLen = (int32_t)dataLen;
     while (waitWriteLen > 0) {
-        int32_t ret = SoftBusMutexLock(&connection->lock);
+        ret = SoftBusMutexLock(&connection->lock);
         if (ret != SOFTBUS_OK) {
             return ret;
         }
