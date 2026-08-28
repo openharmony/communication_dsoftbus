@@ -21,6 +21,7 @@
 #include "auth_interface.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
+#include "g_enhance_auth_func_pack.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "g_enhance_trans_func_pack.h"
 #include "legacy/softbus_adapter_hitrace.h"
@@ -705,16 +706,32 @@ static int32_t OpenAuthConn(const char *uuid, uint32_t reqId, bool isMeta, Conne
     AuthConnCallback cb;
     (void)memset_s(&cb, sizeof(AuthConnCallback), 0, sizeof(AuthConnCallback));
     int32_t ret = SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED;
-    if (type == CONNECT_HML) {
-        TRANS_LOGI(TRANS_CTRL, "get AuthConnInfo, linkType=%{public}d", type);
-        ret = AuthGetHmlConnInfo(uuid, &auth, isMeta);
-    }
-    if (ret != SOFTBUS_OK && type == CONNECT_P2P) {
-        TRANS_LOGI(TRANS_CTRL, "get AuthConnInfo, linkType=%{public}d", type);
-        ret = AuthGetP2pConnInfo(uuid, &auth, isMeta);
-    }
-    if (ret != SOFTBUS_OK) {
-        ret = AuthGetPreferConnInfoWithoutSle(uuid, uuid, &auth, isMeta);
+    int32_t osType = 0;
+    GetOsTypeByNetworkId(uuid, &osType);
+    if (osType == OTHER_OS_TYPE) {
+        ret = AuthGetPreferConnInfoWithoutSle(NULL, uuid, &auth, isMeta);
+        cb.onConnOpened = OnAuthConnOpened;
+        cb.onConnOpenFailed = OnAuthConnOpenFailed;
+        if (AuthOpenConnWithOtherOsType(&auth, uuid, reqId, &cb) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "open auth conn fail");
+            return SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED;
+        }
+        TRANS_LOGI(TRANS_CTRL, "ok");
+        return SOFTBUS_OK;
+    } else {
+        if (type == CONNECT_HML) {
+            TRANS_LOGI(TRANS_CTRL, "get AuthConnInfo, linkType=%{public}d", type);
+            ret = AuthGetHmlConnInfo(uuid, &auth, isMeta);
+        }
+        if (ret != SOFTBUS_OK && type == CONNECT_P2P) {
+            TRANS_LOGI(TRANS_CTRL, "get AuthConnInfo, linkType=%{public}d", type);
+            ret = AuthGetP2pConnInfo(uuid, &auth, isMeta);
+        }
+        if (ret != SOFTBUS_OK) {
+            char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+            (void)LnnGetNetworkIdByUuid(uuid, networkId, sizeof(networkId));
+            ret = AuthGetPreferConnInfoWithoutSle(uuid, networkId, &auth, isMeta);
+        }
     }
     cb.onConnOpened = OnAuthConnOpened;
     cb.onConnOpenFailed = OnAuthConnOpenFailed;
@@ -898,7 +915,15 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
     char peerUuid[UUID_BUF_LEN] = { 0 };
     ret = TransGetRemoteUuidByAuthHandle(authHandle, peerUuid);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get remote uuid failed.");
-    ret = TransGetLocalIp(myIp, peerIp, peerUuid);
+    char peerNetWorkId[NETWORK_ID_BUF_LEN] = { 0 };
+    AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked(authHandle.authId, peerNetWorkId, NETWORK_ID_BUF_LEN);
+    int32_t osType = 0;
+    GetOsTypeByNetworkId(peerUuid, &osType);
+    if (osType == OTHER_OS_TYPE) {
+        ret = TransGetLocalIp(myIp, peerIp, peerNetWorkId);
+    } else {
+        ret = TransGetLocalIp(myIp, peerIp, peerUuid);
+    }
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret=%{public}d", ret);
         SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, ret, "get local ip fail", isAuthLink);

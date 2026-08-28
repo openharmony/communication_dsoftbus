@@ -351,7 +351,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest008, T
     info.appInfo.keyType = KEY_TYPE_META;
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
     AuthHandle validHandle = { 1, AUTH_LINK_TYPE_WIFI };
-    EXPECT_CALL(mock, AuthGetLatestIdByUuid(_, _, true, _)).WillOnce(SetArgPointee<3>(validHandle));
+    EXPECT_CALL(mock, AuthGetLatestIdByUuid).WillOnce(SetArgPointee<3>(validHandle));
     EXPECT_CALL(mock, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
@@ -766,9 +766,9 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyHandshakeTest002, TestS
     info.appInfo.appType = APP_TYPE_AUTH;
     info.appInfo.myData.pid = 1;
     NiceMock<SoftbusProxychannelControlPagingInterfaceMock> mock;
-    EXPECT_CALL(mock, TransProxyPackHandshakeMsg).WillOnce(Return(nullptr));
+    EXPECT_CALL(mock, TransProxyPackHandshakeMsg).WillOnce(Return(static_cast<char *>(nullptr)));
     int32_t ret = TransProxyHandshake(&info);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_HEAD_ERR, ret);
 }
 
 /*
@@ -791,7 +791,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyHandshakeTest003, TestS
     AuthHandle invalidHandle = { AUTH_INVALID_ID, 0 };
     EXPECT_CALL(mock, AuthGetLatestIdByUuid).WillOnce(SetArgPointee<3>(invalidHandle));
     int32_t ret = TransProxyHandshake(&info);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SET_CIPHER_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_HEAD_ERR, ret);
 }
 
 /*
@@ -819,9 +819,9 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyHandshakeTest004, TestS
     connInfo.type = AUTH_LINK_TYPE_WIFI;
     EXPECT_CALL(mock, AuthGetConnInfo).WillOnce(DoAll(SetArgPointee<1>(connInfo), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, AuthGetServerSide).WillOnce(DoAll(SetArgPointee<1>(false), Return(SOFTBUS_OK)));
-    EXPECT_CALL(mock, TransProxyPackHandshakeMsg).WillOnce(Return(nullptr));
+    EXPECT_CALL(mock, TransProxyPackHandshakeMsg).WillOnce(Return(static_cast<char *>(nullptr)));
     int32_t ret = TransProxyHandshake(&info);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_ERR, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_HEAD_ERR, ret);
 }
 
 /*
@@ -852,7 +852,8 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyHandshakeTest005, TestS
     cJSON *root = cJSON_CreateObject();
     char *buf = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
-    EXPECT_CALL(mock, TransProxyPackHandshakeMsg).WillOnce(Return(buf));
+    char *bufPtr = buf;
+    EXPECT_CALL(mock, TransProxyPackHandshakeMsg).WillOnce(Return(bufPtr));
     EXPECT_CALL(mock, TransProxyPackMessage).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransProxyHandshake(&info);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_HEAD_ERR, ret);
@@ -886,7 +887,8 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyHandshakeTest006, TestS
     cJSON *root = cJSON_CreateObject();
     char *buf = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
-    EXPECT_CALL(mock, TransProxyPackHandshakeMsg).WillOnce(Return(buf));
+    char *bufPtr = buf;
+    EXPECT_CALL(mock, TransProxyPackHandshakeMsg).WillOnce(Return(bufPtr));
     EXPECT_CALL(mock, TransProxyPackMessage).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransProxyHandshake(&info);
@@ -921,7 +923,8 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyHandshakeTest007, TestS
     cJSON *root = cJSON_CreateObject();
     char *buf = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
-    EXPECT_CALL(mock, TransProxyPackHandshakeMsg).WillOnce(Return(buf));
+    char *bufPtr = buf;
+    EXPECT_CALL(mock, TransProxyPackHandshakeMsg).WillOnce(Return(bufPtr));
     EXPECT_CALL(mock, TransProxyPackMessage).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_OK));
     int32_t ret = TransProxyHandshake(&info);

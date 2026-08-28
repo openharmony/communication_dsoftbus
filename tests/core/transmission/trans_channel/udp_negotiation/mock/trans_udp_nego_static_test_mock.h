@@ -67,6 +67,8 @@ public:
     virtual int32_t TransUdpUpdateReplyCnt(int32_t channelId) = 0;
     virtual int32_t TransDelUdpChannel(int32_t channelId) = 0;
     virtual int32_t AuthMetaGetLocalIpByMetaNodeIdPacked(const char *metaNodeId, char *localIp, int32_t len) = 0;
+    virtual int32_t AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked(int64_t authId, char *peerNetWorkId,
+        uint32_t len) = 0;
     virtual struct WifiDirectManager *GetWifiDirectManager(void) = 0;
     virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
     virtual int32_t AuthMetaGetPidByAuthIdPacked(int64_t authId, int32_t *pid) = 0;
@@ -112,6 +114,8 @@ public:
     MOCK_METHOD1(TransUdpUpdateReplyCnt, int32_t (int32_t channelId));
     MOCK_METHOD1(TransDelUdpChannel, int32_t (int32_t channelId));
     MOCK_METHOD3(AuthMetaGetLocalIpByMetaNodeIdPacked, int32_t (const char *metaNodeId, char *localIp, int32_t len));
+    MOCK_METHOD3(AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked, int32_t (int64_t authId, char *peerNetWorkId,
+        uint32_t len));
     MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager * (void));
     MOCK_METHOD2(LnnGetOsTypeByNetworkId, int32_t (const char *networkId, int32_t *osType));
     MOCK_METHOD2(AuthMetaGetPidByAuthIdPacked, int32_t (int64_t authId, int32_t *pid));

@@ -27,6 +27,8 @@
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "data_bus_native.h"
+#include "g_enhance_auth_func_pack.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "g_enhance_trans_func_pack.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "lnn_distributed_net_ledger.h"
@@ -1098,7 +1100,12 @@ static int32_t TransProxyHandshakeUnpackErrMsg(ProxyChannelInfo *info, const Pro
 
 static int32_t TransProxyHandshakeUnpackRightMsg(ProxyChannelInfo *info, const ProxyMessage *msg, int32_t errCode)
 {
-    int32_t ret = TransProxyUnpackHandshakeAckMsg(msg->data, info, msg->dataLen);
+    int32_t ret;
+    if (info->appInfo.osType == OTHER_OS_TYPE && info->appInfo.metaType == META_HA) {
+        ret = TransProxyUnpackExternalDeviceHandshakeAckMsg(msg->data, info, msg->dataLen);
+    } else {
+        ret = TransProxyUnpackHandshakeAckMsg(msg->data, info, msg->dataLen);
+    }
     if (ret != SOFTBUS_OK) {
         TransProxyReportAuditEvent(info, AUDIT_EVENT_PACKETS_ERROR, errCode);
         TRANS_LOGE(TRANS_CTRL, "UnpackHandshakeAckMsg failed");
@@ -1180,9 +1187,17 @@ static int32_t TransProxyGetLocalInfo(ProxyChannelInfo *chan)
     if (chan->appInfo.appType == APP_TYPE_AUTH) {
         key = STRING_KEY_DEV_UDID;
     }
-    int32_t ret = LnnGetLocalStrInfo(key, chan->appInfo.myData.deviceId, sizeof(chan->appInfo.myData.deviceId));
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, TRANS_CTRL, "channelId=%{public}d Handshake get local info fail", chan->channelId);
+    int32_t ret = SOFTBUS_INVALID_PARAM;
+    if (chan->appInfo.osType == OTHER_OS_TYPE && chan->appInfo.metaType == META_HA) {
+        ret = AuthMetaGetLocalMetaNodeIdByPeerMetaNodeIdPacked(chan->appInfo.peerData.deviceId,
+            chan->appInfo.myData.deviceId, sizeof(chan->appInfo.myData.deviceId));
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+            TRANS_CTRL, "channelId=%{public}d meta node Handshake get local info fail", chan->channelId);
+    } else {
+        ret = LnnGetLocalStrInfo(key, chan->appInfo.myData.deviceId, sizeof(chan->appInfo.myData.deviceId));
+        TRANS_CHECK_AND_RETURN_RET_LOGE(
+            ret == SOFTBUS_OK, ret, TRANS_CTRL, "channelId=%{public}d Handshake get local info fail", chan->channelId);
+    }
     chan->appInfo.myData.tokenType = ACEESS_TOKEN_TYPE_INVALID;
     if (chan->appInfo.appType != APP_TYPE_INNER) {
         ret = GetTokenTypeBySessionName(chan->appInfo.myData.sessionName, &chan->appInfo.myData.tokenType);
@@ -1278,6 +1293,10 @@ static int32_t TransProxyFillDataConfig(AppInfo *appInfo)
 
 static int32_t CheckAndGenerateSinkSessionKey(ProxyChannelInfo *chan)
 {
+    if (chan->appInfo.osType == OTHER_OS_TYPE && chan->appInfo.metaType == META_HA) {
+        DisableCapabilityBit(&chan->appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET);
+        return SOFTBUS_OK;
+    }
     (void)LnnGetNetworkIdByUuid(chan->appInfo.peerData.deviceId, chan->appInfo.peerNetWorkId, NETWORK_ID_BUF_LEN);
     int32_t osType = 0;
     GetOsTypeByNetworkId(chan->appInfo.peerNetWorkId, &osType);
@@ -1291,9 +1310,65 @@ static int32_t CheckAndGenerateSinkSessionKey(ProxyChannelInfo *chan)
     return SOFTBUS_OK;
 }
 
+static void FillMetaNodeAppInfo(int64_t authId, AppInfo *appInfo)
+{
+    char peerNetWorkId[NETWORK_ID_BUF_LEN] = {0};
+    (void)AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked(authId, peerNetWorkId, NETWORK_ID_BUF_LEN);
+    GetOsTypeByNetworkId(peerNetWorkId, &appInfo->osType);
+    LnnGetRemoteNumInfo(peerNetWorkId, NUM_KEY_META_TYPE, &appInfo->metaType);
+    appInfo->isSupportConcurrentMetaNode = AuthMetaIsSupportConcurrentByMetaNodeIdPacked(peerNetWorkId);
+}
+
+static int32_t CheckProxyChannelPermission(const ProxyMessage *msg, ProxyChannelInfo *chan)
+{
+    if ((chan->appInfo.appType == APP_TYPE_AUTH) &&
+        (!CheckSessionNameValidOnAuthChannel(chan->appInfo.myData.sessionName))) {
+        TRANS_LOGE(TRANS_CTRL, "proxy auth check sessionname valid.");
+        return SOFTBUS_TRANS_AUTH_NOTALLOW_OPENED;
+    }
+
+    if (CheckAppTypeAndMsgHead(&msg->msgHead, &chan->appInfo) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "only auth channel surpport plain text data");
+        return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
+    }
+
+    if (chan->appInfo.appType == APP_TYPE_NORMAL && chan->appInfo.callingTokenId != TOKENID_NOT_SET) {
+        if (chan->appInfo.osType != OH_OS_TYPE) {
+            (void)strcpy_s(chan->appInfo.peerNetWorkId, NETWORK_ID_BUF_LEN, chan->appInfo.peerData.deviceId);
+        } else {
+            (void)LnnGetNetworkIdByUuid(
+                chan->appInfo.peerData.deviceId, chan->appInfo.peerNetWorkId, NETWORK_ID_BUF_LEN);
+        }
+        if (chan->appInfo.osType != OH_OS_TYPE) {
+            TRANS_LOGI(TRANS_CTRL, "not support acl check osType=%{public}d", chan->appInfo.osType);
+        } else if (GetCapabilityBit(chan->appInfo.channelCapability, TRANS_CHANNEL_ACL_CHECK_OFFSET)) {
+            int32_t ret = TransCheckServerAccessControl(&chan->appInfo);
+            TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "acl check failed.");
+        } else {
+            TRANS_LOGI(TRANS_CTRL, "not support acl check");
+        }
+    }
+
+    if (TransCheckServerPermission(chan->appInfo.myData.sessionName, chan->appInfo.peerData.sessionName) !=
+        SOFTBUS_OK) {
+        return SOFTBUS_PERMISSION_SERVER_DENIED;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelInfo *chan)
 {
-    int32_t ret = TransProxyUnpackHandshakeMsg(msg->data, chan, msg->dataLen);
+    if (msg == NULL || chan == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret;
+    FillMetaNodeAppInfo(msg->authHandle.authId, &chan->appInfo);
+    if (chan->appInfo.osType == OTHER_OS_TYPE && chan->appInfo.metaType == META_HA) {
+        ret = TransProxyUnpackExternalDeviceHandshakeMsg(msg->data, chan, msg->dataLen);
+    } else {
+        ret = TransProxyUnpackHandshakeMsg(msg->data, chan, msg->dataLen);
+    }
     if (ret != SOFTBUS_OK) {
         TransProxyReportAuditEvent(chan, AUDIT_EVENT_PACKETS_ERROR, ret);
         TRANS_LOGE(TRANS_CTRL, "UnpackHandshakeMsg fail.");
@@ -1322,35 +1397,8 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
         return ret;
     }
 
-    if ((chan->appInfo.appType == APP_TYPE_AUTH) &&
-        (!CheckSessionNameValidOnAuthChannel(chan->appInfo.myData.sessionName))) {
-        TRANS_LOGE(TRANS_CTRL, "proxy auth check sessionname valid.");
-        return SOFTBUS_TRANS_AUTH_NOTALLOW_OPENED;
-    }
-
-    if (CheckAppTypeAndMsgHead(&msg->msgHead, &chan->appInfo) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "only auth channel surpport plain text data");
-        return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
-    }
-
-    if (chan->appInfo.appType == APP_TYPE_NORMAL && chan->appInfo.callingTokenId != TOKENID_NOT_SET) {
-        (void)LnnGetNetworkIdByUuid(chan->appInfo.peerData.deviceId, chan->appInfo.peerNetWorkId, NETWORK_ID_BUF_LEN);
-        int32_t osType = 0;
-        GetOsTypeByNetworkId(chan->appInfo.peerNetWorkId, &osType);
-        if (osType != OH_OS_TYPE) {
-            TRANS_LOGI(TRANS_CTRL, "not support acl check osType=%{public}d", osType);
-        } else if (GetCapabilityBit(chan->appInfo.channelCapability, TRANS_CHANNEL_ACL_CHECK_OFFSET)) {
-            ret = TransCheckServerAccessControl(&chan->appInfo);
-            TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "acl check failed.");
-        } else {
-            TRANS_LOGI(TRANS_CTRL, "not support acl check");
-        }
-    }
-
-    if (TransCheckServerPermission(chan->appInfo.myData.sessionName, chan->appInfo.peerData.sessionName) !=
-        SOFTBUS_OK) {
-        return SOFTBUS_PERMISSION_SERVER_DENIED;
-    }
+    ret = CheckProxyChannelPermission(msg, chan);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "check proxy channel permission failed.");
 
     ret = TransProxyFillDataConfig(&chan->appInfo);
     if (ret != SOFTBUS_OK) {
@@ -3003,27 +3051,27 @@ int32_t TransDisableConnBrIdleCheck(int32_t channelId)
         return SOFTBUS_LOCK_ERR;
     }
     uint32_t connId = 0;
-    bool isExist = false;
+    ConnectType connectType = CONNECT_TYPE_MAX;
     ProxyChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
-        if (item->channelId == channelId && item->appInfo.linkType == LANE_BR) {
+        if (item->channelId == channelId &&
+            (item->type == CONNECT_BR || item->type == CONNECT_BLE)) {
             connId = item->connId;
-            isExist = true;
+            connectType = item->type;
             break;
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-    if (!isExist) {
-        TRANS_LOGW(TRANS_CTRL, "connId not found by channelId=%{public}d", channelId);
-        return SOFTBUS_TRANS_NODE_NOT_FOUND;
+    UpdateOption option;
+    (void)memset_s(&option, sizeof(UpdateOption), 0, sizeof(UpdateOption));
+    if (connectType == CONNECT_BLE) {
+        option.type = CONNECT_BLE;
+        option.bleOption.priority = CONN_BLE_PRIORITY_BALANCED;
+        option.bleOption.isCancelIdleTimeout = true;
+    } else if (connectType == CONNECT_BR) {
+        option.type = CONNECT_BR;
+        option.brOption.enableIdleCheck = false;
     }
-
-    UpdateOption option = {
-        .type = CONNECT_BR,
-        .brOption = {
-            .enableIdleCheck = false,
-        }
-    };
     return ConnUpdateConnection(connId, &option);
 }
 

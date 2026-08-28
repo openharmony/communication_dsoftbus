@@ -181,5 +181,10 @@ int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
 {
     return GetAuthOtherInterfaceMock()->LnnGetLocalNum64Info(key, info);
 }
+
+int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
+{
+    return GetAuthOtherInterfaceMock()->LnnGetOsTypeByNetworkId(networkId, osType);
+}
 }
 } // namespace OHOS

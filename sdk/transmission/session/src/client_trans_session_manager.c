@@ -3463,7 +3463,7 @@ int32_t SetMaxIdleTimeBySocket(int32_t socket, uint32_t maxIdleTime)
     channelId = sessionNode->channelId;
     UnlockClientSessionServerList();
 
-    if (maxIdleTime == 0 && routeType == BT_BR) {
+    if (maxIdleTime == 0 && (routeType == BT_BR || routeType == BT_BLE)) {
         uint32_t bufLen = sizeof(int32_t);
         uint8_t *buf = (uint8_t *)SoftBusCalloc(bufLen);
         int32_t offSet = 0;

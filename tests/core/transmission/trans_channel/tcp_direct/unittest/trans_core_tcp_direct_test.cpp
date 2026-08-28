@@ -536,6 +536,7 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcPostBytes0016, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     TdcPacketHead packetHead;
+    (void)memset_s(&packetHead, sizeof(TdcPacketHead), 0, sizeof(TdcPacketHead));
     packetHead.magicNumber = MAGIC_NUMBER;
     packetHead.module = MODULE_SESSION;
     packetHead.seq = 0;

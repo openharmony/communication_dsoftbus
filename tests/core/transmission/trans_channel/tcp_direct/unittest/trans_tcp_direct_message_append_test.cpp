@@ -289,7 +289,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest004, TestSize.Lev
 {
     int32_t channelId = TEST_CHANNELID;
     TdcPacketHead packetHead = {0};
-    const char *data = "test";
+    char data[] = "test";
     TestTdcPacketHeadInit(&packetHead);
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
     EXPECT_CALL(TcpMessageMock, GetAuthHandleByChanId).WillOnce(Return(SOFTBUS_ENCRYPT_ERR));
@@ -307,7 +307,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest005, TestSize.Lev
 {
     int32_t channelId = TEST_CHANNELID;
     TdcPacketHead packetHead = {0};
-    const char *data = "test";
+    char data[] = "test";
     TestTdcPacketHeadInit(&packetHead);
     int64_t authId = TEST_AUTHID;
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
@@ -328,7 +328,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest006, TestSize.Lev
 {
     int32_t channelId = TEST_CHANNELID;
     TdcPacketHead packetHead = {0};
-    const char *data = "test";
+    char data[] = "test";
     TestTdcPacketHeadInit(&packetHead);
     int64_t authId = TEST_AUTHID;
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
@@ -354,7 +354,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest007, TestSize.Lev
     int32_t ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    const char *data = "test";
+    char data[] = "test";
     TestTdcPacketHeadInit(&packetHead);
     int64_t authId = TEST_AUTHID;
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
@@ -383,7 +383,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest008, TestSize.Lev
     int32_t ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    const char *data = "test";
+    char data[] = "test";
     TestTdcPacketHeadInit(&packetHead);
     int64_t authId = TEST_AUTHID;
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
@@ -441,7 +441,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest010, TestSize.Lev
     int32_t ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    const char *data = "test";
+    char data[] = "test";
     TestTdcPacketHeadInit(&packetHead);
     int64_t authId = TEST_AUTHID;
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
@@ -1080,7 +1080,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest032, TestSize.Lev
     int32_t ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    const char *data = "test";
+    char data[] = "test";
     TestTdcPacketHeadInit(&packetHead);
     int64_t authId = TEST_AUTHID;
     int32_t bufferLen = AuthGetEncryptSize(authId, packetHead.dataLen) + DC_MSG_PACKET_HEAD_SIZE;
@@ -1809,7 +1809,6 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestError001, TestSize.L
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
     ON_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
         .WillByDefault(DoAll(SetArgPointee<1>(AuthHandle{.authId = authId, .type = 1 }), Return(SOFTBUS_OK)));
-    EXPECT_CALL(TcpMessageMock, AuthEncrypt).WillOnce(Return(SOFTBUS_OK));
     int32_t ret = OpenDataBusRequestError(channelId, seq, errDesc, errCode, flags);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
 }
@@ -2185,7 +2184,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, PackBytesTest001, TestSize.Level1)
     SessionConn connInfo;
     (void)memset_s(&connInfo, sizeof(SessionConn), 0, sizeof(SessionConn));
 
-    const char *data = "test";
+    char data[] = "test";
     packetHead.dataLen = TEST_LEN;
     packetHead.flags = TEST_FLAG;
     packetHead.seq = TEST_SEQ;
@@ -2219,7 +2218,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, PackBytesTest002, TestSize.Level1)
     SessionConn connInfo;
     (void)memset_s(&connInfo, sizeof(SessionConn), 0, sizeof(SessionConn));
 
-    const char *data = "test";
+    char data[] = "test";
     packetHead.dataLen = TEST_LEN;
     packetHead.flags = TEST_FLAG;
     packetHead.seq = TEST_SEQ;
@@ -2253,7 +2252,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, PackBytesTest003, TestSize.Level1)
     SessionConn connInfo;
     (void)memset_s(&connInfo, sizeof(SessionConn), 0, sizeof(SessionConn));
 
-    const char *data = "test";
+    char data[] = "test";
     packetHead.dataLen = TEST_LEN;
     packetHead.flags = TEST_FLAG;
     packetHead.seq = TEST_SEQ;
@@ -2396,7 +2395,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest001, TestSize.Level1
     int32_t channelId = TEST_CHANNELID;
     uint32_t flags = FLAG_REPLY;
     uint64_t seq = TEST_SEQ;
-    const char *msg = "testmsg";
+    char msg[] = "testmsg";
     uint32_t dataLen = 0;
     SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
@@ -2420,7 +2419,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest002, TestSize.Level1
     int32_t channelId = TEST_CHANNELID;
     uint32_t flags = FLAG_WIFI;
     uint64_t seq = TEST_SEQ;
-    const char *msg = "testmsg";
+    char msg[] = "testmsg";
     uint32_t dataLen = 0;
 
     int32_t ret = ProcessMessage(channelId, flags, seq, msg, dataLen);

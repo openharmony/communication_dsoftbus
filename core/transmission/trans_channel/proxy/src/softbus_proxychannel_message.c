@@ -22,6 +22,7 @@
 #include "auth_interface.h"
 #include "auth_session_key_struct.h"
 #include "bus_center_manager.h"
+#include "g_enhance_auth_func_pack.h"
 #include "g_enhance_trans_func.h"
 #include "g_enhance_trans_func_pack.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
@@ -100,8 +101,55 @@ static void TransPagingParseMessageHead(char *data, int32_t len, ProxyMessage *m
     msg->dataLen = len - PAGING_CHANNEL_HEAD_LEN;
 }
 
+void PackProxyExternalMessageHead(const ProxyExternalMessageHead *msgHead, uint8_t *buf, uint32_t size)
+{
+    if (size < PROXY_CHANNEL_EXTERNAL_HEAD_LEN) {
+        TRANS_LOGE(TRANS_CTRL, "proxy new head not enough");
+        return;
+    }
+    uint32_t offset = 0;
+    *buf = msgHead->type;
+    offset += sizeof(uint8_t);
+    *(buf + offset) = msgHead->cipher;
+    offset += sizeof(uint8_t);
+    *(uint16_t *)(buf + offset) = SoftBusLEtoBEs((uint16_t)msgHead->myId);
+    offset += sizeof(uint16_t);
+    *(uint16_t *)(buf + offset) = SoftBusLEtoBEs((uint16_t)msgHead->peerId);
+    offset += sizeof(uint16_t);
+    *(uint16_t *)(buf + offset) = SoftBusLEtoBEs((uint16_t)msgHead->reserved);
+    offset += sizeof(uint16_t);
+    *(uint64_t *)(buf + offset) = SoftBusLEtoBEll((uint64_t)msgHead->authId);
+}
+
+int32_t UnpackProxyExternalMessageHead(const char *data, int32_t len, ProxyMessage *msg)
+{
+    if (data == NULL || msg == NULL || len < PROXY_CHANNEL_EXTERNAL_HEAD_LEN) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param, len=%{public}d", len);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *ptr = data;
+    ptr += sizeof(uint8_t);
+
+    msg->msgHead.cipher = *ptr;
+    ptr += sizeof(uint8_t);
+    msg->msgHead.peerId = (int16_t)SoftBusBEtoLEs(*(uint16_t *)ptr);
+    ptr += sizeof(uint16_t);
+    msg->msgHead.myId = (int16_t)SoftBusBEtoLEs(*(uint16_t *)ptr);
+    ptr += sizeof(uint16_t);
+    msg->msgHead.reserved = (int16_t)SoftBusBEtoLEs(*(uint16_t *)ptr);
+    ptr += sizeof(uint16_t);
+    msg->authHandle.authId = (int64_t)SoftBusBEtoLEll(*(uint64_t *)ptr);
+    msg->data = (char *)data + PROXY_CHANNEL_EXTERNAL_HEAD_LEN;
+    msg->dataLen = len - PROXY_CHANNEL_EXTERNAL_HEAD_LEN;
+    return SOFTBUS_OK;
+}
+
 static int32_t TransProxyParseMessageHead(char *data, int32_t len, ProxyMessage *msg)
 {
+    if (len < PROXY_CHANNEL_HEAD_LEN) {
+        TRANS_LOGE(TRANS_CTRL, "parseMessageHead: invalid message len, len=%{public}d", len);
+        return SOFTBUS_INVALID_PARAM;
+    }
     char *ptr = data;
     ptr += sizeof(int8_t);
 
@@ -112,13 +160,14 @@ static int32_t TransProxyParseMessageHead(char *data, int32_t len, ProxyMessage 
     msg->msgHead.myId = (int16_t)SoftBusBEtoLEs(*(uint16_t *)ptr);
     ptr += sizeof(uint16_t);
     msg->msgHead.reserved = (int16_t)SoftBusBEtoLEs(*(uint16_t *)ptr);
+    msg->authHandle.authId = AUTH_INVALID_ID;
     msg->data = data + sizeof(ProxyMessageHead);
     msg->dataLen = len - sizeof(ProxyMessageHead);
 
     return SOFTBUS_OK;
 }
 
-static void TransProxyPackMessageHead(ProxyMessageHead *msgHead, uint8_t *buf, uint32_t size)
+void TransProxyPackMessageHead(ProxyMessageHead *msgHead, uint8_t *buf, uint32_t size)
 {
     if (size < PROXY_CHANNEL_HEAD_LEN) {
         TRANS_LOGE(TRANS_CTRL, "proxy head not enough");
@@ -218,7 +267,7 @@ static int32_t SelectAuthType(AuthConnInfo *connInfo, ConnectionInfo *info)
     return SOFTBUS_OK;
 }
 
-static int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo)
+int32_t TransProxyGetAuthConnInfo(uint32_t connId, AuthConnInfo *connInfo)
 {
     ConnectionInfo info = { 0 };
     int32_t ret = ConnGetConnectionInfo(connId, &info);
@@ -1010,19 +1059,19 @@ int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg)
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth)
+static int32_t DecryptProxyMessage(ProxyMessage *msg, AuthHandle *auth)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(len > PROXY_CHANNEL_HEAD_LEN,
-        SOFTBUS_INVALID_PARAM, TRANS_CTRL, "parseMessage: invalid message len, len=%{public}d", len);
-    int32_t ret = TransProxyParseMessageHead(data, len, msg);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "TransProxyParseMessageHead fail!");
+    int32_t ret = SOFTBUS_INVALID_PARAM;
     if ((msg->msgHead.cipher & ENCRYPTED) != 0) {
         if ((uint32_t)msg->dataLen < (sizeof(uint32_t) + OVERHEAD_LEN) ||
             (uint32_t)msg->dataLen > (PROXY_BYTES_LENGTH_MAX + OVERHEAD_LEN + sizeof(uint32_t))) {
             TRANS_LOGE(TRANS_CTRL, "The data length of the ProxyMessage is abnormal!");
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
         }
-        if (msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE) {
+        if (msg->authHandle.authId != AUTH_INVALID_ID) {
+            auth->authId = msg->authHandle.authId;
+            ret = SOFTBUS_OK;
+        } else if (msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE) {
             TRANS_LOGD(TRANS_CTRL, "prxoy recv handshake cipher=0x%{public}02x", msg->msgHead.cipher);
             ret = GetAuthIdByHandshakeMsg(
                 msg->connId, msg->msgHead.cipher, auth, (int32_t)SoftBusLtoHl(*(uint32_t *)msg->data));
@@ -1053,6 +1102,25 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthH
     return SOFTBUS_OK;
 }
 
+int32_t TransProxyParseMessage(
+    char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth, bool isSupportConcurrentMetaNode)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(len > PROXY_CHANNEL_HEAD_LEN,
+        SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid message len=%{public}d", len);
+    int32_t ret;
+    uint8_t msgType = (uint8_t)(*((uint8_t *)data) & FOUR_BIT_MASK);
+    uint8_t cipher = *((uint8_t *)data + 1);
+    if (isSupportConcurrentMetaNode && (len >= PROXY_CHANNEL_EXTERNAL_HEAD_LEN) &&
+        msgType != PROXYCHANNEL_MSG_TYPE_NORMAL && (cipher & ENCRYPTED) != 0) {
+        ret = UnpackProxyExternalMessageHead(data, len, msg);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "UnpackProxyExternalMessageHead fail!");
+    } else {
+        ret = TransProxyParseMessageHead(data, len, msg);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "TransProxyParseMessageHead fail!");
+    }
+    return DecryptProxyMessage(msg, auth);
+}
+
 int32_t PackPlaintextMessage(ProxyMessageHead *msg, ProxyDataInfo *dataInfo)
 {
     if (msg == NULL || dataInfo == NULL) {
@@ -1078,6 +1146,32 @@ int32_t PackPlaintextMessage(ProxyMessageHead *msg, ProxyDataInfo *dataInfo)
     return SOFTBUS_OK;
 }
 
+int32_t PackPlaintextExternalMessage(const ProxyExternalMessageHead *msg, ProxyDataInfo *dataInfo)
+{
+    if (msg == NULL || dataInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t connHeadLen = ConnGetHeadSize();
+    uint32_t size = PROXY_CHANNEL_EXTERNAL_HEAD_LEN + connHeadLen + dataInfo->inLen;
+    uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
+    if (buf == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "malloc proxy buf fail, myChannelId=%{public}d", msg->myId);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    PackProxyExternalMessageHead(msg, buf + connHeadLen, PROXY_CHANNEL_EXTERNAL_HEAD_LEN);
+    if (memcpy_s(buf + connHeadLen + PROXY_CHANNEL_EXTERNAL_HEAD_LEN,
+        size - connHeadLen - PROXY_CHANNEL_EXTERNAL_HEAD_LEN,
+        dataInfo->inData, dataInfo->inLen) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "plaint ext meta node message memcpy fail.");
+        SoftBusFree(buf);
+        return SOFTBUS_MEM_ERR;
+    }
+    dataInfo->outData = buf;
+    dataInfo->outLen = size;
+    return SOFTBUS_OK;
+}
+
 static int32_t PackEncryptedMessage(ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo)
 {
     if (authHandle.authId == AUTH_INVALID_ID) {
@@ -1093,6 +1187,37 @@ static int32_t PackEncryptedMessage(ProxyMessageHead *msg, AuthHandle authHandle
     TransProxyPackMessageHead(msg, buf + ConnGetHeadSize(), PROXY_CHANNEL_HEAD_LEN);
     uint8_t *encData = buf + ConnGetHeadSize() + PROXY_CHANNEL_HEAD_LEN;
     uint32_t encDataLen = size - ConnGetHeadSize() - PROXY_CHANNEL_HEAD_LEN;
+    if (AuthEncrypt(&authHandle, dataInfo->inData, dataInfo->inLen, encData, &encDataLen) != SOFTBUS_OK) {
+        SoftBusFree(buf);
+        TRANS_LOGE(TRANS_CTRL, "pack msg encrypt fail, myChannelId=%{public}d", msg->myId);
+        return SOFTBUS_ENCRYPT_ERR;
+    }
+    dataInfo->outData = buf;
+    dataInfo->outLen = size;
+    return SOFTBUS_OK;
+}
+
+int32_t PackEncryptedExternalMessage(
+    const ProxyExternalMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo)
+{
+    if (msg == NULL || dataInfo == NULL || dataInfo->inData == NULL || dataInfo->inLen == 0) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (authHandle.authId == AUTH_INVALID_ID) {
+        TRANS_LOGE(TRANS_CTRL, "invalid authId, myChannelId=%{public}d", msg->myId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t size = ConnGetHeadSize() + PROXY_CHANNEL_EXTERNAL_HEAD_LEN +
+        AuthGetEncryptSize(authHandle.authId, dataInfo->inLen);
+    uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
+    if (buf == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "malloc enc buf fail, myChannelId=%{public}d", msg->myId);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    PackProxyExternalMessageHead(msg, buf + ConnGetHeadSize(), PROXY_CHANNEL_EXTERNAL_HEAD_LEN);
+    uint8_t *encData = buf + ConnGetHeadSize() + PROXY_CHANNEL_EXTERNAL_HEAD_LEN;
+    uint32_t encDataLen = size - ConnGetHeadSize() - PROXY_CHANNEL_EXTERNAL_HEAD_LEN;
     if (AuthEncrypt(&authHandle, dataInfo->inData, dataInfo->inLen, encData, &encDataLen) != SOFTBUS_OK) {
         SoftBusFree(buf);
         TRANS_LOGE(TRANS_CTRL, "pack msg encrypt fail, myChannelId=%{public}d", msg->myId);
@@ -1899,4 +2024,181 @@ int32_t TransProxyParseD2DData(const char *data, int32_t len)
     }
     return OnProxyChannelMsgReceived(myId, &(info.appInfo), data + PROXY_CHANNEL_D2D_HEAD_LEN,
         len - PROXY_CHANNEL_D2D_HEAD_LEN);
+}
+
+char *TransProxyPackExternalDeviceHandshakeMsg(ProxyChannelInfo *info)
+{
+    TRANS_LOGI(TRANS_CTRL, "PackExternalDeviceHandshakeMsg enter");
+    if (info == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return NULL;
+    }
+    cJSON *root = cJSON_CreateObject();
+    if (root == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "create json object failed.");
+        return NULL;
+    }
+    AppInfo *appInfo = &(info->appInfo);
+    if (!AddNumberToJsonObject(root, JSON_KEY_TYPE, appInfo->appType) ||
+        !AddStringToJsonObject(root, JSON_KEY_IDENTITY, info->identity) ||
+        !AddStringToJsonObject(root, JSON_KEY_DEVICE_ID, appInfo->myData.deviceId) ||
+        !AddStringToJsonObject(root, JSON_KEY_SRC_BUS_NAME, appInfo->myData.sessionName) ||
+        !AddStringToJsonObject(root, JSON_KEY_DST_BUS_NAME, appInfo->peerData.sessionName) ||
+        !AddNumberToJsonObject(root, API_VERSION, appInfo->myData.apiVersion) ||
+        !AddNumberToJsonObject(root, JSON_KEY_MTU_SIZE, appInfo->myData.dataConfig) ||
+        !AddNumberToJsonObject(root, TRANS_CAPABILITY, appInfo->channelCapability)) {
+        TRANS_LOGE(TRANS_CTRL, "add base json object failed.");
+        cJSON_Delete(root);
+        return NULL;
+    }
+    (void)cJSON_AddTrueToObject(root, JSON_KEY_HAS_PRIORITY);
+    if (!AddStringToJsonObject(root, JSON_KEY_PKG_NAME, appInfo->myData.pkgName)) {
+        TRANS_LOGE(TRANS_CTRL, "add pkgName failed.");
+        cJSON_Delete(root);
+        return NULL;
+    }
+    SessionKeyBase64 sessionBase64;
+    (void)memset_s(&sessionBase64, sizeof(SessionKeyBase64), 0, sizeof(SessionKeyBase64));
+    int32_t ret = SoftBusBase64Encode((unsigned char *)sessionBase64.sessionKeyBase64,
+        sizeof(sessionBase64.sessionKeyBase64), &(sessionBase64.len),
+        (unsigned char *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "base64 encode sessionkey FAIL ret=%{public}d", ret);
+        cJSON_Delete(root);
+        return NULL;
+    }
+    if (!AddStringToJsonObject(root, JSON_KEY_SESSION_KEY, sessionBase64.sessionKeyBase64)) {
+        cJSON_Delete(root);
+        return NULL;
+    }
+    (void)AddNumberToJsonObject(root, JSON_KEY_BUSINESS_TYPE, appInfo->businessType);
+    (void)AddNumberToJsonObject(root, JSON_KEY_TRANS_FLAGS, appInfo->transFlag);
+    char *buf = cJSON_PrintUnformatted(root);
+    cJSON_Delete(root);
+    return buf;
+}
+
+int32_t TransProxyUnpackExternalDeviceHandshakeMsg(const char *msg, ProxyChannelInfo *chan, int32_t len)
+{
+    TRANS_LOGI(TRANS_CTRL, "UnpackExternalDeviceHandshakeMsg enter, len=%{public}d", len);
+    if (msg == NULL || chan == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    cJSON *root = cJSON_ParseWithLength(msg, len);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(root != NULL, SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "parse json failed.");
+    AppInfo *appInfo = &(chan->appInfo);
+    int32_t ret = TransProxyGetJsonObject(root, chan);
+    if (ret != SOFTBUS_OK) {
+        cJSON_Delete(root);
+        return ret;
+    }
+
+    char sessionKey[BASE64KEY] = { 0 };
+    (void)GetJsonObjectStringItem(root, JSON_KEY_SESSION_KEY, sessionKey, BASE64KEY);
+    size_t keyLen = 0;
+    if (strlen(sessionKey) != 0) {
+        int32_t decRet = SoftBusBase64Decode((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey),
+            &keyLen, (uint8_t *)sessionKey, strlen(sessionKey));
+        if (keyLen != sizeof(appInfo->sessionKey) || decRet != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "decode session fail ret=%{public}d", decRet);
+            cJSON_Delete(root);
+            (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
+            return SOFTBUS_DECRYPT_ERR;
+        }
+    }
+    if (!GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME, appInfo->peerData.pkgName,
+        sizeof(appInfo->peerData.pkgName))) {
+        TRANS_LOGW(TRANS_CTRL, "no item to get pkg name");
+    }
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_BUSINESS_TYPE, (int32_t *)&appInfo->businessType)) {
+        appInfo->businessType = BUSINESS_TYPE_NOT_CARE;
+    }
+    (void)GetJsonObjectNumberItem(root, JSON_KEY_TRANS_FLAGS, &appInfo->transFlag);
+    cJSON_Delete(root);
+    (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
+    return SOFTBUS_OK;
+}
+
+char *TransProxyPackExternalDeviceHandshakeAckMsg(ProxyChannelInfo *chan)
+{
+    TRANS_LOGI(TRANS_CTRL, "PackExternalDeviceHandshakeAckMsg enter");
+    if (chan == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return NULL;
+    }
+    AppInfo *appInfo = &(chan->appInfo);
+    cJSON *root = cJSON_CreateObject();
+    if (root == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "create json object failed.");
+        return NULL;
+    }
+    if (!AddStringToJsonObject(root, JSON_KEY_IDENTITY, chan->identity) ||
+        !AddStringToJsonObject(root, JSON_KEY_DEVICE_ID, appInfo->myData.deviceId) ||
+        !AddNumberToJsonObject(root, TRANS_CAPABILITY, appInfo->channelCapability)) {
+        cJSON_Delete(root);
+        return NULL;
+    }
+    if (appInfo->myData.dataConfig != 0) {
+        if (!AddNumberToJsonObject(root, JSON_KEY_MTU_SIZE, appInfo->myData.dataConfig)) {
+            cJSON_Delete(root);
+            return NULL;
+        }
+    }
+    (void)cJSON_AddTrueToObject(root, JSON_KEY_HAS_PRIORITY);
+    if (!AddStringToJsonObject(root, JSON_KEY_PKG_NAME, appInfo->myData.pkgName) ||
+        !AddStringToJsonObject(root, JSON_KEY_SRC_BUS_NAME, appInfo->myData.sessionName) ||
+        !AddStringToJsonObject(root, JSON_KEY_DST_BUS_NAME, appInfo->peerData.sessionName)) {
+        cJSON_Delete(root);
+        return NULL;
+    }
+    char *buf = cJSON_PrintUnformatted(root);
+    cJSON_Delete(root);
+    return buf;
+}
+
+int32_t TransProxyUnpackExternalDeviceHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo, int32_t len)
+{
+    TRANS_LOGI(TRANS_CTRL, "UnpackExternalDeviceHandshakeAckMsg enter, len=%{public}d", len);
+    if (msg == NULL || chanInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    cJSON *root = cJSON_ParseWithLength(msg, len);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(root != NULL, SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "parse json failed.");
+    if (!GetJsonObjectStringItem(root, JSON_KEY_IDENTITY, chanInfo->identity, sizeof(chanInfo->identity)) ||
+        !GetJsonObjectStringItem(root, JSON_KEY_DEVICE_ID, chanInfo->appInfo.peerData.deviceId,
+                                 sizeof(chanInfo->appInfo.peerData.deviceId))) {
+        TRANS_LOGE(TRANS_CTRL, "fail to get identity or deviceId");
+        cJSON_Delete(root);
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_MTU_SIZE,
+                                 (int32_t *)&(chanInfo->appInfo.peerData.dataConfig))) {
+        TRANS_LOGD(TRANS_CTRL, "peer dataconfig is null.");
+    }
+
+    int32_t ret = TransProxyGetAppInfoType(chanInfo->myId, chanInfo->identity, &chanInfo->appInfo.appType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "failed to get app type");
+        cJSON_Delete(root);
+        return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
+    }
+
+    if (!GetJsonObjectStringItem(root, JSON_KEY_SRC_BUS_NAME, chanInfo->appInfo.peerData.sessionName,
+            sizeof(chanInfo->appInfo.peerData.sessionName)) ||
+        !GetJsonObjectStringItem(root, JSON_KEY_DST_BUS_NAME, chanInfo->appInfo.myData.sessionName,
+            sizeof(chanInfo->appInfo.myData.sessionName))) {
+        TRANS_LOGW(TRANS_CTRL, "fail to get session name");
+    }
+    if (!GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME, chanInfo->appInfo.peerData.pkgName,
+                                 sizeof(chanInfo->appInfo.peerData.pkgName))) {
+        TRANS_LOGW(TRANS_CTRL, "no item to get pkg name");
+    }
+    if (!GetJsonObjectNumberItem(root, TRANS_CAPABILITY,
+                                 (int32_t *)&(chanInfo->appInfo.channelCapability))) {
+        chanInfo->appInfo.channelCapability = 0;
+    }
+    cJSON_Delete(root);
+    return SOFTBUS_OK;
 }

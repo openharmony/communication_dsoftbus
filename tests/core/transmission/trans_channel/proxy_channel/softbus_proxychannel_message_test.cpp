@@ -386,7 +386,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest001, TestSize
     char *buf = reinterpret_cast<char *>(SoftBusCalloc(sizeof(ProxyMessage)));
     ASSERT_TRUE(buf != nullptr);
 
-    int32_t ret = TransProxyParseMessage(buf, PROXY_CHANNEL_HEAD_LEN, &msg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, PROXY_CHANNEL_HEAD_LEN, &msg, &authHandle, false);
     EXPECT_NE(SOFTBUS_OK, ret);
     SoftBusFree(buf);
 }
@@ -407,7 +407,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest002, TestSize
 
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_MAX & FOUR_BIT_MASK) | (TEST_INVALID_HEAD_VERSION << VERSION_SHIFT);
     EXPECT_EQ(EOK, memcpy_s(buf, len, &msg, len));
-    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(buf);
 }
@@ -428,7 +428,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest003, TestSize
 
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_MAX & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
     EXPECT_EQ(EOK, memcpy_s(buf, len, &msg, len));
-    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(buf);
 }
@@ -450,7 +450,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest004, TestSize
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
     msg.msgHead.cipher = 0;
     EXPECT_EQ(EOK, memcpy_s(buf, len, &msg, len));
-    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(buf);
 }
@@ -473,7 +473,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest005, TestSize
     msg.msgHead.cipher = 1;
     msg.msgHead.peerId = -1;
     EXPECT_EQ(EOK, memcpy_s(buf, len, &msg, len));
-    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(buf);
 }
@@ -497,7 +497,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest006, TestSize
 
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
     EXPECT_EQ(EOK, memcpy_s(buf, len, &msg, len));
-    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(buf);
 }
@@ -521,7 +521,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest007, TestSize
 
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
     EXPECT_EQ(EOK, memcpy_s(buf, len, &msg, len));
-    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(buf);
 }
@@ -545,7 +545,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest008, TestSize
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
     EXPECT_EQ(EOK, memcpy_s(buf, len, &msg, len));
 
-    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(buf);
 }
@@ -572,7 +572,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest009, TestSize
     ConnectionInfo errInfo;
     errInfo.type = CONNECT_TYPE_MAX;
 
-    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(buf);
 }
@@ -599,7 +599,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest010, TestSize
     ConnectionInfo tcpInfo;
     tcpInfo.type = CONNECT_TCP;
 
-    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(buf);
 }
@@ -626,7 +626,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest011, TestSize
     ConnectionInfo tcpInfo;
     tcpInfo.type = CONNECT_TCP;
 
-    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(buf);
 }
@@ -653,7 +653,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest012, TestSize
     ConnectionInfo brInfo;
     brInfo.type = CONNECT_BR;
 
-    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(buf);
 }
@@ -674,7 +674,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest013, TestSize
         .msgHead.cipher = 0x3
     };
 
-    int32_t ret = TransProxyParseMessage(data, 24, &msg, &auth);
+    int32_t ret = TransProxyParseMessage(data, 24, &msg, &auth, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -1131,7 +1131,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, PackPlaintextMessageTest001, TestSize.L
     ProxyDataInfo dataInfo;
     (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
     dataInfo.inLen = FAST_TRANS_DATASIZE;
-    dataInfo.inData = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_FAST_TRANS_DATA));
+    dataInfo.inData = (uint8_t *)TEST_FAST_TRANS_DATA;
     int32_t ret = PackPlaintextMessage(nullptr, &dataInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = PackPlaintextMessage(&msg, nullptr);

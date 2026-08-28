@@ -31,6 +31,8 @@ public:
     virtual ~TransTcpDirectListenerInterface() {};
     virtual char *PackRequest(const AppInfo *appInfo, int64_t requestId) = 0;
     virtual int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const char *data) = 0;
+    virtual int32_t TransTdcPostExternalBytes(int32_t channelId, TdcExternalPacketHead *packetHead,
+        const char *data) = 0;
     virtual int32_t AuthGetServerSide(int64_t authId, bool *isServer) = 0;
     virtual int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo) = 0;
     virtual char *PackExternalDeviceRequest(const AppInfo *appInfo, int64_t requestId) = 0;
@@ -42,6 +44,8 @@ public:
     ~TransTcpDirectListenerInterfaceMock() override;
     MOCK_METHOD2(PackRequest, char *(const AppInfo *appInfo, int64_t requestId));
     MOCK_METHOD3(TransTdcPostBytes, int32_t(int32_t channelId, TdcPacketHead *packetHead, const char *data));
+    MOCK_METHOD3(TransTdcPostExternalBytes, int32_t(int32_t channelId, TdcExternalPacketHead *packetHead,
+        const char *data));
     MOCK_METHOD2(AuthGetServerSide, int32_t(int64_t authId, bool *isServer));
     MOCK_METHOD2(AuthGetConnInfo, int32_t(AuthHandle authHandle, AuthConnInfo *connInfo));
     MOCK_METHOD2(PackExternalDeviceRequest, char * (const AppInfo *appInfo, int64_t requestId));

@@ -286,11 +286,11 @@ ohos_unittest("TransChannelCommonTest") {
 group("unittest") {
   testonly = true
   deps = [
+    ":TransChannelCommonTest",
     ":TransInnerTest",
     ":TransLaneCommonTest",
     ":TransLanePendingTest",
     ":TransUkManagerTest",
-    ":TransChannelCommonTest",
     "mock/softbus_message_open_channel_test:unittest",
   ]
   if (dsoftbus_feature_lnn_lane_mgr) {

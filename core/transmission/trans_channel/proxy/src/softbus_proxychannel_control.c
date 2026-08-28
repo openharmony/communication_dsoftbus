@@ -20,10 +20,14 @@
 
 #include "auth_apply_key_process.h"
 #include "auth_interface.h"
+#include "bus_center_info_key.h"
+#include "bus_center_manager.h"
 #include "cJSON.h"
+#include "g_enhance_auth_func_pack.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_conn_interface.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_proxychannel_manager.h"
@@ -131,8 +135,12 @@ static int32_t SetCipherOfHandshakeMsg(ProxyChannelInfo *info, uint8_t *cipher)
     } else {
         (void)TransProxySetKeyTypeByChanId(info->channelId, KEY_TYPE_NORMAL);
     }
-    AuthGetLatestIdByUuid(info->appInfo.peerData.deviceId, ConvertConnectType2AuthLinkType(info->type),
-                          isMeta, &info->authHandle);
+    if (info->appInfo.osType == OTHER_OS_TYPE && info->appInfo.metaType == META_HA) {
+        AuthMetaGetAuthHandleByPeerMetaNodeIdPacked(info->appInfo.peerData.deviceId, &info->authHandle);
+    } else {
+        AuthGetLatestIdByUuid(info->appInfo.peerData.deviceId, ConvertConnectType2AuthLinkType(info->type),
+            false, &info->authHandle);
+    }
     if (info->authHandle.authId == AUTH_INVALID_ID) {
         TRANS_LOGE(TRANS_CTRL, "get authId for cipher err, isMeta=%{public}d", isMeta);
         return SOFTBUS_TRANS_PROXY_GET_AUTH_ID_FAILED;
@@ -242,11 +250,32 @@ int32_t TransPagingHandshake(int32_t channelId, uint8_t *authKey, uint32_t keyLe
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyHandshake(ProxyChannelInfo *info)
+static int32_t PackExternalHandshakeData(ProxyChannelInfo *info, char **payLoad, ProxyDataInfo *dataInfo)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param.");
-    char *payLoad = NULL;
-    ProxyDataInfo dataInfo = {0};
+    ProxyExternalMessageHead msgHead = {0};
+    msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
+    msgHead.cipher = CS_MODE;
+    if (SetCipherOfHandshakeMsg(info, &msgHead.cipher) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "set cipher fail");
+        return SOFTBUS_TRANS_PROXY_SET_CIPHER_FAILED;
+    }
+    msgHead.myId = info->myId;
+    msgHead.peerId = INVALID_CHANNEL_ID;
+    msgHead.authId = info->authHandle.authId;
+    TRANS_LOGI(TRANS_CTRL, "send metaNode handshake msg myChannelId=%{public}d, cipher=0x%{public}02x",
+        msgHead.myId, msgHead.cipher);
+    *payLoad = TransProxyPackExternalDeviceHandshakeMsg(info);
+    if (*payLoad == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "pack handshake fail");
+        return SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_ERR;
+    }
+    dataInfo->inData = (uint8_t *)*payLoad;
+    dataInfo->inLen = strlen(*payLoad) + 1;
+    return PackEncryptedExternalMessage(&msgHead, info->authHandle, dataInfo);
+}
+
+static int32_t PackNormalHandshakeData(ProxyChannelInfo *info, char **payLoad, ProxyDataInfo *dataInfo)
+{
     ProxyMessageHead msgHead = {0};
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     msgHead.cipher = CS_MODE;
@@ -260,21 +289,36 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
     msgHead.peerId = INVALID_CHANNEL_ID;
     TRANS_LOGI(
         TRANS_CTRL, "send handshake msg myChannelId=%{public}d, cipher=0x%{public}02x", msgHead.myId, msgHead.cipher);
-    payLoad = TransProxyPackHandshakeMsg(info);
-    if (payLoad == NULL) {
+    *payLoad = TransProxyPackHandshakeMsg(info);
+    if (*payLoad == NULL) {
         TRANS_LOGE(TRANS_CTRL, "pack handshake fail");
         return SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_ERR;
     }
-    dataInfo.inData = (uint8_t *)payLoad;
-    dataInfo.inLen = strlen(payLoad) + 1;
-    if (TransProxyPackMessage(&msgHead, info->authHandle, &dataInfo) != SOFTBUS_OK) {
+    dataInfo->inData = (uint8_t *)*payLoad;
+    dataInfo->inLen = strlen(*payLoad) + 1;
+    return TransProxyPackMessage(&msgHead, info->authHandle, dataInfo);
+}
+
+int32_t TransProxyHandshake(ProxyChannelInfo *info)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param.");
+    char *payLoad = NULL;
+    ProxyDataInfo dataInfo = {0};
+    int32_t ret;
+    if (info->appInfo.osType == OTHER_OS_TYPE && info->appInfo.metaType == META_HA &&
+        info->appInfo.isSupportConcurrentMetaNode) {
+        ret = PackExternalHandshakeData(info, &payLoad, &dataInfo);
+    } else {
+        ret = PackNormalHandshakeData(info, &payLoad, &dataInfo);
+    }
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "pack handshake head fail");
         cJSON_free(payLoad);
         return SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_HEAD_ERR;
     }
     cJSON_free(payLoad);
     dataInfo.inData = NULL;
-    int32_t ret = TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen,
+    ret = TransProxyTransSendMsg(info->connId, dataInfo.outData, dataInfo.outLen,
         CONN_HIGH, info->appInfo.myData.pid);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "send handshake buf fail");
@@ -382,11 +426,9 @@ int32_t TransPagingAckHandshake(ProxyChannelInfo *chan, int32_t retCode)
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t retCode)
+static int32_t PackNormalAckHandshakeData(
+    ProxyChannelInfo *chan, int32_t retCode, char **payLoad, ProxyDataInfo *dataInfo)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(chan != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param.");
-    char *payLoad = NULL;
-    ProxyDataInfo dataInfo = {0};
     ProxyMessageHead msgHead = {0};
     msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE_ACK & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     if (chan->appInfo.appType != APP_TYPE_AUTH) {
@@ -399,25 +441,71 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t 
         TRANS_LOGI(TRANS_CTRL,
             "send handshake error msg errCode=%{public}d, myChannelId=%{public}d, peerChannelId=%{public}d",
             retCode, chan->myId, chan->peerId);
-        payLoad = TransProxyPackHandshakeErrMsg(retCode);
+        *payLoad = TransProxyPackHandshakeErrMsg(retCode);
     } else {
         TRANS_LOGI(TRANS_CTRL, "send handshake ack msg myChannelId=%{public}d, peerChannelId=%{public}d",
             chan->myId, chan->peerId);
-        payLoad = TransProxyPackHandshakeAckMsg(chan);
+        *payLoad = TransProxyPackHandshakeAckMsg(chan);
     }
-    if (payLoad == NULL) {
+    if (*payLoad == NULL) {
         TRANS_LOGE(TRANS_CTRL, "pack handshake ack fail");
         return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }
-    dataInfo.inData = (uint8_t *)payLoad;
-    dataInfo.inLen = strlen(payLoad) + 1;
-    if (TransProxyPackMessage(&msgHead, chan->authHandle, &dataInfo) != SOFTBUS_OK) {
+    dataInfo->inData = (uint8_t *)*payLoad;
+    dataInfo->inLen = strlen(*payLoad) + 1;
+    return TransProxyPackMessage(&msgHead, chan->authHandle, dataInfo);
+}
+
+static int32_t PackExternalAckHandshakeData(
+    ProxyChannelInfo *chan, int32_t retCode, char **payLoad, ProxyDataInfo *dataInfo)
+{
+    ProxyExternalMessageHead msgHead = {0};
+    msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE_ACK & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
+    msgHead.cipher = (msgHead.cipher | ENCRYPTED);
+    msgHead.myId = chan->myId;
+    msgHead.peerId = chan->peerId;
+    msgHead.authId = chan->authHandle.authId;
+
+    if (retCode != SOFTBUS_OK) {
+        TRANS_LOGI(TRANS_CTRL,
+            "send handshake error msg errCode=%{public}d, myChannelId=%{public}d, peerChannelId=%{public}d",
+            retCode, chan->myId, chan->peerId);
+        *payLoad = TransProxyPackHandshakeErrMsg(retCode);
+    } else {
+        TRANS_LOGI(TRANS_CTRL, "send handshake ack msg myChannelId=%{public}d, peerChannelId=%{public}d",
+            chan->myId, chan->peerId);
+        *payLoad = TransProxyPackExternalDeviceHandshakeAckMsg(chan);
+    }
+    if (*payLoad == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "pack handshake ack fail");
+        return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
+    }
+    dataInfo->inData = (uint8_t *)*payLoad;
+    dataInfo->inLen = strlen(*payLoad) + 1;
+    return PackEncryptedExternalMessage(&msgHead, chan->authHandle, dataInfo);
+}
+
+int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t retCode)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(chan != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param.");
+    char *payLoad = NULL;
+    ProxyDataInfo dataInfo = {0};
+    int32_t ret;
+
+    if (chan->appInfo.osType == OTHER_OS_TYPE && chan->appInfo.metaType == META_HA &&
+        chan->appInfo.isSupportConcurrentMetaNode) {
+        ret = PackExternalAckHandshakeData(chan, retCode, &payLoad, &dataInfo);
+    } else {
+        ret = PackNormalAckHandshakeData(chan, retCode, &payLoad, &dataInfo);
+    }
+
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "pack handshake ack head fail");
         cJSON_free(payLoad);
         return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }
     cJSON_free(payLoad);
-    int32_t ret = TransProxyTransSendMsg(connId, dataInfo.outData, dataInfo.outLen,
+    ret = TransProxyTransSendMsg(connId, dataInfo.outData, dataInfo.outLen,
         CONN_HIGH, chan->appInfo.myData.pid);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "send handshakeack buf fail");
     return SOFTBUS_OK;
@@ -560,6 +648,43 @@ int32_t TransPagingReset(ProxyChannelInfo *info)
     return SOFTBUS_OK;
 }
 
+static int32_t PackNormalResetData(const ProxyChannelInfo *info, char **payLoad, ProxyDataInfo *dataInfo)
+{
+    ProxyMessageHead msgHead = {0};
+    msgHead.type = (PROXYCHANNEL_MSG_TYPE_RESET & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
+    msgHead.myId = info->myId;
+    msgHead.peerId = info->peerId;
+    if (info->appInfo.appType != APP_TYPE_AUTH) {
+        msgHead.cipher = (msgHead.cipher | ENCRYPTED);
+    }
+    *payLoad = TransProxyPackIdentity(info->identity);
+    if (*payLoad == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "pack reset fail");
+        return SOFTBUS_TRANS_PACK_LEEPALIVE_ACK_FAILED;
+    }
+    dataInfo->inData = (uint8_t *)*payLoad;
+    dataInfo->inLen = strlen(*payLoad) + 1;
+    return TransProxyPackMessage(&msgHead, info->authHandle, dataInfo);
+}
+
+static int32_t PackExternalResetData(const ProxyChannelInfo *info, char **payLoad, ProxyDataInfo *dataInfo)
+{
+    ProxyExternalMessageHead msgHead = {0};
+    msgHead.type = (PROXYCHANNEL_MSG_TYPE_RESET & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
+    msgHead.myId = info->myId;
+    msgHead.peerId = info->peerId;
+    msgHead.cipher = (msgHead.cipher | ENCRYPTED);
+    msgHead.authId = info->authHandle.authId;
+    *payLoad = TransProxyPackIdentity(info->identity);
+    if (*payLoad == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "pack reset fail");
+        return SOFTBUS_TRANS_PACK_LEEPALIVE_ACK_FAILED;
+    }
+    dataInfo->inData = (uint8_t *)*payLoad;
+    dataInfo->inLen = strlen(*payLoad) + 1;
+    return PackEncryptedExternalMessage(&msgHead, info->authHandle, dataInfo);
+}
+
 int32_t TransProxyResetPeer(ProxyChannelInfo *info)
 {
     if (info == NULL) {
@@ -572,22 +697,15 @@ int32_t TransProxyResetPeer(ProxyChannelInfo *info)
     }
     char *payLoad = NULL;
     ProxyDataInfo dataInfo = {0};
-    ProxyMessageHead msgHead = {0};
-    msgHead.type = (PROXYCHANNEL_MSG_TYPE_RESET & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
-    msgHead.myId = info->myId;
-    msgHead.peerId = info->peerId;
-    if (info->appInfo.appType != APP_TYPE_AUTH) {
-        msgHead.cipher = (msgHead.cipher | ENCRYPTED);
+    int32_t ret;
+
+    if (info->appInfo.osType == OTHER_OS_TYPE && info->appInfo.metaType == META_HA &&
+        info->appInfo.isSupportConcurrentMetaNode) {
+        ret = PackExternalResetData(info, &payLoad, &dataInfo);
+    } else {
+        ret = PackNormalResetData(info, &payLoad, &dataInfo);
     }
 
-    payLoad = TransProxyPackIdentity(info->identity);
-    if (payLoad == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "pack reset fail");
-        return SOFTBUS_TRANS_PACK_LEEPALIVE_ACK_FAILED;
-    }
-    dataInfo.inData = (uint8_t *)payLoad;
-    dataInfo.inLen = strlen(payLoad) + 1;
-    int32_t ret = TransProxyPackMessage(&msgHead, info->authHandle, &dataInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "pack reset head fail");
         cJSON_free(payLoad);

@@ -19,6 +19,7 @@
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "g_enhance_auth_func_pack.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_ohos_account_adapter.h"
 #include "legacy/softbus_adapter_hitrace.h"
@@ -95,43 +96,60 @@ int32_t GetCipherFlagByAuthId(AuthHandle authHandle, uint32_t *flag, bool *isAut
     return SOFTBUS_OK;
 }
 
+static char *PackRequestByOsType(const AppInfo *appInfo, uint32_t req)
+{
+    if (appInfo->osType == OTHER_OS_TYPE) {
+        return PackExternalDeviceRequest(appInfo, req);
+    }
+    return PackRequest(appInfo, req);
+}
+
 static int32_t TransPostBytes(SessionConn *conn, bool isAuthServer, uint32_t cipherFlag)
 {
     uint64_t seq = TransTdcGetNewSeqId();
     if (isAuthServer) {
         seq |= AUTH_CONN_SERVER_SIDE;
     }
-    char *bytes = NULL;
-    if (conn->appInfo.osType == OTHER_OS_TYPE) {
-        bytes = PackExternalDeviceRequest(&conn->appInfo, conn->req);
-    } else {
-        bytes = PackRequest(&conn->appInfo, conn->req);
-    }
+    char *bytes = PackRequestByOsType(&conn->appInfo, conn->req);
     if (bytes == NULL) {
-        TRANS_LOGE(TRANS_CTRL,
-            "Pack Request failed channelId=%{public}d, fd=%{public}d",
+        TRANS_LOGE(TRANS_CTRL, "Pack Request failed channelId=%{public}d, fd=%{public}d",
             conn->channelId, conn->appInfo.fd);
         return SOFTBUS_TRANS_PACK_REQUEST_FAILED;
     }
-    TdcPacketHead packetHead = {
-        .magicNumber = MAGIC_NUMBER,
-        .module = MODULE_SESSION,
-        .seq = seq,
-        .flags = (FLAG_REQUEST | cipherFlag),
-        .dataLen = strlen(bytes), /* reset after encrypt */
-    };
-    if (conn->isMeta) {
-        if (conn->appInfo.osType == OTHER_OS_TYPE) {
-            packetHead.flags |= (FLAG_EXTERNAL_DEVICE + FLAG_AUTH_META);
-        } else {
-            packetHead.flags |= FLAG_AUTH_META;
+
+    int32_t ret;
+    bool isSupportConcurrentMetaNode = AuthMetaIsSupportConcurrentByRemoteIpPacked(conn->appInfo.peerData.addr);
+    if (conn->appInfo.osType == OTHER_OS_TYPE && isSupportConcurrentMetaNode) {
+        TdcExternalPacketHead packetHead = {
+            .magicNumber = MAGIC_NUMBER,
+            .module = MODULE_SESSION,
+            .seq = seq,
+            .flags = (FLAG_REQUEST | cipherFlag),
+            .dataLen = strlen(bytes),
+            .authId = conn->authHandle.authId,
+        };
+        packetHead.flags |= (FLAG_EXTERNAL_DEVICE + FLAG_AUTH_META);
+        ret = TransTdcPostExternalBytes(conn->channelId, &packetHead, bytes);
+    } else {
+        TdcPacketHead packetHead = {
+            .magicNumber = MAGIC_NUMBER,
+            .module = MODULE_SESSION,
+            .seq = seq,
+            .flags = (FLAG_REQUEST | cipherFlag),
+            .dataLen = strlen(bytes),
+        };
+        if (conn->isMeta) {
+            if (conn->appInfo.osType == OTHER_OS_TYPE) {
+                packetHead.flags |= (FLAG_EXTERNAL_DEVICE + FLAG_AUTH_META);
+            } else {
+                packetHead.flags |= FLAG_AUTH_META;
+            }
         }
+        ret = TransTdcPostBytes(conn->channelId, &packetHead, bytes);
     }
-    int32_t ret = TransTdcPostBytes(conn->channelId, &packetHead, bytes);
     cJSON_free(bytes);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL,
-            "TransTdc post bytes failed channelId=%{public}d, fd=%{public}d, ret=%{public}d",
+        TRANS_LOGE(TRANS_CTRL, "TransTdc post bytes failed channelId=%{public}d, fd=%{public}d, ret=%{public}d",
             conn->channelId, conn->appInfo.fd, ret);
         return ret;
     }

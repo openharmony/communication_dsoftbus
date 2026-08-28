@@ -46,6 +46,11 @@ int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const ch
     return GetTransTcpDirectListenerInterface()->TransTdcPostBytes(channelId, packetHead, data);
 }
 
+int32_t TransTdcPostExternalBytes(int32_t channelId, TdcExternalPacketHead *packetHead, const char *data)
+{
+    return GetTransTcpDirectListenerInterface()->TransTdcPostExternalBytes(channelId, packetHead, data);
+}
+
 int32_t AuthGetServerSide(int64_t authId, bool *isServer)
 {
     return GetTransTcpDirectListenerInterface()->AuthGetServerSide(authId, isServer);

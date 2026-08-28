@@ -434,7 +434,6 @@ HWTEST_F(TransLaneCommonTest, CopyAppInfoFromSessionParam003, TestSize.Level1)
 
     EXPECT_CALL(transLaneCommonMock, TransGetPkgNameBySessionName).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(transLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(transLaneCommonMock, LnnGetOsTypeByNetworkId).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(transLaneCommonMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_TRANS_BAD_KEY));
     ret = CopyAppInfoFromSessionParam(appInfo, param);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -468,28 +467,28 @@ HWTEST_F(TransLaneCommonTest, TransCommonGetAppInfo001, TestSize.Level1)
     NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
     EXPECT_CALL(transLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
     int32_t ret = TransCommonGetAppInfo(param, appInfo);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_BAD_KEY);
+    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
     SessionAttribute testAttr = {
         attr.dataType = TYPE_FILE,
     };
     param->attr = &testAttr;
     ret = TransCommonGetAppInfo(param, appInfo);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_BAD_KEY);
+    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
     SessionAttribute newAttr = {
         attr.dataType = TYPE_MESSAGE,
     };
     param->attr = &newAttr;
     ret = TransCommonGetAppInfo(param, appInfo);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_BAD_KEY);
+    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
     SessionAttribute testNewAttr = {
         attr.dataType = TYPE_BYTES,
     };
     param->attr = &testNewAttr;
     ret = TransCommonGetAppInfo(param, appInfo);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_BAD_KEY);
+    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
     SoftBusFree(appInfo);
     SoftBusFree(param);
@@ -523,7 +522,6 @@ HWTEST_F(TransLaneCommonTest, TransCommonGetAppInfo002, TestSize.Level1)
     EXPECT_CALL(transLaneCommonMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(transLaneCommonMock, TransGetPkgNameBySessionName).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(transLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(transLaneCommonMock, LnnGetOsTypeByNetworkId).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(transLaneCommonMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
     ret = TransCommonGetAppInfo(param, appInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);

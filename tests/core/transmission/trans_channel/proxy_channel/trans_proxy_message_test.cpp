@@ -740,7 +740,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest001, TestSize.Level1)
     ASSERT_TRUE(buf != nullptr);
 
     /* test invalid len */
-    int32_t ret = TransProxyParseMessage(buf, PROXY_CHANNEL_HEAD_LEN, &msg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, PROXY_CHANNEL_HEAD_LEN, &msg, &authHandle, false);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
@@ -763,7 +763,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest002, TestSize.Level1)
     /* test invalid head version */
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_MAX & FOUR_BIT_MASK) | (TEST_INVALID_HEAD_VERSION << VERSION_SHIFT);
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle, false);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
@@ -786,7 +786,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest003, TestSize.Level1)
     /* test invalid head type */
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_MAX & FOUR_BIT_MASK) | (TEST_VERSION_1 << VERSION_SHIFT);
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle, false);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
@@ -810,7 +810,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest004, TestSize.Level1)
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (TEST_VERSION_1 << VERSION_SHIFT);
     msg.msgHead.cipher = 0;
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
@@ -834,7 +834,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest005, TestSize.Level1)
     msg.msgHead.cipher = TEST_CIPHER_1;
     msg.msgHead.peerId = TEST_PEER_ID_NEG_1;
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &msg, &authHandle, false);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
@@ -867,7 +867,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest006, TestSize.Level1)
 
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (TEST_VERSION_1 << VERSION_SHIFT);
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle, false);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
@@ -899,7 +899,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest007, TestSize.Level1)
 
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (TEST_VERSION_1 << VERSION_SHIFT);
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
@@ -936,7 +936,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest008, TestSize.Level1)
     EXPECT_CALL(commMock, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_MEM_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
 
     /* test get auth connection info fail */
-    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle, false);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
@@ -977,7 +977,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest009, TestSize.Level1)
     EXPECT_CALL(commMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
 
     /* test auth connection type is invalid */
-    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle, false);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
@@ -1018,7 +1018,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest010, TestSize.Level1)
     EXPECT_CALL(commMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
 
     /* test auth connection type is tcp, and isBr is false */
-    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
@@ -1060,7 +1060,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest011, TestSize.Level1)
     EXPECT_CALL(commMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
 
     /* test auth connection type is tcp, and isBr is true */
-    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
@@ -1101,7 +1101,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest012, TestSize.Level1)
     EXPECT_CALL(commMock, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_MEM_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
 
     /* test connection type is br with mem err */
-    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle, false);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
@@ -1142,7 +1142,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest013, TestSize.Level1)
     EXPECT_CALL(commMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
 
     /* test connection type is br with remote str info mem err */
-    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle, false);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
@@ -1183,7 +1183,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest014, TestSize.Level1)
     EXPECT_CALL(commMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
 
     /* test connection type is br with network id mem err */
-    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle, false);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
@@ -1224,7 +1224,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest015, TestSize.Level1)
     EXPECT_CALL(commMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
 
     /* test connection type is br success */
-    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
+    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);

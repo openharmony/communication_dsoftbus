@@ -36,7 +36,8 @@ using namespace testing::ext;
 class SoftbusTransProxyTransceiverInterface {
 public:
 
-    virtual int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth) = 0;
+    virtual int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth,
+        bool isSupportConcurrentMetaNode) = 0;
 
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
 };
@@ -51,7 +52,7 @@ public:
     ~SoftbusTransProxyTransceiverMock();
 
     MOCK_METHOD(int32_t, TransProxyParseMessage,
-        (char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth), (override));
+        (char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth, bool isSupportConcurrentMetaNode), (override));
     
     MOCK_METHOD(int32_t, SoftBusGenerateStrHash,
         (const unsigned char *str, uint32_t len, unsigned char *hash), (override));
@@ -72,10 +73,12 @@ SoftbusTransProxyTransceiverMock::~SoftbusTransProxyTransceiverMock()
     gmock_ = nullptr;
 }
 
-int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth)
+int32_t TransProxyParseMessage(
+    char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth, bool isSupportConcurrentMetaNode)
 {
     std::cout << "TransProxyParseMessage mock calling enter" << std::endl;
-    return SoftbusTransProxyTransceiverMock::GetMockObj().TransProxyParseMessage(data, len, msg, auth);
+    return SoftbusTransProxyTransceiverMock::GetMockObj().TransProxyParseMessage(
+        data, len, msg, auth, isSupportConcurrentMetaNode);
 }
 
 int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)

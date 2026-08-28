@@ -584,6 +584,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_GET_P2P_CONN_INFO_TEST_001, TestSize.Level1)
 HWTEST_F(AuthOtherMockTest, AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_001, TestSize.Level1)
 {
     AuthOtherInterfaceMock authMock;
+    EXPECT_CALL(authMock, LnnGetOsTypeByNetworkId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(OH_OS_TYPE), Return(SOFTBUS_OK)));
     EXPECT_CALL(authMock, LnnGetRemoteNodeInfoById)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(AuthOtherInterfaceMock::ActionOfLnnGetRemoteNodeInfoById);
@@ -600,6 +602,29 @@ HWTEST_F(AuthOtherMockTest, AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_001, 
     ret = AuthCheckSessionKeyValidByConnInfo(networkId, &connInfo);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
     ret = AuthCheckSessionKeyValidByConnInfo(networkId, &connInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_002
+ * @tc.desc: Verify that AuthCheckSessionKeyValidByConnInfo skips session key validation
+ *           when the peer device OS type is OTHER_OS_TYPE.
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherMockTest, AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_002, TestSize.Level1)
+{
+    AuthOtherInterfaceMock authMock;
+    const char *networkId = "123456456";
+    AuthConnInfo connInfo = {
+        .info.ipInfo.ip = "192.168.12.1",
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
+
+    EXPECT_CALL(authMock, LnnGetOsTypeByNetworkId)
+        .WillOnce(DoAll(SetArgPointee<1>(OTHER_OS_TYPE), Return(SOFTBUS_OK)));
+    int32_t ret = AuthCheckSessionKeyValidByConnInfo(networkId, &connInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
