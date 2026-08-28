@@ -246,6 +246,7 @@ if (defined(ohos_lite)) {
         "-fPIC",
         "-fno-builtin",
         "-std=c99",
+        "-fvisibility=hidden",
       ]
       cflags_cc = cflags
       deps = dsoftbus_server_common_deps
