@@ -232,7 +232,8 @@ static bool g_needActionListen = false;
 static uint32_t g_concernCapabilityMask =
     1 << CASTPLUS_CAPABILITY_BITMAP |
     1 << DVKIT_CAPABILITY_BITMAP |
-    1 << OSD_CAPABILITY_BITMAP;
+    1 << OSD_CAPABILITY_BITMAP |
+    1 << COMM_SHARE_CAPABILITY_BITMAP;
 
 static const int g_bleTransCapabilityMap[CAPABILITY_MAX_BITNUM] = {
     -1,
@@ -242,7 +243,7 @@ static const int g_bleTransCapabilityMap[CAPABILITY_MAX_BITNUM] = {
     OSD_CAPABILITY_BITMAP,
     -1,
     -1,
-    -1,
+    COMM_SHARE_CAPABILITY_BITMAP,
     -1,
     -1,
     -1,
@@ -282,6 +283,8 @@ static int ConvertCapBitMap(int oldCap)
             return 0x02;
         case 1 << DVKIT_CAPABILITY_BITMAP: // dvkit
             return 0x04;
+        case 1 << COMM_SHARE_CAPABILITY_BITMAP: // commShare
+            return 0x80;
         default:
             return oldCap;
     }

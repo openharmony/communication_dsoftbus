@@ -118,6 +118,17 @@ static SubscribeOption GetSubscribeOptionForOsd()
     return option;
 }
 
+static PublishOption GetPublishOptionForCommShare()
+{
+    PublishOption option {};
+    option.freq = LOW;
+    option.capabilityData = nullptr;
+    option.dataLen = 0;
+
+    SetCapBitMapPos(CAPABILITY_NUM, option.capabilityBitmap, COMM_SHARE_CAPABILITY_BITMAP);
+    return option;
+}
+
 /*
  * @tc.name: DiscBleInit001
  * @tc.desc: invalid input parameter
@@ -456,6 +467,27 @@ HWTEST_F(DiscBleTest, StartActivePublish001, TestSize.Level1)
     EXPECT_EQ(bleMock.GetAsyncAdvertiseResult(), true);
 
     DISC_LOGI(DISC_TEST, "StartActivePublish001 end ----");
+}
+
+/*
+ * @tc.name: StartActivePublishForCommShare001
+ * @tc.desc: start active publish for commShare, cover ConvertCapBitMap new case (1<<COMM_SHARE -> 0x80)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscBleTest, StartActivePublishForCommShare001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "StartActivePublishForCommShare001 begin ----");
+    BleMock bleMock;
+    bleMock.SetupSuccessStub();
+
+    BusCenterMock busMock;
+    busMock.SetupSuccessStub();
+
+    PublishOption option = GetPublishOptionForCommShare();
+    EXPECT_EQ(g_interface->mediumInterface->Publish(&option), SOFTBUS_OK);
+
+    DISC_LOGI(DISC_TEST, "StartActivePublishForCommShare001 end ----");
 }
 
 /*
