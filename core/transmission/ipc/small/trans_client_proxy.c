@@ -356,3 +356,11 @@ int32_t ClientIpcCheckCollabRelation(const char *pkgName, int32_t pid,
     }
     return ret;
 }
+
+int32_t ClientIpcOnProfileDeleted(const ChannelMsg *data, const int64_t *serviceIds, int32_t serviceIdCount)
+{
+    (void)data;
+    (void)serviceIds;
+    (void)serviceIdCount;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
