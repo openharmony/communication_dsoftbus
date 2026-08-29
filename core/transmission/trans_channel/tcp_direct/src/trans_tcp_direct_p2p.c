@@ -918,7 +918,7 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
     char peerNetWorkId[NETWORK_ID_BUF_LEN] = { 0 };
     AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked(authHandle.authId, peerNetWorkId, NETWORK_ID_BUF_LEN);
     int32_t osType = 0;
-    GetOsTypeByNetworkId(peerUuid, &osType);
+    GetOsTypeByNetworkId(peerNetWorkId, &osType);
     if (osType == OTHER_OS_TYPE) {
         ret = TransGetLocalIp(myIp, peerIp, peerNetWorkId);
     } else {
