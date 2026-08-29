@@ -40,6 +40,12 @@
 #define SOFTBUS_CLIENT_PATH_NAME "/system/lib/platformsdk/libsoftbus_client.z.so"
 #endif
 
+#ifdef __aarch64__
+#define SOFTBUS_FAR_FIELD_PATH_NAME "/system/lib64/libfar_field_meta_node.z.so"
+#else
+#define SOFTBUS_FAR_FIELD_PATH_NAME "/system/lib/libfar_field_meta_node.z.so"
+#endif
+
 bool g_softbusServerPluginLoaded = false;
 bool g_softbusClientPluginLoaded = false;
 
@@ -48,7 +54,8 @@ const char *g_soName[SOFTBUS_HANDLE_BUTT] = {
     SOFTBUS_SERVER_PLUGIN_PATH_NAME,
     SOFTBUS_CLIENT_PLUGIN_PATH_NAME,
     SOFTBUS_SERVER_PATH_NAME,
-    SOFTBUS_CLIENT_PATH_NAME
+    SOFTBUS_CLIENT_PATH_NAME,
+    SOFTBUS_FAR_FIELD_PATH_NAME,
 };
 
 bool SoftbusServerPluginLoadedFlagGet(void)

@@ -40,7 +40,7 @@
 
 #include "proxy_config.h"
 #include "proxy_connection.h"
-#include "proxy_manager.h"
+#include "br_proxy_manager.h"
 #include "proxy_observer.h"
 
 #define READ_SLEEP_TIME 5

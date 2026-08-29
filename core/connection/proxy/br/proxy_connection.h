@@ -15,7 +15,10 @@
 #ifndef PROXY_CHANNEL_BR_CONNECTION_H
 #define PROXY_CHANNEL_BR_CONNECTION_H
 
-#include "proxy_manager.h"
+#include "../proxy_manager.h"
+
+// Forward declaration - ProxyConnection is now defined in br_proxy_manager.h
+struct ProxyConnection;
 
 #define BR_INVALID_SOCKET_HANDLE (-1)
 

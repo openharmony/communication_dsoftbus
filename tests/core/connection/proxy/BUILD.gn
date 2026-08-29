@@ -18,13 +18,14 @@ import("//foundation/communication/dsoftbus/dsoftbus.gni")
 dsoftbus_root_path = "../../../.."
 module_output_path = "dsoftbus/soft_bus/connection/proxy"
 
-ohos_unittest("ProxyChannelManagerTest") {
+ohos_unittest("BrProxyChannelManagerTest") {
     module_out_path = module_output_path
 
     include_dirs = [
     "$dsoftbus_root_path/core/adapter/br/include",
     "$softbus_adapter_common/net/bluetooth/include",
     "$dsoftbus_root_path/core/connection/proxy",
+    "$dsoftbus_root_path/core/connection/proxy/br",
     "$dsoftbus_root_path/test/core/connection/proxy",
     "$dsoftbus_root_path/test/core/connection/proxy/unittest/mock",
     "$dsoftbus_root_path/core/connection/common/include",
@@ -43,13 +44,14 @@ ohos_unittest("ProxyChannelManagerTest") {
   ]
 
   sources = [
-    "$dsoftbus_root_path/core/connection/proxy/proxy_config.c",
-    "$dsoftbus_root_path/core/connection/proxy/proxy_manager.c",
-    "$dsoftbus_root_path/core/connection/proxy/proxy_connection.c",
+    "$dsoftbus_root_path/core/connection/proxy/br/proxy_config.c",
+    "$dsoftbus_root_path/core/connection/proxy/br/br_proxy_manager.c",
+    "$dsoftbus_root_path/core/connection/proxy/br/proxy_connection.c",
     "$dsoftbus_root_path/core/connection/common/src/softbus_conn_common.c",
     "$dsoftbus_root_path/tests/core/connection/proxy/unittest/mock/proxy_manager_mock.cpp",
+    "$dsoftbus_root_path/tests/core/connection/proxy/unittest/mock/proxy_manager_stub.c",
     "$dsoftbus_root_path/tests/core/connection/proxy/unittest/proxy_config_test.cpp",
-    "$dsoftbus_root_path/tests/core/connection/proxy/unittest/proxy_manager_test.cpp",
+    "$dsoftbus_root_path/tests/core/connection/proxy/unittest/br_proxy_manager_test.cpp",
   ]
 
   external_deps = [

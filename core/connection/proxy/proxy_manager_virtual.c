@@ -34,20 +34,23 @@ static int32_t RegisterProxyChannelListener(ProxyConnectListener *listener)
     return SOFTBUS_CONN_PROXY_NOT_SUPPORT_ERR;
 }
 
-static struct ProxyConnection *GetProxyChannelByChannelId(uint32_t channelId)
+static void ClearProxyInfo(struct ProxyChannel *channel)
 {
-    (void)channelId;
-    return NULL;
+    (void)channel;
+}
+
+static uint32_t GenerateChannelId(void)
+{
+    return 0;
 }
 
 static ProxyChannelManager g_proxyChannelManager = {
     .generateRequestId = GenerateRequestId,
     .openProxyChannel = OpenProxyChannel,
     .registerProxyChannelListener = RegisterProxyChannelListener,
-
-    .getConnectionById = GetProxyChannelByChannelId,
-    .proxyChannelRequestInfo = NULL,
-    .proxyConnectionList = NULL,
+    .proxyConnectionList = {0},
+    .generateChannelId = GenerateChannelId,
+    .clearProxyInfo = ClearProxyInfo,
 };
 
 ProxyChannelManager *GetProxyChannelManager(void)

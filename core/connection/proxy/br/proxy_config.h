@@ -18,7 +18,8 @@
 
 #include <stdint.h>
 
-#include "proxy_manager.h"
+#include "../proxy_manager.h"
+#include "br_proxy_manager.h"
 
 #define PROXY_POLICY_MAX_SIZE 3
 #define PROXY_RETRY_MAX_TIMES 64
