@@ -271,19 +271,8 @@ void LnnUpdateOhosAccount(UpdateAccountReason reason)
     AccountUpdateProcess(localAccountHash, accountHash, accountId, reason);
 }
 
-void LnnOnOhosAccountLogout(int32_t userId)
+void LnnOnOhosAccountLogout(void)
 {
-#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
-    if (!IsForegroundUserId(userId)) {
-        LNN_LOGE(LNN_STATE, "OnAccountChanged userId invalid, userid=%{public}d", userId);
-        return;
-    }
-    (void)HbMultiUserHandleLogout(userId);
-    if (userId != JudgeDeviceTypeAndGetOsAccountIds()) {
-        LNN_LOGI(LNN_STATE, "OnAccountChanged non-main screen logout, no need handle, userId=%{public}d", userId);
-        return;
-    }
-#endif
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
     char accountUid[ACCOUNT_UID_STR_LEN] = {0};
     uint32_t size = 0;

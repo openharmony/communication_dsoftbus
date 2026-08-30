@@ -64,7 +64,8 @@ static void DeviceFound(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport
         return;
     }
     ReportDeviceFoundResultEvt();
-    if (LnnNotifyDiscoveryDevice(addr, infoReport, true) != SOFTBUS_OK) {
+    if (LnnNotifyDiscoveryDevice(addr, infoReport, true, AUTH_INVALID_USER_ID,
+        AUTH_INVALID_USER_ID) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "notify device found failed\n");
     }
 }

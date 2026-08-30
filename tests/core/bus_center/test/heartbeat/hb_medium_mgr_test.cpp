@@ -403,9 +403,9 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRelayProcess, TestSize.Level1)
     EXPECT_CALL(hbStrategyMock, LnnStartHbByTypeAndStrategy)
         .WillOnce(Return(SOFTBUS_NETWORK_POST_MSG_FAIL))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    HbMediumMgrRelayProcess(TEST_DEVID, CONNECTION_ADDR_BR, HEARTBEAT_TYPE_BLE_V1);
-    HbMediumMgrRelayProcess(TEST_DEVID, CONNECTION_ADDR_BR, HEARTBEAT_TYPE_BLE_V1);
-    HbMediumMgrRelayProcess(nullptr, CONNECTION_ADDR_BR, HEARTBEAT_TYPE_BLE_V1);
+    HbMediumMgrRelayProcess(TEST_DEVID, CONNECTION_ADDR_BR, HEARTBEAT_TYPE_BLE_V1, nullptr, 0);
+    HbMediumMgrRelayProcess(TEST_DEVID, CONNECTION_ADDR_BR, HEARTBEAT_TYPE_BLE_V1, nullptr, 0);
+    HbMediumMgrRelayProcess(nullptr, CONNECTION_ADDR_BR, HEARTBEAT_TYPE_BLE_V1, nullptr, 0);
 }
 
 /*
@@ -906,7 +906,7 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRelayProcess_TEST01, TestSize.Level1)
 {
     NiceMock<HeartBeatStategyInterfaceMock> heartBeatMock;
     EXPECT_CALL(heartBeatMock, LnnStartHbByTypeAndStrategy).WillRepeatedly(Return(SOFTBUS_OK));
-    HbMediumMgrRelayProcess(TEST_UDID_HASH, CONNECTION_ADDR_WLAN, HEARTBEAT_TYPE_BLE_V1);
+    HbMediumMgrRelayProcess(TEST_UDID_HASH, CONNECTION_ADDR_WLAN, HEARTBEAT_TYPE_BLE_V1, nullptr, 0);
 }
 
 /*

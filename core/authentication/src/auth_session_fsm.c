@@ -1427,13 +1427,13 @@ static void GetCredTypeByCredId(AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "query credential fail");
         return;
     }
-    info->credId = IdServiceGetCredIdFromCredList(nodeInfo.userId, credList);
+    info->credId = IdServiceGetCredIdFromCredList(nodeInfo.localUserId, credList);
     if (info->credId == NULL) {
         AUTH_LOGE(AUTH_FSM, "get cred id fail");
         IdServiceDestroyCredentialList(&credList);
         return;
     }
-    if (IdServiceGetCredTypeByCredId(nodeInfo.userId, info->credId, &info->credIdType) != SOFTBUS_OK) {
+    if (IdServiceGetCredTypeByCredId(nodeInfo.localUserId, info->credId, &info->credIdType) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "get cred id type fail");
     }
     IdServiceDestroyCredentialList(&credList);
@@ -2320,7 +2320,7 @@ int32_t AuthSessionGetUserId(int64_t authSeq)
             info.credNegoState = CRED_NEGO_STATE_COMPATIBLE;
         }
     }
-    return info.userId;
+    return info.peerUserId;
 }
 
 int32_t AuthSessionGetSourceUserId(int64_t authSeq)

@@ -28,8 +28,8 @@ public:
     virtual ~EventInterface() {};
 
     virtual int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
-    virtual int32_t LnnNotifyDiscoveryDevice(
-        const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect) = 0;
+    virtual int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
+        bool isNeedConnect, int32_t peerUserId, int32_t localUserId) = 0;
     virtual void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
     virtual void LnnDeinitBusCenterEvent(void) = 0;
     virtual int32_t LnnInitBusCenterEvent(void) = 0;
@@ -42,7 +42,8 @@ public:
     ~EventInterfaceMock() override;
 
     MOCK_METHOD2(LnnRegisterEventHandler, int32_t(LnnEventType, LnnEventHandler));
-    MOCK_METHOD3(LnnNotifyDiscoveryDevice, int32_t(const ConnectionAddr *, const LnnDfxDeviceInfoReport *, bool));
+    MOCK_METHOD5(LnnNotifyDiscoveryDevice, int32_t(const ConnectionAddr *, const LnnDfxDeviceInfoReport *, bool,
+        int32_t, int32_t));
     MOCK_METHOD2(LnnUnregisterEventHandler, void(LnnEventType, LnnEventHandler));
     MOCK_METHOD0(LnnDeinitBusCenterEvent, void(void));
     MOCK_METHOD0(LnnInitBusCenterEvent, int32_t(void));
@@ -53,8 +54,8 @@ public:
 
 extern "C" {
     int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
-    int32_t LnnNotifyDiscoveryDevice(
-        const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect);
+    int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
+        bool isNeedConnect, int32_t peerUserId, int32_t localUserId);
     void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler);
     void LnnDeinitBusCenterEvent(void);
     int32_t LnnInitBusCenterEvent(void);

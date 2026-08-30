@@ -391,10 +391,11 @@ int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
     return GetLocalLedgerDepsInterface()->SoftbusGetConfig(type, val, len);
 }
 
-int32_t LnnNotifyDiscoveryDevice(
-    const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect)
+int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
+    bool isNeedConnect, int32_t peerUserId, int32_t localUserId)
 {
-    return GetLocalLedgerDepsInterface()->LnnNotifyDiscoveryDevice(addr, infoReport, isNeedConnect);
+    return GetLocalLedgerDepsInterface()->LnnNotifyDiscoveryDevice(addr, infoReport, isNeedConnect, peerUserId,
+        localUserId);
 }
 
 int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen, bool hasMcuRequestDisable)
@@ -413,9 +414,9 @@ void LnnUpdateOhosAccount(UpdateAccountReason reason)
     return GetLocalLedgerDepsInterface()->LnnUpdateOhosAccount(reason);
 }
 
-void LnnOnOhosAccountLogout(int32_t userId)
+void LnnOnOhosAccountLogout(void)
 {
-    return GetLocalLedgerDepsInterface()->LnnOnOhosAccountLogout(userId);
+    return GetLocalLedgerDepsInterface()->LnnOnOhosAccountLogout();
 }
 
 void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state)

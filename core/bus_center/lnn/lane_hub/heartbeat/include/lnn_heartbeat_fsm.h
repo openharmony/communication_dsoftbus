@@ -18,6 +18,7 @@
 
 #include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_state_machine.h"
+#include "lnn_heartbeat_channel_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,6 +58,7 @@ typedef struct {
     LnnHeartbeatState state;
     LnnHeartbeatStrategyType strategyType;
     LnnHeartbeatType hbType;
+    LnnHeartbeatChannel channel;
 
     ListNode node;
     FsmStateMachine fsm;
@@ -67,6 +69,7 @@ typedef struct {
     bool isRelay;
     bool isMsdpRange;
     LnnHeartbeatType hbType;
+    LnnHeartbeatChannel channel;
     bool *isRemoved;
 } LnnRemoveSendEndMsgPara;
 
@@ -75,6 +78,7 @@ typedef struct {
     bool isWakeUp;
     const char networkId[NETWORK_ID_BUF_LEN];
     LnnHeartbeatType hbType;
+    LnnHeartbeatChannel channel;
     ConnectionAddrType addrType;
     uint64_t checkDelay;
 } LnnCheckDevStatusMsgPara;
@@ -91,7 +95,9 @@ typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     LnnHeartbeatType hbType;
     LnnHeartbeatStrategyType strategyType;
+    LnnHeartbeatChannel channel;
     int32_t duration;
+    int32_t userId;
     uint64_t checkDelay;
     char callerId[PKG_NAME_SIZE_MAX];
 } LnnProcessSendOnceMsgPara;
@@ -102,7 +108,7 @@ int32_t LnnStopHeartbeatFsm(LnnHeartbeatFsm *hbFsm);
 int32_t LnnPostNextSendOnceMsgToHbFsm(
     LnnHeartbeatFsm *hbFsm, const LnnProcessSendOnceMsgPara *para, uint64_t delayMillis);
 int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag,
-    LnnProcessSendOnceMsgPara *msgPara, uint64_t delayMillis);
+    const LnnProcessSendOnceMsgPara *msgPara, uint64_t delayMillis);
 int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatSendEndData *custData, uint64_t delayMillis);
 int32_t LnnPostStartMsgToHbFsm(LnnHeartbeatFsm *hbFsm, uint64_t delayMillis);
 int32_t LnnPostStopMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type);

@@ -13,24 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef LNN_DISTRIBUTED_USER_INFO_H
-#define LNN_DISTRIBUTED_USER_INFO_H
+#ifndef LNN_HEARTBEAT_CHANNEL_MGR_H
+#define LNN_HEARTBEAT_CHANNEL_MGR_H
 
-#include "lnn_node_info_struct.h"
+#include "lnn_heartbeat_channel_struct.h"
+#include "lnn_heartbeat_medium_mgr.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t LnnInitDistributedUserLedger(void);
-void LnnDeinitDistributedUserLedger(void);
+int32_t LnnHbChannelMgrInit(void);
+void LnnHbChannelMgrDeinit(void);
 
-int32_t LnnUpdateDistributedUserInfo(const UserInfo *userInfo, const char *udid);
-void LnnRemoveUserInfoNode(const char *udid);
-int32_t LnnFindUserByUserIdAndUdid(const char *udid, int32_t userId, UserInfo *userInfo);
+int32_t LnnHbChannelEnable(LnnHeartbeatChannel channel, bool enable);
+bool LnnHbChannelIsEnabled(LnnHeartbeatChannel channel);
+
+int32_t LnnHbChannelSetUserId(LnnHeartbeatChannel channel, int32_t userId);
+int32_t LnnHbChannelGetUserId(LnnHeartbeatChannel channel, int32_t *userId);
+bool LnnHbChannelIsSupportRelay(LnnHeartbeatChannel channel);
 
 #ifdef __cplusplus
 }
 #endif
+#endif /* LNN_HEARTBEAT_CHANNEL_MGR_H */
 
-#endif // LNN_DISTRIBUTED_USER_INFO_H

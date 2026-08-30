@@ -582,3 +582,46 @@ bool LnnIsOsAccountConstraint(void)
     }
     return LnnIsOsAccountConstraintByLocalId(currentId);
 }
+
+bool IsOsAccountLoggedInByUserId(int32_t userId)
+{
+    if (userId <= 0) {
+        LNN_LOGW(LNN_STATE, "invalid userId=%{public}d", userId);
+        return false;
+    }
+    auto accountInfo = OHOS::AccountSA::OhosAccountKits::GetInstance().QueryOsAccountDistributedInfo(userId);
+    if (!accountInfo.first) {
+        LNN_LOGI(LNN_STATE, "QueryOsAccountDistributedInfo failed, userId=%{public}d not logged in", userId);
+        return false;
+    }
+    if (accountInfo.second.name_.empty()) {
+        LNN_LOGI(LNN_STATE, "accountInfo uid is empty, userId=%{public}d not logged in", userId);
+        return false;
+    }
+    if (memcmp(DEFAULT_ACCOUNT_NAME, accountInfo.second.name_.c_str(), accountInfo.second.name_.length()) == 0) {
+        LNN_LOGI(LNN_STATE, "default account name, userId=%{public}d not logged in", userId);
+        return false;
+    }
+    return true;
+}
+
+bool IsActiveOsAccountUnlockedByUserId(int32_t userId)
+{
+    if (userId < 0) {
+        LNN_LOGE(LNN_STATE, "invalid userId=%{public}d", userId);
+        return false;
+    }
+    bool isUnlocked = false;
+    OHOS::ErrCode res = OHOS::AccountSA::OsAccountManager::IsOsAccountVerified(userId, isUnlocked);
+    if (res != OHOS::ERR_OK) {
+        LNN_LOGE(LNN_STATE, "check account verify status failed, res=%{public}d, userId=%{public}d", res, userId);
+        return false;
+    }
+    LNN_LOGD(LNN_STATE, "account verify status=%{public}d, userId=%{public}d,", isUnlocked, userId);
+    return isUnlocked;
+}
+
+bool LnnIsOsAccountConstraintByUserId(int32_t userId)
+{
+    return LnnIsOsAccountConstraintByLocalId(userId);
+}

@@ -91,6 +91,13 @@ if (dsoftbus_feature_lnn_frame && dsoftbus_feature_lnn_ble) {
     "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_strategy.c",
     "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_utils.c",
   ]
+  if (dsoftbus_feature_multi_foreground_user) {
+    bus_center_hub_src +=
+        [ "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_channel_mgr.c" ]
+  } else {
+    bus_center_hub_src +=
+        [ "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_channel_mgr_virtual.c" ]
+  }
 } else {
   bus_center_hub_src += [
     "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_ctrl_virtual.c",

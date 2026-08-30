@@ -38,6 +38,10 @@ ohos_unittest("HeartBeatMediumTest") {
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
   ]
 
+  sources += [
+    "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_account_info_stub.cpp",
+  ]
+
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_dfx_path/interface/include/legacy",
@@ -141,6 +145,10 @@ ohos_unittest("HeartBeatMediumStaticTest") {
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
   ]
 
+  sources += [
+    "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_account_info_stub.cpp",
+  ]
+
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_dfx_path/interface/include/legacy",
@@ -148,6 +156,7 @@ ohos_unittest("HeartBeatMediumStaticTest") {
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "$dsoftbus_root_path/adapter/common/net/wifi/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
@@ -215,6 +224,12 @@ ohos_unittest("HeartBeatFSMTest") {
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
+
+  if (dsoftbus_feature_multi_foreground_user) {
+    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_channel_mgr.c" ]
+  } else {
+    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_channel_mgr_virtual.c" ]
+  }
 
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include/form",
@@ -299,6 +314,18 @@ ohos_unittest("HeartBeatStrategyTest") {
   sources = [
     "$dsoftbus_root_path/tests/core/bus_center/test/heartbeat/hb_strategy_test.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_fsm_strategy_mock.cpp",
+  ]
+
+  if (dsoftbus_feature_multi_foreground_user) {
+    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_channel_mgr.c" ]
+  } else {
+    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_channel_mgr_virtual.c" ]
+  }
+
+  sources += [
+    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_adapter_virtual.cpp",
+    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_virtual.cpp",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_user_info_virtual.c",
   ]
 
   include_dirs = [
@@ -450,6 +477,12 @@ ohos_unittest("HeartBeatCtrlTest") {
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_strategy_mock.cpp",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
+
+  if (dsoftbus_feature_multi_foreground_user) {
+    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_channel_mgr.c" ]
+  } else {
+    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_channel_mgr_virtual.c" ]
+  }
 
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include/form",
@@ -666,6 +699,12 @@ ohos_unittest("HeartBeatCtrlStaticTest") {
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
   ]
+
+  if (dsoftbus_feature_multi_foreground_user) {
+    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_channel_mgr.c" ]
+  } else {
+    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_channel_mgr_virtual.c" ]
+  }
 
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include/form",

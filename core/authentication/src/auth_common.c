@@ -787,7 +787,7 @@ void SetDpGroupShare(const NodeInfo *info, AuthHandle authHandle)
         DelDupAuthManager(auth);
         return;
     }
-    remoteInfo.userId = info->userId;
+    remoteInfo.userId = info->peerUserId;
     if ((strcpy_s(remoteInfo.credId, CRED_ID_STR_LEN, auth->credId) != EOK) ||
         (strcpy_s(remoteInfo.shareCredId, CRED_ID_STR_LEN, auth->shareCredId) != EOK) ||
         (strcpy_s(remoteInfo.udid, UDID_BUF_LEN, info->deviceInfo.deviceUdid) != EOK) ||

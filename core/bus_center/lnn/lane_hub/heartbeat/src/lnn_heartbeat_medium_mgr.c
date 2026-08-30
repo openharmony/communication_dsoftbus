@@ -24,7 +24,11 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger_common.h"
+#include "lnn_distributed_user_info.h"
 #include "lnn_feature_capability.h"
+#include "lnn_heartbeat_channel_mgr.h"
+#include "lnn_ohos_account.h"
+#include "lnn_ohos_account_adapter.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_net_builder.h"
@@ -55,9 +59,14 @@ typedef struct {
     ConnectOnlineReason connectReason;
     bool isDirectlyHb;
     bool isConnect;
+    int32_t peerUserId;
+    int32_t localUserId;
 } LnnConnectCondition;
 
-static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType type, LnnHeartbeatType hbType);
+static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType type, LnnHeartbeatType hbType,
+    const uint8_t *accountHash, uint32_t accountHashLen);
+static void HbResolveJoinLnnUserIds(DeviceInfo *device, HbRespData *hbResp,
+    int32_t *peerUserId, int32_t *localUserId);
 static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
     LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp);
 static int32_t HbMediumMgrRecvHigherWeight(
@@ -377,12 +386,57 @@ static bool HbIsRepeatedJoinLnnRequest(LnnHeartbeatRecvInfo *storedInfo, uint64_
     return false;
 }
 
-static bool HbIsNeedReAuth(const NodeInfo *nodeInfo, const char *newAccountHash)
+static int32_t GetPeerUserIdFromHbResp(HbRespData *hbResp, const NodeInfo *deviceInfo)
+{
+    int32_t peerUserId = DEFAULT_PEER_USER_ID;
+    if (hbResp == NULL || deviceInfo == NULL) {
+        return peerUserId;
+    }
+    uint8_t defaultUserId[USERID_LEN] = { 0 };
+    uint8_t noEncryptUserId[USERID_LEN] = {0xFF, 0xFF, 0xFF, 0xFF};
+    if (memcmp(hbResp->advUserId, defaultUserId, USERID_LEN) != 0 &&
+        memcmp(hbResp->advUserId, noEncryptUserId, USERID_LEN) != 0) {
+        NodeInfo tmpNodeInfo;
+        (void)memset_s(&tmpNodeInfo, sizeof(tmpNodeInfo), 0, sizeof(tmpNodeInfo));
+        if (memcpy_s(tmpNodeInfo.cipherInfo.key, SESSION_KEY_LENGTH,
+            deviceInfo->cipherInfo.key, SESSION_KEY_LENGTH) == EOK &&
+            memcpy_s(tmpNodeInfo.cipherInfo.iv, BLE_BROADCAST_IV_LEN,
+            deviceInfo->cipherInfo.iv, BLE_BROADCAST_IV_LEN) == EOK &&
+            DecryptUserIdPacked(&tmpNodeInfo, hbResp->advUserId, USERID_LEN) == SOFTBUS_OK) {
+            peerUserId = tmpNodeInfo.peerUserId;
+        } else {
+            LNN_LOGE(LNN_HEART_BEAT, "decrypt advUserId fail");
+        }
+    }
+    return peerUserId;
+}
+
+static bool HbIsNeedReAuth(const NodeInfo *nodeInfo, const char *newAccountHash, HbRespData *hbResp)
 {
     char *anonyNetworkId = NULL;
     Anonymize(nodeInfo->networkId, &anonyNetworkId);
+
+    int32_t peerUserId = GetPeerUserIdFromHbResp(hbResp, nodeInfo);
+    if (peerUserId != DEFAULT_PEER_USER_ID) {
+        UserInfo storedUserInfo;
+        (void)memset_s(&storedUserInfo, sizeof(storedUserInfo), 0, sizeof(storedUserInfo));
+        if (LnnFindUserByUserIdAndUdid(nodeInfo->deviceInfo.deviceUdid, peerUserId,
+            &storedUserInfo) == SOFTBUS_OK) {
+            bool isNeedReAuth = memcmp(storedUserInfo.accountHash, newAccountHash,
+                HB_SHORT_ACCOUNT_HASH_LEN) != 0;
+            LNN_LOGI(LNN_HEART_BEAT,
+                "reauth networkId=%{public}s,"
+                "userId=%{public}d, accountHash:%{public}02X%{public}02X->%{public}02X%{public}02X"
+                "result=%{public}d", AnonymizeWrapper(anonyNetworkId), peerUserId,
+                storedUserInfo.accountHash[0], storedUserInfo.accountHash[1],
+                newAccountHash[0], newAccountHash[1], isNeedReAuth);
+                AnonymizeFree(anonyNetworkId);
+                return isNeedReAuth;
+        }
+    }
+
     LNN_LOGI(LNN_HEART_BEAT,
-        "peer networkId=%{public}s, accountHash:%{public}02X%{public}02X->%{public}02X%{public}02X",
+        "reauth networkId=%{public}s, accountHash:%{public}02X%{public}02X->%{public}02X%{public}02X",
         AnonymizeWrapper(anonyNetworkId), nodeInfo->accountHash[0], nodeInfo->accountHash[1],
         newAccountHash[0], newAccountHash[1]);
     AnonymizeFree(anonyNetworkId);
@@ -540,7 +594,7 @@ static int32_t UpdateUserIdCheckSum(NodeInfo *deviceInfo, HbRespData *hbResp)
         LNN_LOGE(LNN_HEART_BEAT, "deviceInfo or hbResp is NULL");
         return SOFTBUS_INVALID_PARAM;
     }
-    uint8_t userIdCheckSum[USERID_CHECKSUM_LEN] = {0};
+    uint8_t userIdCheckSum[USERID_CHECKSUM_LEN] = { 0 };
     if (memcmp(hbResp->userIdCheckSum, userIdCheckSum, USERID_CHECKSUM_LEN) == 0) {
         LNN_LOGI(LNN_HEART_BEAT, "checkSum is null no need update");
         return SOFTBUS_OK;
@@ -554,7 +608,7 @@ static int32_t UpdateUserIdCheckSum(NodeInfo *deviceInfo, HbRespData *hbResp)
     if (memcmp(noEncryptUserId, hbResp->advUserId, USERID_LEN) == 0) {
         return SOFTBUS_ENCRYPT_ERR;
     }
-    uint8_t defaultUserId[USERID_LEN] = {0};
+    uint8_t defaultUserId[USERID_LEN] = { 0 };
     if ((memcmp(defaultUserId, hbResp->advUserId, USERID_LEN) != 0) &&
         DecryptUserIdPacked(deviceInfo, hbResp->advUserId, USERID_LEN) != SOFTBUS_OK) {
         return SOFTBUS_DECRYPT_ERR;
@@ -562,25 +616,33 @@ static int32_t UpdateUserIdCheckSum(NodeInfo *deviceInfo, HbRespData *hbResp)
     return SOFTBUS_OK;
 }
 
-static bool IsAccountChange(DeviceInfo *device, NodeInfo *cacheDeviceInfo)
+static bool IsAccountChange(DeviceInfo *device, NodeInfo *cacheDeviceInfo, HbRespData *hbResp)
 {
-    char accountString[LONG_TO_STRING_MAX_LEN] = {0};
-    if (sprintf_s(accountString, LONG_TO_STRING_MAX_LEN, "%" PRId64, cacheDeviceInfo->accountId) == -1) {
-        LNN_LOGE(LNN_HEART_BEAT, "long to string fail");
-        return true;
+    int32_t peerUserId = GetPeerUserIdFromHbResp(hbResp, cacheDeviceInfo);
+    UserInfo storedUserInfo;
+    (void)memset_s(&storedUserInfo, sizeof(UserInfo), 0, sizeof(UserInfo));
+    if (LnnFindUserByUserIdAndUdid(cacheDeviceInfo->deviceInfo.deviceUdid,
+        peerUserId, &storedUserInfo) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_HEART_BEAT, "find user by userId=%{public}d fail, fallback to cache accountId", peerUserId);
+        char accountString[LONG_TO_STRING_MAX_LEN] = { 0 };
+        if (sprintf_s(accountString, LONG_TO_STRING_MAX_LEN, "%" PRId64, cacheDeviceInfo->accountId) == -1) {
+            LNN_LOGE(LNN_HEART_BEAT, "long to string fail");
+            return true;
+        }
+        char accountHash[SHA_256_HASH_LEN] = { 0 };
+        if (SoftBusGenerateStrHash((uint8_t *)accountString, strlen(accountString),
+        (unsigned char *)accountHash) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "account hash fail");
+            return true;
+        }
+        return memcmp(accountHash, device->accountHash, HB_SHORT_ACCOUNT_HASH_LEN) != 0;
     }
-    char accountHash[SHA_256_HASH_LEN] = { 0 };
-    int32_t ret = SoftBusGenerateStrHash((uint8_t *)accountString, strlen(accountString),
-    (unsigned char *)accountHash);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "account hash fail, ret=%{public}d", ret);
-        return true;
-    }
-    bool isChange = memcmp(accountHash, device->accountHash, HB_SHORT_ACCOUNT_HASH_LEN) != 0;
+    bool isChange = memcmp(storedUserInfo.accountHash, device->accountHash, HB_SHORT_ACCOUNT_HASH_LEN) != 0;
     if (isChange) {
-        LNN_LOGI(LNN_HEART_BEAT, "accountHash compare. "
-        "accountHash=[%{public}02X, %{public}02X], device->accountHash=[%{public}02X, %{public}02X]",
-            accountHash[0], accountHash[1], device->accountHash[0], device->accountHash[1]);
+        LNN_LOGI(LNN_HEART_BEAT, "accountHash compare by userId=%{public}d. "
+        "stored=[%{public}02X, %{public}02X], device->accountHash=[%{public}02X, %{public}02X]",
+            peerUserId, storedUserInfo.accountHash[0], storedUserInfo.accountHash[1],
+            device->accountHash[0], device->accountHash[1]);
     }
     return isChange;
 }
@@ -597,7 +659,7 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectO
         return true;
     }
     if (LnnRetrieveDeviceInfoPacked(device->devId, &deviceInfo) != SOFTBUS_OK ||
-        IsInvalidBrmac(deviceInfo.connectInfo.macAddr) || IsAccountChange(device, &deviceInfo)) {
+        IsInvalidBrmac(deviceInfo.connectInfo.macAddr) || IsAccountChange(device, &deviceInfo, hbResp)) {
         *connectReason = BLE_FIRST_CONNECT;
         LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because retrieve fail, "
             "stateVersion=%{public}d->%{public}d", deviceInfo.stateVersion, (int32_t)hbResp->stateVersion);
@@ -816,7 +878,8 @@ static int32_t SoftBusNetNodeResult(DeviceInfo *device, HbRespData *hbResp,
         ProcessUdidAnonymize(device->devId);
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
     }
-    if (LnnNotifyDiscoveryDevice(device->addr, &info, connectCondition->isConnect) != SOFTBUS_OK) {
+    if (LnnNotifyDiscoveryDevice(device->addr, &info, connectCondition->isConnect,
+        connectCondition->peerUserId, connectCondition->localUserId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "mgr recv process notify device found fail");
         return SOFTBUS_NETWORK_NOTIFY_DISCOVERY_DEV_ERR;
     }
@@ -847,12 +910,8 @@ static void DfxRecordHeartBeatAuthStart(const AuthConnInfo *connInfo, const char
     LNN_EVENT(EVENT_SCENE_JOIN_LNN, EVENT_STAGE_AUTH, extra);
 }
 
-static int32_t HbOnlineNodeAuth(DeviceInfo *device, LnnHeartbeatRecvInfo *storedInfo, uint64_t nowTime)
+static int32_t HbOnlineNodeAuth(DeviceInfo *device, int32_t peerUserId, int32_t localUserId)
 {
-    if (HbIsRepeatedReAuthRequest(storedInfo, nowTime)) {
-        LNN_LOGE(LNN_HEART_BEAT, "reauth request repeated");
-        return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
-    }
     AuthConnInfo authConn;
     uint32_t requestId = AuthGenRequestId();
     AuthVerifyParam authVerifyParam;
@@ -863,6 +922,8 @@ static int32_t HbOnlineNodeAuth(DeviceInfo *device, LnnHeartbeatRecvInfo *stored
     authVerifyParam.deviceKeyId.hasDeviceKeyId = false;
     authVerifyParam.deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
     authVerifyParam.deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    authVerifyParam.peerUserId = peerUserId;
+    authVerifyParam.localUserId = localUserId;
     (void)LnnConvertAddrToAuthConnInfo(device->addr, &authConn);
     DfxRecordHeartBeatAuthStart(&authConn, LNN_DEFAULT_PKG_NAME, requestId);
     if (AuthStartVerify(&authConn, &authVerifyParam, LnnGetReAuthVerifyCallback()) != SOFTBUS_OK) {
@@ -999,6 +1060,7 @@ static int32_t CheckJoinLnnConnectResult(
     connectCondition.connectReason = CONNECT_INITIAL_VALUE;
     connectCondition.isDirectlyHb = isDirectlyHb;
     connectCondition.isConnect = IsNeedConnectOnLine(device, hbResp, &connectCondition.connectReason);
+    HbResolveJoinLnnUserIds(device, hbResp, &connectCondition.peerUserId, &connectCondition.localUserId);
     if (connectCondition.isConnect && !device->isOnline) {
         if (IsSupportCloudSync(device)) {
             return SOFTBUS_NETWORK_PEER_NODE_CONNECT;
@@ -1035,7 +1097,7 @@ static void CheckUserIdCheckSumChange(HbRespData *hbResp, NodeInfo *nodeInfo)
     }
 }
 
-static bool IsNetworkIdChange(DeviceInfo *device, NodeInfo *remoteInfo, HbRespData *hbResp)
+static bool IsNetworkIdChange(DeviceInfo *device, const NodeInfo *remoteInfo, HbRespData *hbResp)
 {
     if (device == NULL || remoteInfo == NULL || hbResp == NULL) {
         LNN_LOGD(LNN_HEART_BEAT, "invalid param");
@@ -1168,6 +1230,94 @@ int32_t LnnCleanTriggerSparkInfo(const char *udid, ConnectionAddrType addrType)
     return SOFTBUS_OK;
 }
 
+static int32_t HbFindLocalUserIdForPeerUser(const uint8_t *peerAccountHash)
+{
+    if (peerAccountHash == NULL) {
+        return 0;
+    }
+    int32_t *localUserIds = NULL;
+    uint32_t localUserIdsLen = 0;
+    if (GetAllForegroundAccountIds(&localUserIds, &localUserIdsLen) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get all foreground account ids failed");
+        return 0;
+    }
+    int32_t matchedLocalUserId = 0;
+    for (uint32_t i = 0; i < localUserIdsLen; i++) {
+        int64_t accountId = 0;
+        uint8_t accountHash[SHA_256_HASH_LEN] = { 0 };
+        if (LnnGetAccountIdByUserId(localUserIds[i], &accountId, accountHash,
+            SHA_256_HASH_LEN) == SOFTBUS_OK && accountId > 0 &&
+            memcmp(accountHash, peerAccountHash, HB_SHORT_ACCOUNT_HASH_LEN) == 0) {
+            matchedLocalUserId = localUserIds[i];
+            break;
+        }
+    }
+    SoftBusFree(localUserIds);
+    return matchedLocalUserId;
+}
+
+static void HbResolveJoinLnnUserIds(DeviceInfo *device, HbRespData *hbResp,
+    int32_t *peerUserId, int32_t *localUserId)
+{
+    *peerUserId = DEFAULT_PEER_USER_ID;
+    *localUserId = DEFAULT_LOCAL_USER_ID;
+    NodeInfo peerNodeInfo;
+    (void)memset_s(&peerNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnRetrieveDeviceInfoPacked(device->devId, &peerNodeInfo) == SOFTBUS_OK) {
+        *peerUserId = GetPeerUserIdFromHbResp(hbResp, &peerNodeInfo);
+    }
+    *localUserId = HbFindLocalUserIdForPeerUser((const uint8_t *)device->accountHash);
+    if (*localUserId <= 0) {
+        *localUserId = DEFAULT_LOCAL_USER_ID;
+    }
+}
+
+static int32_t HbCheckAndAuthPeerUserId(DeviceInfo *device, const NodeInfo *nodeInfo, HbRespData *hbResp)
+{
+    if (device == NULL || nodeInfo == NULL || hbResp == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint8_t defaultuserId[USERID_LEN] = { 0 };
+    uint8_t noEncryptUserId[USERID_LEN] = {0xFF, 0xFF, 0xFF, 0xFF};
+    if (memcmp(hbResp->advUserId, defaultuserId, USERID_LEN) == 0 ||
+        memcmp(hbResp->advUserId, noEncryptUserId, USERID_LEN) == 0) {
+        LNN_LOGD(LNN_HEART_BEAT, "advUserId not encrypted, skip");
+        return SOFTBUS_OK;
+    }
+    int32_t peerUserId = GetPeerUserIdFromHbResp(hbResp, nodeInfo);
+    if (peerUserId == nodeInfo->peerUserId) {
+        LNN_LOGD(LNN_HEART_BEAT, "peerUserIdd same as peerUserId=%{public}d, skip", peerUserId);
+        return SOFTBUS_OK;
+    }
+    UserInfo storedUserInfo;
+    (void)memset_s(&storedUserInfo, sizeof(UserInfo), 0, sizeof(UserInfo));
+    if (LnnFindUserByUserIdAndUdid(nodeInfo->deviceInfo.deviceUdid, peerUserId, &storedUserInfo) != SOFTBUS_OK &&
+        storedUserInfo.isOnline) {
+        LNN_LOGD(LNN_HEART_BEAT, "peerUserId=%{public}d already online, skip", peerUserId);
+        return SOFTBUS_OK;
+    }
+    int32_t localUserId = HbFindLocalUserIdForPeerUser((const uint8_t *)device->accountHash);
+    if (localUserId <= 0) {
+        LNN_LOGD(LNN_HEART_BEAT, "not matching localUserId for peerUserId=%{public}d, skip", peerUserId);
+        return SOFTBUS_OK;
+    }
+    LNN_LOGI(LNN_HEART_BEAT, "auth unonline peer user, peerUserId=%{public}d, localUserId=%{public}d",
+        peerUserId, localUserId);
+    return HbOnlineNodeAuth(device, peerUserId, localUserId);
+}
+
+static bool HbIsNeedReAuthForOnlineNode(const NodeInfo *nodeInfo, DeviceInfo *device,
+    HbRespData *hbResp, bool isDirectlyHb)
+{
+    if (isDirectlyHb) {
+        return false;
+    }
+    return HbIsNeedReAuth(nodeInfo, device->accountHash, hbResp) ||
+        IsUuidChange(nodeInfo->uuid, hbResp, HB_SHORT_UUID_LEN) ||
+        IsNetworkIdChange(device, nodeInfo, hbResp);
+}
+
 static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
     LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
@@ -1194,30 +1344,31 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     bool isDirectlyHb = IsDirectlyHeartBeat(device, hbResp);
-    if (HbGetOnlineNodeByRecvInfo(device->devId, device->addr[0].type, &nodeInfo, hbResp) == SOFTBUS_OK) {
-        CheckUserIdCheckSumChange(hbResp, &nodeInfo);
-        if (IsNeedTriggerSparkGroup(&nodeInfo, storedInfo, nowTime)) {
-            TriggerSparkGroupJoinAgainPacked(nodeInfo.deviceInfo.deviceUdid, SPARK_GROUP_DELAY_TIME_MS);
-        }
-        if (isDirectlyHb || (!HbIsNeedReAuth(&nodeInfo, device->accountHash) &&
-            !IsUuidChange(nodeInfo.uuid, hbResp, HB_SHORT_UUID_LEN) &&
-            !IsNetworkIdChange(device, &nodeInfo, hbResp))) {
-            (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-            return HbUpdateOfflineTimingByRecvInfo(nodeInfo.networkId, device->addr[0].type, hbType, nowTime);
-        }
-        if (!device->isOnline) {
-            LNN_LOGW(LNN_HEART_BEAT, "ignore lnn request, not support connect");
-            (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-            return HbUpdateOfflineTimingByRecvInfo(nodeInfo.networkId, device->addr[0].type, hbType, nowTime);
-        } else {
-            res = HbOnlineNodeAuth(device, storedInfo, nowTime);
-            (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-            return res;
-        }
+    if (HbGetOnlineNodeByRecvInfo(device->devId, device->addr[0].type, &nodeInfo, hbResp) != SOFTBUS_OK) {
+        res = CheckJoinLnnConnectResult(device, hbResp, isDirectlyHb, storedInfo, nowTime);
+        (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
+        return res;
     }
-    res = CheckJoinLnnConnectResult(device, hbResp, isDirectlyHb, storedInfo, nowTime);
+    CheckUserIdCheckSumChange(hbResp, &nodeInfo);
+
+    if (IsNeedTriggerSparkGroup(&nodeInfo, storedInfo, nowTime)) {
+        (void)TriggerSparkGroupJoinAgainPacked(nodeInfo.deviceInfo.deviceUdid, SPARK_GROUP_DELAY_TIME_MS);
+    }
+    bool needReAuth = HbIsNeedReAuthForOnlineNode(&nodeInfo, device, hbResp, isDirectlyHb);
+    bool isRepeatedReAuth = needReAuth && device->isOnline && HbIsRepeatedReAuthRequest(storedInfo, nowTime);
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-    return res;
+    LNN_LOGI(LNN_HEART_BEAT, "needReAuth=%{public}d, isRepeatedReAuth=%{public}d", needReAuth, isRepeatedReAuth);
+    if (needReAuth || !device->isOnline) {
+        if (!needReAuth) {
+            (void)HbCheckAndAuthPeerUserId(device, &nodeInfo, hbResp);
+        }
+        return HbUpdateOfflineTimingByRecvInfo(nodeInfo.networkId, device->addr[0].type, hbType, nowTime);
+    }
+    if (isRepeatedReAuth) {
+        return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
+    }
+    int32_t localUserId = HbFindLocalUserIdForPeerUser((const uint8_t *)device->accountHash);
+    return HbOnlineNodeAuth(device, nodeInfo.peerUserId, localUserId > 0 ? localUserId : DEFAULT_LOCAL_USER_ID);
 }
 
 static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
@@ -1328,7 +1479,39 @@ static void HbMediumMgrRecvSleInfo(const char *networkId, SleDeviceInfo *info)
     AnonymizeFree(anonyNetworkId);
 }
 
-static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType type, LnnHeartbeatType hbType)
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+static LnnHeartbeatChannel HbMediumMgrGetRelayChannel(
+    const char *udidHash, const uint8_t *accountHash, uint32_t accountHashLen)
+{
+    if (accountHash == NULL || accountHashLen < HB_SHORT_ACCOUNT_HASH_LEN) {
+        return HEARTBEAT_CHANNEL_DEFAULT;
+    }
+    for (int32_t i = 0; i < accountHashLen; i++) {
+        if (!LnnHbChannelIsSupportRelay(i)) {
+            continue;
+        }
+        int32_t channelUserId = 0;
+        if (LnnHbChannelGetUserId(i, &channelUserId) != SOFTBUS_OK || channelUserId <= 0) {
+            continue;
+        }
+        int64_t accountId = 0;
+        uint8_t localHash[SHA_256_HASH_LEN] = { 0 };
+        if (LnnGetAccountIdByUserId(channelUserId, &accountId, localHash, SHA_256_HASH_LEN) != SOFTBUS_OK ||
+            accountId <= 0) {
+            continue;
+        }
+        if (memcmp(localHash, accountHash, SHA_256_HASH_LEN) == 0) {
+            LNN_LOGI(LNN_HEART_BEAT, "relay match same-account, channel=%{public}d, userId=%{public}d",
+                i, channelUserId);
+            return i;
+        }
+    }
+    return HEARTBEAT_CHANNEL_DEFAULT;
+}
+#endif
+
+static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType type, LnnHeartbeatType hbType,
+    const uint8_t *accountHash, uint32_t accountHashLen)
 {
     (void)type;
 
@@ -1341,10 +1524,18 @@ static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType typ
     LNN_LOGD(LNN_HEART_BEAT, "mgr relay process, udidhash=%{public}s, hbType=%{public}d",
         AnonymizeWrapper(anonyUdid), hbType);
     AnonymizeFree(anonyUdid);
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    LnnHeartbeatChannel channel = HbMediumMgrGetRelayChannel(udidHash, accountHash, accountHashLen);
+    if (LnnStartHbRelayByChannel(hbType | HEARTBEAT_TYPE_BLE_V3, channel) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "mgr relay process fail, channel=%{public}d", channel);
+        return;
+    }
+#else
     if (LnnStartHbByTypeAndStrategy(hbType | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "mgr relay process fail");
         return;
     }
+#endif
 }
 
 static int32_t HbInitRecvList(void)

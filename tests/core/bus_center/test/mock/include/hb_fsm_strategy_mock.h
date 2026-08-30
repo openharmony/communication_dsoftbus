@@ -37,7 +37,7 @@ public:
     virtual int32_t LnnPostSendEndMsgToHbFsm(
         LnnHeartbeatFsm *hbFsm, LnnHeartbeatSendEndData *custData, uint64_t delayMillis) = 0;
     virtual int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag,
-        LnnProcessSendOnceMsgPara *msgPara, uint64_t delayMillis) = 0;
+        const LnnProcessSendOnceMsgPara *msgPara, uint64_t delayMillis) = 0;
     virtual SoftBusScreenState GetScreenState(void) = 0;
     virtual bool LnnCheckSupportedHbType(LnnHeartbeatType *srcType, LnnHeartbeatType *dstType) = 0;
     virtual int32_t LnnPostStartMsgToHbFsm(LnnHeartbeatFsm *hbFsm, uint64_t delayMillis) = 0;
@@ -84,7 +84,7 @@ public:
 
     MOCK_METHOD3(LnnPostSendEndMsgToHbFsm, int32_t(LnnHeartbeatFsm *, LnnHeartbeatSendEndData *, uint64_t));
     MOCK_METHOD5(LnnPostSendBeginMsgToHbFsm,
-        int32_t(LnnHeartbeatFsm *, LnnHeartbeatType, bool, LnnProcessSendOnceMsgPara *, uint64_t));
+        int32_t(LnnHeartbeatFsm *, LnnHeartbeatType, bool, const LnnProcessSendOnceMsgPara *, uint64_t));
     MOCK_METHOD0(GetScreenState, SoftBusScreenState(void));
     MOCK_METHOD2(LnnCheckSupportedHbType, bool(LnnHeartbeatType *, LnnHeartbeatType *));
     MOCK_METHOD2(LnnPostStartMsgToHbFsm, int32_t(LnnHeartbeatFsm *, uint64_t));

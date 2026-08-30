@@ -38,7 +38,15 @@ int32_t LnnGetHbStrategyManager(
     LnnHeartbeatStrategyManager *mgr, LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType);
 
 int32_t LnnStartNewHbStrategyFsm(void);
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+int32_t LnnStartHbStrategyFsmForChannel(LnnHeartbeatChannel channel, LnnHeartbeatType hbType, int32_t userId);
+int32_t LnnStartHeartbeatForChannel(LnnHeartbeatChannel channel, uint64_t delayMillis);
+LnnHeartbeatFsm *LnnGetChannelFsm(LnnHeartbeatChannel channel);
+#endif
 int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay);
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+int32_t LnnStartHbRelayByChannel(LnnHeartbeatType hbType, LnnHeartbeatChannel channel);
+#endif
 int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara);
 int32_t LnnStartHbByTypeAndStrategyDirectly(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType,
     bool isRelay, const char *networkId, uint64_t timeout);

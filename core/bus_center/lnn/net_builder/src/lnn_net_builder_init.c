@@ -95,7 +95,7 @@ static void GetSessionKeyByNodeInfo(const NodeInfo *info, AuthHandle authHandle)
     UpdateDpAclParams aclParams = {
         .accountId = nodeInfo.accountId,
         .deviceId = nodeInfo.deviceInfo.deviceUdid,
-        .peerUserId = nodeInfo.userId,
+        .peerUserId = nodeInfo.peerUserId,
         .localUserId = nodeInfo.localUserId
     };
     bool isNeedUpdateAclState = false;

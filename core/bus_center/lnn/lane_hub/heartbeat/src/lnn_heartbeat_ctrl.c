@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,11 @@
 #include "lnn_multi_user_process.h"
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account.h"
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+#include "lnn_heartbeat_channel_mgr.h"
+#include "lnn_heartbeat_channel_struct.h"
+#include "lnn_ohos_account_adapter.h"
+#endif
 #include "lnn_init_monitor.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
@@ -67,6 +72,14 @@ static atomic_bool g_enableState = false;
 static atomic_bool g_enableStateMcu = false;
 static bool g_isScreenOnOnce = false;
 static atomic_bool g_isCloudSyncEnd = false;
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+#define HB_INVALID_USER_ID (-1)
+static int32_t g_channelUserId[HB_MAX_CHANNEL_COUNT] = {
+    [HEARTBEAT_CHANNEL_DEFAULT] = HB_INVALID_USER_ID,
+    [HEARTBEAT_CHANNEL_1] = HB_INVALID_USER_ID,
+    [HEARTBEAT_CHANNEL_2] = HB_INVALID_USER_ID,
+};
+#endif
 
 static IBleRangeInnerCallback g_bleRangeCallback = {
     .onRangeResult = NULL,
@@ -109,19 +122,42 @@ bool IsHeartbeatEnable(void)
     }
     bool isBtOn = ((g_hbConditionState.btState != SOFTBUS_BLE_TURN_OFF) &&
         (g_hbConditionState.btState != SOFTBUS_BT_UNKNOWN));
-    bool isScreenUnlock = g_hbConditionState.lockState == SOFTBUS_SCREEN_UNLOCK;
-    bool isLogIn = g_hbConditionState.accountState == SOFTBUS_ACCOUNT_LOG_IN;
-    bool isBackground = g_hbConditionState.backgroundState == SOFTBUS_USER_BACKGROUND;
     bool isNightMode = g_hbConditionState.nightModeState == SOFTBUS_NIGHT_MODE_ON;
     bool isOOBEEnd =
         g_hbConditionState.OOBEState == SOFTBUS_OOBE_END || g_hbConditionState.OOBEState == SOFTBUS_FACK_OOBE_END;
     bool isInitCheckSuc = IsLnnInitCheckSucceed(MONITOR_BLE_NET);
     bool isDeviceRisk = g_hbConditionState.deviceRiskState == SOFTBUS_DEVICE_IS_RISK;
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    return g_hbConditionState.heartbeatEnable && isBtOn && !g_hbConditionState.isRequestDisable &&
+        !isNightMode && isOOBEEnd && isInitCheckSuc && !isDeviceRisk;
+#else
+    bool isScreenUnlock = g_hbConditionState.lockState == SOFTBUS_SCREEN_UNLOCK;
+    bool isLogIn = g_hbConditionState.accountState == SOFTBUS_ACCOUNT_LOG_IN;
+    bool isBackground = g_hbConditionState.backgroundState == SOFTBUS_USER_BACKGROUND;
     bool isConstraint = LnnIsOsAccountConstraint();
-    return g_hbConditionState.heartbeatEnable && isBtOn && isScreenUnlock && !g_hbConditionState.isRequestDisable &&
-        (isLogIn || g_hbConditionState.hasTrustedRelation) && !isBackground && !isNightMode && isOOBEEnd &&
-        isInitCheckSuc && !isDeviceRisk && !isConstraint;
+    return g_hbConditionState.heartbeatEnable && isBtOn && isScreenUnlock &&
+        !g_hbConditionState.isRequestDisable && (isLogIn || g_hbConditionState.hasTrustedRelation) &&
+            !isBackground && !isNightMode && isOOBEEnd && isInitCheckSuc && !isDeviceRisk && !isConstraint;
+#endif
 }
+
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+static bool IsHeartbeatEnableForMultiUser(int32_t userId)
+{
+    if (userId <= 0) {
+        LNN_LOGW(LNN_HEART_BEAT, "invalid userId=%{public}d", userId);
+        return false;
+    }
+    bool isUserLogIn = IsOsAccountLoggedInByUserId(userId);
+    bool isUserBackground = IsActiveOsAccountUnlockedByUserId(userId);
+    bool isUserConstraint = LnnIsOsAccountConstraintByUserId(userId);
+    bool isEnable = !isUserConstraint && ((isUserLogIn || isUserBackground) || g_hbConditionState.hasTrustedRelation);
+    LNN_LOGD(LNN_HEART_BEAT,
+        "userId=%{public}d, LoggedIn=%{public}d, unlocked=%{public}d, constraint=%{public}d, enable=%{public}d",
+        userId, isUserLogIn, isUserBackground, isUserConstraint, isEnable);
+    return isEnable;
+}
+#endif
 
 bool IsHeartbeatEnableForMcu(void)
 {
@@ -289,6 +325,73 @@ static void HbUpdateEnableStatusToMcu(void)
     LNN_LOGI(LNN_HEART_BEAT, "isBleEnable=%{public}d", isBleEnable);
 }
 
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+static void HbUpdateChannelEnableState(bool isEnable, bool globalUnchanged)
+{
+    if (!isEnable) {
+        for (int32_t i = 0; i < HEARTBEAT_CHANNEL_MAX; i++) {
+            LnnHbChannelEnable((LnnHeartbeatChannel)i, false);
+        }
+        return;
+    }
+    bool hasChannelDisabled = false;
+    bool hasChannelEnabled = false;
+    for (int32_t i = 0; i < HEARTBEAT_CHANNEL_MAX; i++) {
+        LnnHeartbeatChannel channel = (LnnHeartbeatChannel)i;
+        int32_t userId = g_channelUserId[channel];
+        bool wasEnabled = LnnHbChannelIsEnabled(channel);
+        bool channelEnable = IsHeartbeatEnableForMultiUser(userId);
+        LnnHbChannelEnable(channel, channelEnable);
+        if (channel == HEARTBEAT_CHANNEL_DEFAULT) {
+            continue;
+        }
+        if (wasEnabled && !channelEnable) {
+            LNN_LOGI(LNN_HEART_BEAT, "channel=%{public}d disabled, userId=%{public}d", channel, userId);
+            hasChannelDisabled = true;
+        } else if (!wasEnabled && channelEnable) {
+            LnnHeartbeatType hbType = HEARTBEAT_TYPE_BLE_V1;
+            if (LnnStartHbStrategyFsmForChannel(channel, hbType, userId) != SOFTBUS_OK) {
+                LNN_LOGE(LNN_HEART_BEAT, "start channel=%{public}d fsm fail, userId=%{public}d", channel, userId);
+            } else {
+                LnnStartHeartbeatForChannel(channel, 0);
+                LNN_LOGI(LNN_HEART_BEAT, "channel=%{public}d enabled, userId=%{public}d", channel, userId);
+            }
+            hasChannelEnabled = true;
+        }
+    }
+    if (!globalUnchanged) {
+        return;
+    }
+    if (hasChannelDisabled) {
+        LnnStopHeartbeatByType(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1 | HEARTBEAT_TYPE_BLE_V3);
+    }
+    if (hasChannelEnabled) {
+        LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false);
+    }
+}
+#endif
+
+static void HbEnableHeartbeatGlobal(void)
+{
+    LNN_LOGD(LNN_HEART_BEAT, "condition changed to enabled");
+    if (LnnStartHbByTypeAndStrategy(
+        HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat fail");
+    }
+    g_enableState = true;
+    LnnStartHeartbeat(0);
+}
+
+static void HbDisableHeartbeatGlobal(void)
+{
+    LNN_LOGD(LNN_HEART_BEAT, "condition changed to disabled");
+    if (LnnStopHeartbeatByType(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1 | HEARTBEAT_TYPE_BLE_V3) !=
+        SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "stop ble heartbeat fail");
+    }
+    g_enableState = false;
+}
+
 static void HbConditionChanged(bool isOnlySetState)
 {
     HbRefreshConditionState();
@@ -296,6 +399,9 @@ static void HbConditionChanged(bool isOnlySetState)
         HbUpdateEnableStatusToMcu();
     }
     bool isEnable = IsHeartbeatEnable();
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    HbUpdateChannelEnableState(isEnable, isOnlySetState == isEnable);
+#endif
     if (g_enableState == isEnable) {
         LNN_LOGI(LNN_HEART_BEAT, "ctrl ignore same enable request, isEnable=%{public}d", isEnable);
         return;
@@ -312,20 +418,9 @@ static void HbConditionChanged(bool isOnlySetState)
         return;
     }
     if (isEnable) {
-        LNN_LOGD(LNN_HEART_BEAT, "condition changed to enabled");
-        if (LnnStartHbByTypeAndStrategy(
-            HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_HEART_BEAT, "start ble heartbeat fail");
-        }
-        g_enableState = true;
-        LnnStartHeartbeat(0);
+        HbEnableHeartbeatGlobal();
     } else {
-        LNN_LOGD(LNN_HEART_BEAT, "condition changed to disabled");
-        if (LnnStopHeartbeatByType(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1 | HEARTBEAT_TYPE_BLE_V3) !=
-            SOFTBUS_OK) {
-            LNN_LOGE(LNN_HEART_BEAT, "stop ble heartbeat fail");
-        }
-        g_enableState = false;
+        HbDisableHeartbeatGlobal();
     }
 }
 
@@ -892,7 +987,28 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
-static void HbHandleAccountLogin(void)
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+static LnnHeartbeatChannel HbGetChannelByUserId(uint32_t userId)
+{
+    for (int32_t i = 0; i < HB_MAX_CHANNEL_COUNT; i++) {
+        if (g_channelUserId[i] == userId) {
+            return (LnnHeartbeatChannel)i;
+        }
+    }
+    return HEARTBEAT_CHANNEL_MAX;
+}
+
+static void HbStopMultiChannel(int32_t userId)
+{
+    LnnHeartbeatChannel channel = HbGetChannelByUserId(userId);
+    if (channel == HEARTBEAT_CHANNEL_MAX || channel == HEARTBEAT_CHANNEL_DEFAULT) {
+        return;
+    }
+    LnnHbChannelEnable(channel, false);
+}
+#endif
+
+static void HbHandleAccountLogin(int32_t userId)
 {
     LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_ACCOUNT_LOG_IN");
     LnnAsyncCallbackDelayHelper(
@@ -916,8 +1032,10 @@ static void HbHandleAccountLogout(int32_t userId)
     if (LnnDeleteSyncToDB(0, 0, true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB clear local cache fail");
     }
+#else
+    HbStopMultiChannel(userId);
 #endif
-    LnnOnOhosAccountLogout(userId);
+    LnnOnOhosAccountLogout();
     HbConditionChanged(false);
     if (LnnStartHbByTypeAndStrategy(
         HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
@@ -936,7 +1054,7 @@ static void HbAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
     g_hbConditionState.accountState = accountState;
     switch (accountState) {
         case SOFTBUS_ACCOUNT_LOG_IN:
-            HbHandleAccountLogin();
+            HbHandleAccountLogin(event->userId);
             break;
         case SOFTBUS_ACCOUNT_LOG_OUT:
             HbHandleAccountLogout(event->userId);
@@ -1585,6 +1703,12 @@ static void HbRangeCallback(SoftBusRangeHandle handle, const RangeResult *result
 
 int32_t LnnInitHeartbeat(void)
 {
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    if (LnnHbChannelMgrInit() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "channel mgr init fail");
+        return SOFTBUS_NETWORK_HEARTBEAT_CHANNEL_DISABLE;
+    }
+#endif
     if (LnnHbStrategyInit() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "strategy module init fail");
         return SOFTBUS_NETWORK_HB_INIT_STRATEGY_FAIL;
@@ -1614,6 +1738,9 @@ int32_t LnnInitHeartbeat(void)
 void LnnDeinitHeartbeat(void)
 {
     LnnHbStrategyDeinit();
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    LnnHbChannelMgrDeinit();
+#endif
     LnnHbMediumMgrDeinit();
     SoftBusUnregRangeCbPacked(MODULE_BLE_HEARTBEAT);
     LnnUnregisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, HbIpAddrChangeEventHandler);

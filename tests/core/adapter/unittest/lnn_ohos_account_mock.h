@@ -133,7 +133,7 @@ public:
     virtual int32_t LnnInitSyncInfoManager(void);
     virtual int32_t LnnInitWifiDirect(void);
     virtual int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
-        bool isNeedConnect);
+        bool isNeedConnect, int32_t peerUserId, int32_t localUserId);
     virtual int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
     virtual int32_t LnnRegistPhysicalSubnet(LnnPhysicalSubnet *manager);
     virtual int32_t LnnRegistProtocol(LnnProtocolManager *protocolMgr);
@@ -181,7 +181,7 @@ public:
     virtual void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state);
     virtual void LnnNotifyPhysicalSubnetStatusChanged(const char *ifName, ProtocolType protocolType, void *status);
     virtual void LnnOnOhosAccountChanged(void);
-    virtual void LnnOnOhosAccountLogout(int32_t userId) = 0;
+    virtual void LnnOnOhosAccountLogout(void);
     virtual void LnnSetUnlockState(void);
     virtual void LnnStopDiscovery(void);
     virtual void LnnStopPublish(void);
@@ -234,7 +234,7 @@ public:
     MOCK_METHOD0(LnnIsAutoNetWorkingEnabled, bool(void));
     MOCK_METHOD0(LnnNotifyHBRepeat, void(void));
     MOCK_METHOD0(LnnOnOhosAccountChanged, void(void));
-    MOCK_METHOD1(LnnOnOhosAccountLogout, void(int32_t));
+    MOCK_METHOD0(LnnOnOhosAccountLogout, void(void));
     MOCK_METHOD0(LnnSetUnlockState, void());
     MOCK_METHOD0(LnnStartDiscovery, int32_t(void));
     MOCK_METHOD0(LnnStartPublish, int32_t(void));
@@ -302,7 +302,8 @@ public:
     MOCK_METHOD3(LnnEncryptDataByHuks, int32_t(const struct HksBlob *, const struct HksBlob *, struct HksBlob *));
     MOCK_METHOD3(LnnGetFullStoragePath, int32_t(LnnFileId, char *, uint32_t));
     MOCK_METHOD3(LnnIsSameConnectionAddr, bool(const ConnectionAddr *, const ConnectionAddr *, bool));
-    MOCK_METHOD3(LnnNotifyDiscoveryDevice, int32_t(const ConnectionAddr *, const LnnDfxDeviceInfoReport *, bool));
+    MOCK_METHOD5(LnnNotifyDiscoveryDevice, int32_t(const ConnectionAddr *, const LnnDfxDeviceInfoReport *, bool,
+        int32_t, int32_t));
     MOCK_METHOD3(LnnNotifyPhysicalSubnetStatusChanged, void(const char *, ProtocolType, void *));
     MOCK_METHOD3(LnnSendNotTrustedInfo, int32_t(const NotTrustedDelayInfo *, uint32_t, LnnSyncInfoMsgComplete));
     MOCK_METHOD3(LnnVisitHbTypeSet, bool(VisitHbTypeCb, LnnHeartbeatType *, void *));

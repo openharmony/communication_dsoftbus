@@ -2061,7 +2061,7 @@ static int32_t UpdateLocalUserId(const void *userId)
     if (userId == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    g_localNetLedger.localInfo.userId = *(int32_t *)userId;
+    g_localNetLedger.localInfo.localUserId = *(int32_t *)userId;
     UpdateLocalDeviceInfoToMlpsPacked(&g_localNetLedger.localInfo);
     return SOFTBUS_OK;
 }
@@ -2097,7 +2097,7 @@ static int32_t L1GetUserId(void *userId, uint32_t len)
     if (userId == NULL || len != sizeof(int32_t)) {
         return SOFTBUS_INVALID_PARAM;
     }
-    *((int32_t *)userId) = g_localNetLedger.localInfo.userId;
+    *((int32_t *)userId) = g_localNetLedger.localInfo.localUserId;
     return SOFTBUS_OK;
 }
 
@@ -2886,7 +2886,7 @@ static void InitUserIdCheckSum(NodeInfo *nodeInfo)
     uint8_t userIdCheckSum[USERID_CHECKSUM_LEN] = {0};
     int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
     LNN_LOGI(LNN_LEDGER, "get userId:%{public}d", userId);
-    nodeInfo->userId = userId;
+    nodeInfo->localUserId = userId;
     int32_t ret = HbBuildUserIdCheckSumPacked(&userId, 1, userIdCheckSum, USERID_CHECKSUM_LEN);
     if (ret != SOFTBUS_OK) {
         LNN_LOGW(LNN_LEDGER, "get userIdCheckSum failed, ret=%{public}d", ret);

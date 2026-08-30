@@ -800,7 +800,8 @@ static int32_t GenerateAuthParam(NodeInfo *localNodeInfo, NodeInfo *remoteNodeIn
     }
     if (authMode == HICHAIN_AUTH_IDENTITY_SERVICE) {
         credId =
-            GetCredIdByIdService(localUdidHash, remoteUdidHash, remoteNodeInfo->accountHash, localNodeInfo->userId);
+            GetCredIdByIdService(localUdidHash, remoteUdidHash, remoteNodeInfo->accountHash,
+                localNodeInfo->localUserId);
         if (credId == NULL) {
             AUTH_LOGE(AUTH_CONN, "get cred id fail");
             return SOFTBUS_AUTH_GET_CRED_ID_FAIL;
