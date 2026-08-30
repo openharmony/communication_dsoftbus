@@ -557,7 +557,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_USER_ID_TO_MSG_TEST_001, TestSize.Level1)
 HWTEST_F(LNNNetworkInfoTest, NOTIFY_REMOTE_DEV_OFFLINE_BY_USER_ID_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
-    NodeInfo info = { .userId = 101 };
+    NodeInfo info = { .peerUserId = 101 };
     EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(DoAll(SetArgPointee<2>(info), Return(SOFTBUS_OK)));
@@ -575,7 +575,7 @@ HWTEST_F(LNNNetworkInfoTest, NOTIFY_REMOTE_DEV_OFFLINE_BY_USER_ID_TEST_001, Test
 HWTEST_F(LNNNetworkInfoTest, NOTIFY_REMOTE_DEV_OFFLINE_BY_USER_ID_TEST_002, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
-    NodeInfo info = { .userId = 0 };
+    NodeInfo info = { .peerUserId = 0 };
     EXPECT_EQ(EOK, strcpy_s(info.networkId, NETWORK_ID_BUF_LEN, NETWORKID));
     EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
         .WillOnce(DoAll(SetArgPointee<2>(info), Return(SOFTBUS_OK)))
@@ -593,7 +593,7 @@ HWTEST_F(LNNNetworkInfoTest, NOTIFY_REMOTE_DEV_OFFLINE_BY_USER_ID_TEST_002, Test
 HWTEST_F(LNNNetworkInfoTest, NOTIFY_REMOTE_DEV_OFFLINE_BY_USER_ID_TEST_003, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
-    NodeInfo info = { .userId = 100 };
+    NodeInfo info = { .peerUserId = 100 };
     EXPECT_EQ(EOK, strcpy_s(info.networkId, NETWORK_ID_BUF_LEN, NETWORKID));
     EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
         .WillOnce(DoAll(SetArgPointee<2>(info), Return(SOFTBUS_OK)))
@@ -1072,7 +1072,7 @@ HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_001, TestSize.L
     EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
         .WillRepeatedly(testing::Invoke([](const char *id, IdCategory type, NodeInfo *nodeInfo) {
             if (nodeInfo != nullptr) {
-                nodeInfo->userId = BITS;
+                nodeInfo->peerUserId = BITS;
             }
             return SOFTBUS_OK;
         }));
@@ -1101,7 +1101,7 @@ HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_002, TestSize.L
     EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
         .WillRepeatedly(testing::Invoke([](const char *id, IdCategory type, NodeInfo *nodeInfo) {
             if (nodeInfo != nullptr) {
-                nodeInfo->userId = 123;
+                nodeInfo->peerUserId = 123;
             }
             return SOFTBUS_INVALID_PARAM;
         }));
@@ -1133,7 +1133,7 @@ HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_003, TestSize.L
     EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
         .WillRepeatedly(testing::Invoke([](const char *id, IdCategory type, NodeInfo *nodeInfo) {
             if (nodeInfo != nullptr) {
-                nodeInfo->userId = BITS;
+                nodeInfo->peerUserId = BITS;
             }
             return SOFTBUS_OK;
         }));
@@ -1164,7 +1164,7 @@ HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_004, TestSize.L
     EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
         .WillRepeatedly(testing::Invoke([](const char *id, IdCategory type, NodeInfo *nodeInfo) {
             if (nodeInfo != nullptr) {
-                nodeInfo->userId = 0;
+                nodeInfo->peerUserId = 0;
             }
             return SOFTBUS_OK;
         }));
@@ -1195,7 +1195,7 @@ HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_005, TestSize.L
     EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
         .WillRepeatedly(testing::Invoke([](const char *id, IdCategory type, NodeInfo *nodeInfo) {
             if (nodeInfo != nullptr) {
-                nodeInfo->userId = 0;
+                nodeInfo->peerUserId = 0;
             }
             return SOFTBUS_OK;
         }));

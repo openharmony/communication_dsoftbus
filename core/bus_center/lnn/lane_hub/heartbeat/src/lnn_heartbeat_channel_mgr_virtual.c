@@ -13,37 +13,41 @@
  * limitations under the License.
  */
 
-#include "lnn_distributed_user_info.h"
-
-#include "lnn_log.h"
+#include "lnn_heartbeat_channel_mgr.h"
 #include "softbus_error_code.h"
 
-int32_t LnnInitDistributedUserLedger(void)
+int32_t LnnHbChannelMgrInit(void)
 {
-    LNN_LOGI(LNN_INIT, "init virtual distribute user ledger");
     return SOFTBUS_OK;
 }
 
-void LnnDeinitDistributedUserLedger(void)
+void LnnHbChannelMgrDeinit(void)
 {
 }
 
-void LnnRemoveUserInfoNode(const char *udid)
+int32_t LnnHbChannelEnable(LnnHeartbeatChannel channel, bool enable)
 {
-    (void)udid;
+    (void)channel;
+    (void)enable;
+    return SOFTBUS_OK;
 }
 
-int32_t LnnUpdateDistributedUserInfo(const UserInfo *userInfo, const char *udid)
+bool LnnHbChannelIsEnabled(LnnHeartbeatChannel channel)
 {
-    (void)userInfo;
-    (void)udid;
-    return SOFTBUS_NOT_IMPLEMENT;
+    (void)channel;
+    return false;
 }
 
-int32_t LnnFindUserByUserIdAndUdid(const char *udid, int32_t userId, UserInfo *userInfo)
+int32_t LnnHbChannelSetUserId(LnnHeartbeatChannel channel, int32_t userId)
 {
-    (void)udid;
+    (void)channel;
     (void)userId;
-    (void)userInfo;
-    return SOFTBUS_NOT_IMPLEMENT;
+    return SOFTBUS_OK;
+}
+
+int32_t LnnHbChannelGetUserId(LnnHeartbeatChannel channel, int32_t *userId)
+{
+    (void)channel;
+    (void)userId;
+    return SOFTBUS_OK;
 }

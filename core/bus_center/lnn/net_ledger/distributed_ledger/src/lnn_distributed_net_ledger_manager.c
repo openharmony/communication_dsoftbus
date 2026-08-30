@@ -863,10 +863,10 @@ static int32_t DlGetUserId(const char *networkId, bool checkOnline, void *buf, u
     (void)checkOnline;
     NodeInfo *info = NULL;
     RETURN_IF_GET_NODE_VALID(networkId, buf, info);
-    if (sizeof(info->userId) > len) {
+    if (sizeof(info->peerUserId) > len) {
         return SOFTBUS_INVALID_PARAM;
     }
-    *((int32_t *)buf) = info->userId;
+    *((int32_t *)buf) = info->peerUserId;
     return SOFTBUS_OK;
 }
 
@@ -2074,7 +2074,7 @@ int32_t LnnSetDLConnUserId(const char *networkId, int32_t userId)
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         return SOFTBUS_NOT_FIND;
     }
-    nodeInfo->userId = userId;
+    nodeInfo->peerUserId = userId;
     int32_t ret = LnnSaveRemoteDeviceInfoPacked(nodeInfo);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));

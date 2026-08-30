@@ -423,7 +423,7 @@ static void SetAssetSessionKeyByAuthInfo(NodeInfo *info, AuthHandle authHandle)
     UpdateDpAclParams aclParams = {
         .accountId = info->accountId,
         .deviceId = info->deviceInfo.deviceUdid,
-        .peerUserId = info->userId,
+        .peerUserId = info->peerUserId,
         .localUserId = info->localUserId
     };
     bool isNeedUpdateAclState = false;

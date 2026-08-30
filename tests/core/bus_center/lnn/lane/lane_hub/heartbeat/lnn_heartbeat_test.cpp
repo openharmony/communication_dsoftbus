@@ -96,7 +96,7 @@ void InitEventMock(EventInterfaceMock &hbEventMock)
 {
     ON_CALL(hbEventMock, LnnRegisterEventHandler(_, _))
         .WillByDefault(EventInterfaceMock::ActionifLnnRegisterEventHandler);
-    ON_CALL(hbEventMock, LnnNotifyDiscoveryDevice(_, _, _)).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(hbEventMock, LnnNotifyDiscoveryDevice(_, _, _, _, _)).WillByDefault(Return(SOFTBUS_OK));
 }
 
 void HeartBeatEnhanceTest::SetUpTestCase()

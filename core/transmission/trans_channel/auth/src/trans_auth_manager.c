@@ -1372,7 +1372,7 @@ int32_t TransNotifyAuthDataSuccess(int32_t channelId, const ConnectOption *connO
     }
     LnnDfxDeviceInfoReport infoReport;
     (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
-    return LnnNotifyDiscoveryDevice(&addr, &infoReport, true);
+    return LnnNotifyDiscoveryDevice(&addr, &infoReport, true, AUTH_INVALID_USER_ID, AUTH_INVALID_USER_ID);
 }
 
 int32_t TransAuthGetAppInfoByChanId(int32_t channelId, AppInfo *appInfo)

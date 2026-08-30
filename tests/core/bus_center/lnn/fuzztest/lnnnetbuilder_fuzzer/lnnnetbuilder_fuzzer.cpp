@@ -222,7 +222,11 @@ bool LnnNotifyDiscoveryDeviceFuzzTest()
     (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
     bool isNeedConnect;
     GenerateBool(isNeedConnect);
-    LnnNotifyDiscoveryDevice(&addr, &infoReport, isNeedConnect);
+    int32_t peerUserId;
+    GenerateInt32(peerUserId);
+    int32_t localUserId;
+    GenerateInt32(localUserId);
+    LnnNotifyDiscoveryDevice(&addr, &infoReport, isNeedConnect, peerUserId, localUserId);
     return true;
 }
 

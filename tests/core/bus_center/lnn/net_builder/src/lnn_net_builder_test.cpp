@@ -97,11 +97,11 @@ HWTEST_F(LNNNetBuilderTest, LNN_NOTIFY_DISCOVERY_DEVICE_TEST_001, TestSize.Level
     (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
     memcpy_s(target.peerUid, MAX_ACCOUNT_HASH_LEN, PEERUID, strlen(PEERUID));
     memcpy_s(target.info.ip.ip, IP_STR_MAX_LEN, IP, strlen(IP));
-    int32_t ret = LnnNotifyDiscoveryDevice(&target, &infoReport, false);
+    int32_t ret = LnnNotifyDiscoveryDevice(&target, &infoReport, false, 0, 0);
     EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetBuilder();
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnNotifyDiscoveryDevice(nullptr, &infoReport, false);
+    ret = LnnNotifyDiscoveryDevice(nullptr, &infoReport, false, 0, 0);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 

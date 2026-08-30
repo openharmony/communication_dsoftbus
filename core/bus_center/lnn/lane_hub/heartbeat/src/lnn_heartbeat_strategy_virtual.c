@@ -199,3 +199,20 @@ int32_t LnnUpdateSendInfoStrategy(LnnHeartbeatUpdateInfoType type)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+int32_t LnnStartHbStrategyFsmForChannel(LnnHeartbeatChannel channel, LnnHeartbeatType hbType, int32_t userId)
+{
+    (void)channel;
+    (void)hbType;
+    (void)userId;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnStartHeartbeatForChannel(LnnHeartbeatChannel channel, uint64_t delayMillis)
+{
+    (void)channel;
+    (void)delayMillis;
+    return SOFTBUS_OK;
+}
+#endif
+

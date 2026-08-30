@@ -3261,7 +3261,7 @@ static void UpdatePeerDeviceName(NodeInfo *peerNodeInfo)
 static void UnpackUserIdCheckSum(JsonObj *json, NodeInfo *nodeInfo)
 {
     char userIdCheckSumHexStr[USERID_CHECKSUM_HEXSTRING_LEN] = { 0 };
-    OptInt(json, USERID, &nodeInfo->userId, 0);
+    OptInt(json, USERID, &nodeInfo->peerUserId, 0);
     if (!JSON_GetStringFromObject(json, USERID_CHECKSUM, userIdCheckSumHexStr, sizeof(userIdCheckSumHexStr))) {
         AUTH_LOGE(AUTH_FSM, "JSON_GetStringFromObject fail!");
         return;
@@ -3389,8 +3389,9 @@ int32_t UnpackDeviceInfoMessage(
         return SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
     }
     JSON_Delete(json);
-    if ((info != NULL) && (nodeInfo->userId != 0) && (nodeInfo->userId != info->userId)) {
-        AUTH_LOGE(AUTH_FSM, "deviceIdUserId=%{public}d, deviceInfoUserId=%{public}d", info->userId, nodeInfo->userId);
+    if ((info != NULL) && (nodeInfo->peerUserId != 0) && (nodeInfo->peerUserId != info->userId)) {
+        AUTH_LOGE(AUTH_FSM, "deviceIdUserId=%{public}d, deviceInfoUserId=%{public}d",
+            info->userId, nodeInfo->peerUserId);
         return SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
     }
     int32_t stateVersion;

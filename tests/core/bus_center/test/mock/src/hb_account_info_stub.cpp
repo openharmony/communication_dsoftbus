@@ -14,29 +14,24 @@
  */
 
 #include "lnn_distributed_user_info.h"
+#include "lnn_ohos_account.h"
+#include "lnn_ohos_account_adapter.h"
 
-#include "lnn_log.h"
 #include "softbus_error_code.h"
 
-int32_t LnnInitDistributedUserLedger(void)
+int32_t GetAllForegroundAccountIds(int32_t **userIds, uint32_t *userIdsLen)
 {
-    LNN_LOGI(LNN_INIT, "init virtual distribute user ledger");
-    return SOFTBUS_OK;
+    (void)userIds;
+    (void)userIdsLen;
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
-void LnnDeinitDistributedUserLedger(void)
+int32_t LnnGetAccountIdByUserId(int32_t userId, int64_t *accountId, uint8_t *accountHash, uint32_t len)
 {
-}
-
-void LnnRemoveUserInfoNode(const char *udid)
-{
-    (void)udid;
-}
-
-int32_t LnnUpdateDistributedUserInfo(const UserInfo *userInfo, const char *udid)
-{
-    (void)userInfo;
-    (void)udid;
+    (void)userId;
+    (void)accountId;
+    (void)accountHash;
+    (void)len;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 

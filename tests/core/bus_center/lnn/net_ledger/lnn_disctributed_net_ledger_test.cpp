@@ -1661,7 +1661,7 @@ HWTEST_F(LNNDisctributedLedgerTest, UPDATE_REMOTE_NODE_INFO_Test_001, TestSize.L
     EXPECT_EQ(EOK, strcpy_s(newInfo.deviceInfo.unifiedDefaultName, DEVICE_NAME_BUF_LEN, NODE2_DEVICE_NAME));
     EXPECT_EQ(EOK, strcpy_s(newInfo.accountHash, SHA_256_HASH_LEN, ACCOUNT_HASH));
     newInfo.accountId = 100;
-    newInfo.userId = 100;
+    newInfo.peerUserId = 100;
     newInfo.localStateVersion = 1;
     newInfo.stateVersion = 123;
     int32_t connectionType = CONNECTION_ADDR_BLE;
@@ -1701,7 +1701,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_UPDATE_ACCOUNT_INFO_Test_001, TestSize.L
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     EXPECT_EQ(EOK, strcpy_s(info.deviceInfo.deviceUdid, UDID_BUF_LEN, NODE1_UDID));
     info.accountId = 100;
-    info.userId = 100;
+    info.peerUserId = 100;
     EXPECT_EQ(SOFTBUS_OK, LnnUpdateAccountInfo(&info));
 }
 

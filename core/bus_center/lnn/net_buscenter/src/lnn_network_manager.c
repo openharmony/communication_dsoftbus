@@ -660,7 +660,7 @@ static void OnGroupDeleted(const char *groupId, int32_t groupType, int32_t userI
     (void)groupId;
     LNN_LOGI(LNN_BUILDER, "OnGroupDeleted, groupType=%{public}d, userId=%{public}d", groupType, userId);
     if (groupType == AUTH_IDENTICAL_ACCOUNT_GROUP) {
-        LnnOnOhosAccountLogout(userId);
+        LnnOnOhosAccountLogout();
     }
     LnnHbOnTrustedRelationReduced();
 }
@@ -711,7 +711,8 @@ static void RestoreBrNetworkDevices(void)
     LnnDfxDeviceInfoReport infoReport;
     (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
     LIST_FOR_EACH_ENTRY_SAFE(item, next, g_nightOnCache, DeviceNightMode, node) {
-        if (LnnNotifyDiscoveryDevice(&(item->addrs), &infoReport, true) != SOFTBUS_OK) {
+        if (LnnNotifyDiscoveryDevice(&(item->addrs), &infoReport, true, AUTH_INVALID_USER_ID,
+        AUTH_INVALID_USER_ID) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "notify device found failed\n");
         }
         ListDelete(&item->node);

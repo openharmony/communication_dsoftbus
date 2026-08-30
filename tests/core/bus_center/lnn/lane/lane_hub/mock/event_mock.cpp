@@ -42,10 +42,10 @@ int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
     return GetEventInterface()->LnnRegisterEventHandler(event, handler);
 }
 
-int32_t LnnNotifyDiscoveryDevice(
-    const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect)
+int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
+    bool isNeedConnect, int32_t peerUserId, int32_t localUserId)
 {
-    return GetEventInterface()->LnnNotifyDiscoveryDevice(addr, infoReport, isNeedConnect);
+    return GetEventInterface()->LnnNotifyDiscoveryDevice(addr, infoReport, isNeedConnect, peerUserId, localUserId);
 }
 
 void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)

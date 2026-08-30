@@ -26,6 +26,7 @@
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
+#include "lnn_heartbeat_channel_mgr.h"
 #include "lnn_net_builder.h"
 
 #include "softbus_adapter_mem.h"
@@ -604,7 +605,6 @@ static void ReportSendBroadcastResultEvt(void)
 
 static int32_t OnSendOneHbBegin(FsmStateMachine *fsm, int32_t msgType, void *para)
 {
-    (void)fsm;
     (void)msgType;
     int32_t ret = SOFTBUS_NETWORK_HB_SEND_BEGIN_FAILED;
 
@@ -613,6 +613,10 @@ static int32_t OnSendOneHbBegin(FsmStateMachine *fsm, int32_t msgType, void *par
         LNN_LOGW(LNN_HEART_BEAT, "send once begin get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    LnnHeartbeatFsm *hbFsm = TO_HEARTBEAT_FSM(fsm);
+    custData->channel = hbFsm->channel;
+#endif
     do {
         if (LnnHbMediumMgrSendBegin(custData) != SOFTBUS_OK) {
             LNN_LOGE(LNN_HEART_BEAT, "send once begin to manager fail");
@@ -637,6 +641,10 @@ static int32_t OnSendOneHbEnd(FsmStateMachine *fsm, int32_t msgType, void *para)
         LNN_LOGW(LNN_HEART_BEAT, "send once end get invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+    LnnHeartbeatFsm *hbFsm = TO_HEARTBEAT_FSM(fsm);
+    custData->channel = hbFsm->channel;
+#endif
     do {
         if (!CheckHbFsmStateMsgArgs(fsm)) {
             LNN_LOGW(LNN_HEART_BEAT, "send once end get invalid fsm");
@@ -666,7 +674,21 @@ static int32_t OnStartHbProcess(FsmStateMachine *fsm, int32_t msgType, void *par
     LnnFsmPostMessage(&hbFsm->fsm, EVENT_HB_AS_MASTER_NODE, NULL);
     if (LnnIsHeartbeatEnable(HEARTBEAT_TYPE_BLE_V0)) {
         /* Send once ble v0 heartbeat to recovery ble network. */
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+        LnnProcessSendOnceMsgPara msgPara = {
+            .hbType = HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3,
+            .strategyType = STRATEGY_HB_SEND_SINGLE,
+            .isRelay = false,
+            .isSyncData = false,
+            .isDirectBoardcast = false,
+            .isMsdpRange = false,
+        };
+        if (LnnPostNextSendOnceMsgToHbFsm(hbFsm, &msgPara, 0) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "post send once to channel=%{public}d fail", hbFsm->channel);
+        }
+#else
         LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false);
+#endif
     }
     return SOFTBUS_OK;
 }
@@ -681,7 +703,22 @@ static int32_t OnReStartHbProcess(FsmStateMachine *fsm, int32_t msgType, void *p
         return SOFTBUS_INVALID_PARAM;
     }
     if (LnnIsHeartbeatEnable(HEARTBEAT_TYPE_BLE_V0)) {
+#ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
+        LnnHeartbeatFsm *hbFsm = TO_HEARTBEAT_FSM(fsm);
+        LnnProcessSendOnceMsgPara msgPara = {
+            .hbType = HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3,
+            .strategyType = STRATEGY_HB_SEND_SINGLE,
+            .isRelay = false,
+            .isSyncData = false,
+            .isDirectBoardcast = false,
+            .isMsdpRange = false,
+        };
+        if (LnnPostNextSendOnceMsgToHbFsm(hbFsm, &msgPara, 0) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "post send once to channel=%{public}d fail", hbFsm->channel);
+        }
+#else
         LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false);
+#endif
     }
     return SOFTBUS_OK;
 }
@@ -1289,18 +1326,20 @@ int32_t LnnPostNextSendOnceMsgToHbFsm(LnnHeartbeatFsm *hbFsm, const LnnProcessSe
     return SOFTBUS_OK;
 }
 
-int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type,
-    bool wakeupFlag, LnnProcessSendOnceMsgPara *msgPara, uint64_t delayMillis)
+static int32_t PostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type,
+    bool wakeupFlag, const LnnProcessSendOnceMsgPara *msgPara, uint64_t delayMillis)
 {
-    LNN_LOGD(LNN_HEART_BEAT, "LnnPostSendBeginMsgToHbFsm enter hbType=%{public}d, isSyncData=%{public}d",
-        type, msgPara->isSyncData);
-    LnnHeartbeatSendBeginData *custData = NULL;
-
-    if (hbFsm == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "post send begin msg get invalid param");
-        return SOFTBUS_INVALID_PARAM;
+    int32_t userId = msgPara->userId;
+    if (userId <= 0) {
+        if (LnnHbChannelGetUserId(hbFsm->channel, &userId) != SOFTBUS_OK || userId <= 0) {
+            if (LnnGetLocalNumInfo(NUM_KEY_USERID, &userId) != SOFTBUS_OK || userId <= 0) {
+                LNN_LOGE(LNN_HEART_BEAT, "get user id failed for channel=%{public}d", hbFsm->channel);
+                return SOFTBUS_NETWORK_NODE_KEY_INFO_ERR;
+            }
+        }
     }
-    custData = (LnnHeartbeatSendBeginData *)SoftBusCalloc(sizeof(LnnHeartbeatSendBeginData));
+    LnnHeartbeatSendBeginData *custData =
+        (LnnHeartbeatSendBeginData *)SoftBusCalloc(sizeof(LnnHeartbeatSendBeginData));
     if (custData == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "new hbType obj msg malloc err");
         return SOFTBUS_MALLOC_ERR;
@@ -1315,6 +1354,7 @@ int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type
     custData->isFast = msgPara->isFast;
     custData->isDirectBoardcast = msgPara->isDirectBoardcast;
     custData->isMsdpRange = msgPara->isMsdpRange;
+    custData->userId = userId;
     if (strcpy_s(custData->networkId, NETWORK_ID_BUF_LEN, msgPara->networkId) != EOK) {
         LNN_LOGE(LNN_HEART_BEAT, "cpy networkId fail");
         SoftBusFree(custData);
@@ -1328,6 +1368,19 @@ int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type
     return SOFTBUS_OK;
 }
 
+int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type,
+    bool wakeupFlag, const LnnProcessSendOnceMsgPara *msgPara, uint64_t delayMillis)
+{
+    LNN_LOGD(LNN_HEART_BEAT, "LnnPostSendBeginMsgToHbFsm enter hbType=%{public}d, isSyncData=%{public}d",
+        type, msgPara->isSyncData);
+
+    if (hbFsm == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "post send begin msg get invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return PostSendBeginMsgToHbFsm(hbFsm, type, wakeupFlag, msgPara, delayMillis);
+}
+
 int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatSendEndData *custData,
     uint64_t delayMillis)
 {
@@ -1336,13 +1389,17 @@ int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatSendEndData
         LNN_LOGE(LNN_HEART_BEAT, "post send end msg get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    LNN_LOGD(LNN_HEART_BEAT, "LnnPostSendEndMsgToHbFsm enter hbType=%{public}d", custData->hbType);
+    LNN_LOGD(LNN_HEART_BEAT, "LnnPostSendEndMsgToHbFsm enter hbType=%{public}d, channel=%{public}d",
+        custData->hbType, hbFsm->channel);
     dupData = (LnnHeartbeatSendEndData *)SoftBusCalloc(sizeof(LnnHeartbeatSendEndData));
     if (dupData == NULL) {
         LNN_LOGE(LNN_HEART_BEAT, "post send end msg malloc error");
         return SOFTBUS_MALLOC_ERR;
     }
     *dupData = *custData;
+#ifdef DSOFTBUS_FEATURE_MULTI_CHANNEL_FOREGROUND_USER
+    dupData->channel = hbFsm->channel;
+#endif
     if (LnnFsmPostMessageDelay(&hbFsm->fsm, EVENT_HB_SEND_ONE_END, (void *)dupData, delayMillis) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "post send end msg to hbFsm fail");
         SoftBusFree(dupData);

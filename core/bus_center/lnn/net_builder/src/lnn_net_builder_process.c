@@ -349,7 +349,7 @@ static void GetSessionKeyByAuthHandle(const DeviceVerifyPassMsgPara *msgPara, Au
     UpdateDpAclParams aclParams = {
         .accountId = msgPara->nodeInfo->accountId,
         .deviceId = msgPara->nodeInfo->deviceInfo.deviceUdid,
-        .peerUserId = msgPara->nodeInfo->userId,
+        .peerUserId = msgPara->nodeInfo->peerUserId,
         .localUserId = msgPara->nodeInfo->localUserId
     };
     bool isNeedUpdateAclState = false;

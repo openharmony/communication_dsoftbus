@@ -185,6 +185,21 @@ static int32_t InsertNewDistributedUser(const char *udid, const UserInfo *userIn
     return SOFTBUS_OK;
 }
 
+static UserStorageInfo *FindUserByUserId(SoftBusList *list, int32_t userId)
+{
+    if (list == NULL) {
+        LNN_LOGE(LNN_LEDGER, "list is null, please check list");
+        return NULL;
+    }
+    UserStorageInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &list->list, UserStorageInfo, node) {
+        if (item->info.userId == userId) {
+            return item;
+        }
+    }
+    return NULL;
+}
+
 static UserStorageInfo *FindUserByUserIdAndAccountId(SoftBusList *list, int32_t userId, int64_t accountId)
 {
     if (list == NULL) {
@@ -241,4 +256,35 @@ int32_t LnnUpdateDistributedUserInfo(const UserInfo *userInfo, const char *udid)
     }
     (void)SoftBusMutexUnlock(&g_distributedUserLedgerLock);
     return ret;
+}
+
+int32_t LnnFindUserByUserIdAndUdid(const char *udid, int32_t userId, UserInfo *userInfo)
+{
+    if (udid == NULL || userInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_distributedUserLedgerLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "distributed user ledger lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    DistributedUserInfo *multiUserInfo = (DistributedUserInfo *)LnnMapGet(&g_distributedUserMap, udid);
+    if (multiUserInfo == NULL || multiUserInfo->userList == NULL) {
+        (void)SoftBusMutexUnlock(&g_distributedUserLedgerLock);
+        LNN_LOGE(LNN_LEDGER, "udid not found in distributed user map");
+        return SOFTBUS_NOT_FIND;
+    }
+    UserStorageInfo *userNode = FindUserByUserId(multiUserInfo->userList, userId);
+    if (userNode == NULL) {
+        (void)SoftBusMutexUnlock(&g_distributedUserLedgerLock);
+        LNN_LOGW(LNN_LEDGER, "userId=%{public}d not found for udid", userId);
+        return SOFTBUS_NOT_FIND;
+    }
+    if (memcpy_s(userInfo, sizeof(UserInfo), &userNode->info, sizeof(UserInfo)) != EOK) {
+        (void)SoftBusMutexUnlock(&g_distributedUserLedgerLock);
+        LNN_LOGE(LNN_LEDGER, "copy user info failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    (void)SoftBusMutexUnlock(&g_distributedUserLedgerLock);
+    return SOFTBUS_OK;
 }

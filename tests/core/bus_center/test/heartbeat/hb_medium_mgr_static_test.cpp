@@ -182,11 +182,11 @@ HWTEST_F(HeartBeatMediumStaticTest, HbIsNeedReAuthTest_01, TestSize.Level1)
     char newAccountHash[] = "newAccountHash";
     hbResp.userIdCheckSum[0] = 11;
     EXPECT_NO_FATAL_FAILURE(UpdateUserIdCheckSum(nullptr, nullptr));
-    bool ret = HbIsNeedReAuth(&nodeInfo, newAccountHash);
+    bool ret = HbIsNeedReAuth(&nodeInfo, newAccountHash, &hbResp);
     EXPECT_TRUE(ret);
     EXPECT_NO_FATAL_FAILURE(UpdateUserIdCheckSum(&deviceInfo, &hbResp));
     EXPECT_EQ(strcpy_s(nodeInfo.accountHash, sizeof(newAccountHash), newAccountHash), EOK);
-    ret = HbIsNeedReAuth(&nodeInfo, newAccountHash);
+    ret = HbIsNeedReAuth(&nodeInfo, newAccountHash, &hbResp);
     EXPECT_FALSE(ret);
 }
 
@@ -597,19 +597,14 @@ HWTEST_F(HeartBeatMediumStaticTest, HbOnlineNodeAuthTest_01, TestSize.Level1)
     NiceMock<HeartBeatStategyInterfaceMock> hbStrateMock;
     NiceMock<HbMediumMgrInterfaceMock> hbMediumMock;
     DeviceInfo device;
-    LnnHeartbeatRecvInfo storedInfo;
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
-    (void)memset_s(&storedInfo, sizeof(LnnHeartbeatRecvInfo), 0, sizeof(LnnHeartbeatRecvInfo));
     device.isOnline = true;
-    int32_t ret = HbOnlineNodeAuth(&device, &storedInfo, HB_TIME_FACTOR_TWO_HUNDRED_MS);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_HEARTBEAT_REPEATED);
     EXPECT_CALL(hbStrateMock, AuthStartVerify)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    ret = HbOnlineNodeAuth(&device, &storedInfo, HB_START_DELAY_LEN);
+    int32_t ret = HbOnlineNodeAuth(&device, 100, 0);
     EXPECT_EQ(ret, SOFTBUS_AUTH_START_VERIFY_FAIL);
-    storedInfo.lastJoinLnnTime = 0;
-    ret = HbOnlineNodeAuth(&device, &storedInfo, HB_START_DELAY_LEN);
+    ret = HbOnlineNodeAuth(&device, 100, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 

@@ -1503,7 +1503,7 @@ int32_t LnnDeleteSyncToDB(int32_t userId, int64_t accountId, bool isMainScreenUs
             return SOFTBUS_SPRINTF_ERR;
         }
     } else {
-        int32_t existUserId = (userId == 0) ? localCacheInfo.userId : userId;
+        int32_t existUserId = (userId == 0) ? localCacheInfo.localUserId : userId;
         if (sprintf_s(key, KEY_MAX_LEN, "%ld#%s#%d", existAccountId,
             localCacheInfo.deviceInfo.deviceUdid, existUserId) < 0) {
             LNN_LOGE(LNN_BUILDER, "sprintf_s key fail, include userId");

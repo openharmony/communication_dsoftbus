@@ -66,9 +66,8 @@ void LnnUpdateOhosAccount(UpdateAccountReason reason)
     (void)reason;
 }
 
-void LnnOnOhosAccountLogout(int32_t userId)
+void LnnOnOhosAccountLogout(void)
 {
-    (void)userId;
 }
 
 bool LnnIsDefaultOhosAccount(void)

@@ -86,10 +86,11 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
     return GetNetworkManagerInterface()->LnnGetOnlineStateById(id, type);
 }
 
-int32_t LnnNotifyDiscoveryDevice(
-    const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect)
+int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
+    bool isNeedConnect, int32_t peerUserId, int32_t localUserId)
 {
-    return GetNetworkManagerInterface()->LnnNotifyDiscoveryDevice(addr, infoReport, isNeedConnect);
+    return GetNetworkManagerInterface()->LnnNotifyDiscoveryDevice(addr, infoReport, isNeedConnect, peerUserId,
+        localUserId);
 }
 
 int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen, bool hasMcuRequestDisable)
@@ -108,9 +109,9 @@ void LnnUpdateOhosAccount(UpdateAccountReason reason)
     return GetNetworkManagerInterface()->LnnUpdateOhosAccount(reason);
 }
 
-void LnnOnOhosAccountLogout(int32_t userId)
+void LnnOnOhosAccountLogout(void)
 {
-    return GetNetworkManagerInterface()->LnnOnOhosAccountLogout(userId);
+    return GetNetworkManagerInterface()->LnnOnOhosAccountLogout();
 }
 
 int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)

@@ -925,8 +925,8 @@ void NotifyRemoteDevOffLineByUserId(int32_t userId, const char *udid)
         LNN_LOGE(LNN_BUILDER, "LnnGetRemoteNodeInfoById failed! ret=%{public}d", ret);
         return;
     }
-    if (userId != DP_INACTIVE_DEFAULT_USERID && nodeInfo.userId != 0 && nodeInfo.userId != userId) {
-        LNN_LOGI(LNN_BUILDER, "ledger userid=%{public}d, inactive userid=%{public}d", nodeInfo.userId, userId);
+    if (userId != DP_INACTIVE_DEFAULT_USERID && nodeInfo.peerUserId != 0 && nodeInfo.peerUserId != userId) {
+        LNN_LOGI(LNN_BUILDER, "ledger userid=%{public}d, inactive userid=%{public}d", nodeInfo.peerUserId, userId);
         return;
     }
     uint8_t *msg = ConvertUserIdToMsg(userId);

@@ -44,7 +44,7 @@ int32_t LnnPostSendEndMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatSendEndData
 }
 
 int32_t LnnPostSendBeginMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag,
-    LnnProcessSendOnceMsgPara *msgPara, uint64_t delayMillis)
+    const LnnProcessSendOnceMsgPara *msgPara, uint64_t delayMillis)
 {
     return HeartBeatFSMStrategyInterfaceInstance()->LnnPostSendBeginMsgToHbFsm(
         hbFsm, type, wakeupFlag, msgPara, delayMillis);

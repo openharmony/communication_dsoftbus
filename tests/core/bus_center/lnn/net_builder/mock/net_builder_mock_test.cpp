@@ -64,13 +64,13 @@ HWTEST_F(NetBuilderMockTest, NET_BUILDER_TEST_001, TestSize.Level1)
 
     LnnDfxDeviceInfoReport infoReport;
     (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
-    ret = LnnNotifyDiscoveryDevice(nullptr, &infoReport, false);
+    ret = LnnNotifyDiscoveryDevice(nullptr, &infoReport, false, 0, 0);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 
     ConnectionAddr addr;
     addr.type = CONNECTION_ADDR_BR;
     (void)memcpy_s(addr.info.br.brMac, BT_MAC_LEN, "1A:22:3C:4D:5E:66", BT_MAC_LEN);
-    ret = LnnNotifyDiscoveryDevice(&addr, &infoReport, false);
+    ret = LnnNotifyDiscoveryDevice(&addr, &infoReport, false, 0, 0);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
     LnnDeinitNetBuilder();

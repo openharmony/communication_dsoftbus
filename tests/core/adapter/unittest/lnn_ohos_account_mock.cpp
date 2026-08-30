@@ -409,9 +409,10 @@ int32_t LnnInitWifiDirect(void)
 }
 
 int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
-    bool isNeedConnect)
+    bool isNeedConnect, int32_t peerUserId, int32_t localUserId)
 {
-    return GetLnnOhosAccountInterface()->LnnNotifyDiscoveryDevice(addr, infoReport, isNeedConnect);
+    return GetLnnOhosAccountInterface()->LnnNotifyDiscoveryDevice(addr, infoReport, isNeedConnect, peerUserId,
+        localUserId);
 }
 
 int32_t LnnRegistPhysicalSubnet(LnnPhysicalSubnet *manager)
@@ -630,9 +631,9 @@ void LnnOnOhosAccountChanged(void)
     GetLnnOhosAccountInterface()->LnnOnOhosAccountChanged();
 }
 
-void LnnOnOhosAccountLogout(int32_t userId)
+void LnnOnOhosAccountLogout(void)
 {
-    GetLnnOhosAccountInterface()->LnnOnOhosAccountLogout(userId);
+    GetLnnOhosAccountInterface()->LnnOnOhosAccountLogout();
 }
 
 void LnnSetUnlockState(void)

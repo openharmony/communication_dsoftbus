@@ -196,7 +196,7 @@ typedef struct {
     int32_t bleMacRefreshSwitch;
     int32_t bleConnCloseDelayTime;
     int32_t staticCapLen;
-    int32_t userId;
+    int32_t peerUserId;
     uint32_t stateVersionReason;
     int32_t deviceSecurityLevel;
     int32_t authChannelId[CONNECTION_ADDR_MAX][AUTH_SIDE_MAX];
@@ -239,6 +239,7 @@ typedef struct {
     int64_t accountId;
     uint64_t displayId;
     uint64_t updateTimestamp;
+    bool isOnline;
 } UserInfo;
 
 typedef struct {

@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "lnn_heartbeat_channel_struct.h"
 #include "lnn_heartbeat_utils_struct.h"
 #include "softbus_common.h"
 
@@ -50,7 +51,8 @@ typedef struct {
 } LnnHeartbeatWeight;
 
 typedef struct {
-    void (*onRelay)(const char *udidHash, ConnectionAddrType type, LnnHeartbeatType hbType);
+    void (*onRelay)(const char *udidHash, ConnectionAddrType type, LnnHeartbeatType hbType,
+    const uint8_t *accountHash, uint32_t accountHashLen);
     int32_t (*onReceive)(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight, LnnHeartbeatType hbType,
         bool isOnlineDirectly, HbRespData *hbResp);
     int32_t (*onRecvHigherWeight)(const char *udidHash, int32_t weight, ConnectionAddrType type, bool isReElect,
@@ -61,6 +63,8 @@ typedef struct {
 
 typedef struct {
     LnnHeartbeatType hbType;
+    LnnHeartbeatChannel channel;
+    int32_t userId;
     bool wakeupFlag;
     bool isRelay;
     bool isSyncData;

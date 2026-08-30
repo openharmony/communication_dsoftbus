@@ -811,7 +811,7 @@ static int32_t UpdateRemoteNodeInfo(NodeInfo *oldInfo, NodeInfo *newInfo, int32_
         return SOFTBUS_MEM_ERR;
     }
     oldInfo->accountId = newInfo->accountId;
-    oldInfo->userId = newInfo->userId;
+    oldInfo->localUserId = newInfo->localUserId;
     if (connectionType == CONNECTION_ADDR_BLE) {
         oldInfo->localStateVersion = newInfo->localStateVersion;
         oldInfo->stateVersion = newInfo->stateVersion;
@@ -1492,7 +1492,7 @@ int32_t LnnUpdateAccountInfo(const NodeInfo *info)
         isAccountChanged = !(memcmp(oldInfo->accountHash, info->accountHash, sizeof(oldInfo->accountHash)) == 0);
         oldInfo->accountId = info->accountId;
         UpdateNewNodeAccountHash(oldInfo);
-        oldInfo->userId = info->userId;
+        oldInfo->peerUserId = info->peerUserId;
     }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     if (isAccountChanged) {

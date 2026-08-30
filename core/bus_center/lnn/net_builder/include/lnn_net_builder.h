@@ -41,7 +41,8 @@ void LnnDeinitNetBuilder(void);
 
 int32_t LnnSetReSyncDeviceName(void);
 int32_t LnnNotifyDiscoveryDevice(
-    const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect);
+    const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect, int32_t peerUserId,
+    int32_t localUserId);
 void LnnSyncOfflineComplete(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len);
 int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen, bool hasMcuRequestDisable);
 int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType, DeviceLeaveReason leaveReason);

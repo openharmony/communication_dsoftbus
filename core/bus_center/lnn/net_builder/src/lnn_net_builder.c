@@ -1156,7 +1156,8 @@ int32_t LnnServerLeave(const char *networkId, const char *pkgName)
 }
 
 int32_t LnnNotifyDiscoveryDevice(
-    const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect)
+    const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect, int32_t peerUserId,
+    int32_t localUserId)
 {
     JoinLnnMsgPara *para = NULL;
     if (LnnIsConnectionAddrInvalid(addr)) {

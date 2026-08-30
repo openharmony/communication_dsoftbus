@@ -40,6 +40,10 @@ void LnnUpdateConstraintMapForCurrentAccount(void);
 
 int32_t GetAllForegroundAccountIds(int32_t **userIds, uint32_t *userIdsLen);
 bool IsForegroundUserId(int32_t userId);
+bool IsOsAccountLoggedInByUserId(int32_t userId);
+bool IsActiveOsAccountUnlockedByUserId(int32_t userId);
+bool LnnIsOsAccountConstraintByUserId(int32_t userId);
+
 #ifdef __cplusplus
 }
 #endif

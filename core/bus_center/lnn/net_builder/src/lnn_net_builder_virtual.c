@@ -48,11 +48,14 @@ int32_t LnnServerLeave(const char *networkId, const char *pkgName)
 }
 
 int32_t LnnNotifyDiscoveryDevice(
-    const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnec)
+    const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect, int32_t peerUserId,
+    int32_t localUserId)
 {
     (void)addr;
     (void)infoReport;
-    (void)isNeedConnec;
+    (void)isNeedConnect;
+    (void)peerUserId;
+    (void)localUserId;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 

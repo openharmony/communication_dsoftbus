@@ -105,6 +105,7 @@ typedef struct {
     int64_t oldIndex;
     int32_t idType;
     int32_t userId;
+    int32_t peerUserId;
     bool isNeedPackCert;
     bool isSameAccount;
     uint64_t sessionKeyRandomNum;

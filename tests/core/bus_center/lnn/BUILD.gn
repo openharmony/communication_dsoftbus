@@ -2361,6 +2361,18 @@ ohos_unittest("LNNHeartBeatTest") {
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
   ]
 
+  if (dsoftbus_feature_multi_foreground_user) {
+    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_channel_mgr.c" ]
+  } else {
+    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_channel_mgr_virtual.c" ]
+  }
+
+  sources += [
+    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_adapter_virtual.cpp",
+    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_virtual.cpp",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_user_info_virtual.c",
+  ]
+
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_dfx_path/interface/include/legacy",
@@ -2452,6 +2464,12 @@ ohos_unittest("LnnHeartBeatDeviceRiskTest") {
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/lane_hub/mock/lnn_heartbeat_device_risk_mock.cpp",
   ]
 
+  if (dsoftbus_feature_multi_foreground_user) {
+    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_channel_mgr.c" ]
+  } else {
+    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_channel_mgr_virtual.c" ]
+  }
+
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_dfx_path/interface/include/legacy",
@@ -2542,6 +2560,12 @@ ohos_unittest("LnnHeartBeatConstraintTest") {
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/lane_hub/heartbeat/lnn_heartbeat_constraint_test.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/lane_hub/mock/lnn_heartbeat_constraint_mock.cpp",
   ]
+
+  if (dsoftbus_feature_multi_foreground_user) {
+    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_channel_mgr.c" ]
+  } else {
+    sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_channel_mgr_virtual.c" ]
+  }
 
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include/form",
@@ -3426,10 +3450,18 @@ if (!defined(ohos_lite)) {
       "net_ledger/lnn_decision_db_deps_mock.cpp",
       "net_ledger/lnn_decision_db_test.cpp",
     ]
+    if (dsoftbus_feature_multi_foreground_user) {
+      sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_channel_mgr.c" ]
+    } else {
+      sources += [ "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_channel_mgr_virtual.c" ]
+    }
+    sources += [
+      "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_user_info_virtual.c",
+    ]
 
     include_dirs = [
-      "$dsoftbus_dfx_path/interface/include/form",
-      "$dsoftbus_dfx_path/interface/include/legacy",
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
       "$dsoftbus_root_path/adapter/common/bus_center/include/",
       "$dsoftbus_root_path/adapter/common/include",
       "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",

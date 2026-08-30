@@ -28,6 +28,7 @@ extern "C" {
 #endif
 
 #define AUTH_INVALID_ID (-1)
+#define AUTH_INVALID_USER_ID (-1)
 
 #define AUTH_IDENTICAL_ACCOUNT_GROUP 1
 #define AUTH_SHARE 2
@@ -127,6 +128,8 @@ typedef struct {
     DeviceKeyId deviceKeyId;
     ForceJoinInfo forceJoinInfo;
     uint16_t deviceTypeId;
+    int32_t peerUserId;
+    int32_t localUserId;
 } AuthVerifyParam;
 
 typedef enum {
