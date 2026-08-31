@@ -47,7 +47,6 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_local_net_ledger.h"
-#include "lnn_device_info_struct.h"
 #include "lnn_device_cloud_convergence_struct.h"
 
 #define CAPABILITY_ISACKMAG 0x01
@@ -1110,23 +1109,8 @@ static bool IsSupportNearField(const NodeInfo *nodeInfo)
     return true;
 }
 
-static bool IsLocalDevicePc(void)
-{
-    NodeInfo info;
-    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnGetLocalNodeInfoSafe(&info) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "get local info failed");
-        return false;
-    }
-    return info.deviceInfo.deviceTypeId == TYPE_2IN1_ID;
-}
-
 static bool IsSupportFarField(const NodeInfo *nodeInfo)
 {
-    if (nodeInfo == nullptr) {
-        LNN_LOGI(LNN_EVENT, "device not found, just try send far field");
-        return true;
-    }
     if (!IsFeatureSupport(nodeInfo->feature, BIT_SUPPORT_AGENT_COMMUNICATION)) {
         LNN_LOGE(LNN_EVENT, "peer not support agent communication");
         return false;
@@ -2097,35 +2081,29 @@ static void OnLaneAllocFail(uint32_t laneHandle, int32_t reason)
     LNN_LOGE(LNN_EVENT, "near field lane alloc fail, laneHandle=%{public}u, reason=%{public}d", laneHandle, reason);
     char networkId[NETWORK_ID_BUF_LEN] = {0};
     int32_t ret = GetNearFieldNetworkIdByLaneHandle(laneHandle, networkId);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "get networkId fail, ret=%{public}d", ret);
-        DelNearFieldChannelNodeByLaneHandle(laneHandle);
-        return;
+    if (ret == SOFTBUS_OK) {
+        LNN_LOGI(LNN_EVENT, "near field lane alloc fail, try far field");
+
+        std::vector<CachedMsgToSend> msgsToSend =
+            ExtractCachedMessagesToSend(networkId, CONVERSATION_NEAR_FIELD_WIFI_DIRECT);
+
+        for (const auto &msg : msgsToSend) {
+            NodeInfo nodeInfo;
+            ret = GetDeviceNodeInfo(networkId, &nodeInfo);
+            if (ret != SOFTBUS_OK) {
+                LNN_LOGE(LNN_EVENT, "get device node info failed, skip cached msg, ret=%{public}d", ret);
+                SoftBusFree(msg.data);
+                continue;
+            }
+            SendMsgData msgData = {msg.data, msg.length};
+            int32_t sendRet = LnnSendCtrlMsgByFarField(&msgData,
+                nodeInfo.deviceInfo.deviceUdid, &msg.info, nullptr);
+            LNN_LOGI(LNN_EVENT, "send cached msg done, ret=%{public}d", sendRet);
+            SoftBusFree(msg.data);
+        }
+        LNN_LOGI(LNN_EVENT, "send cached msg count=%{public}zu", msgsToSend.size());
     }
     DelNearFieldChannelNodeByLaneHandle(laneHandle);
-    if (IsLocalDevicePc()) {
-        DelSendMsgCacheByNetworkId(networkId);
-        return;
-    }
-    LNN_LOGI(LNN_EVENT, "near field lane alloc fail, try far field");
-    std::vector<CachedMsgToSend> msgsToSend =
-        ExtractCachedMessagesToSend(networkId, CONVERSATION_NEAR_FIELD_WIFI_DIRECT);
-
-    for (const auto &msg : msgsToSend) {
-        NodeInfo nodeInfo;
-        ret = GetDeviceNodeInfo(networkId, &nodeInfo);
-        if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_EVENT, "get device node info failed, skip cached msg, ret=%{public}d", ret);
-            SoftBusFree(msg.data);
-            continue;
-        }
-        SendMsgData msgData = {msg.data, msg.length};
-        int32_t sendRet = LnnSendCtrlMsgByFarField(&msgData,
-            nodeInfo.deviceInfo.deviceUdid, &msg.info, nullptr);
-        LNN_LOGI(LNN_EVENT, "send cached msg done, ret=%{public}d", sendRet);
-        SoftBusFree(msg.data);
-    }
-    LNN_LOGI(LNN_EVENT, "send cached msg count=%{public}zu", msgsToSend.size());
 }
 
 static void OnNearFieldDisconnected(AuthHandle authHandle)
@@ -2445,8 +2423,7 @@ int32_t LnnPostConversationData(const char *deviceId, const ConversationBusiness
 
     NodeInfo nodeInfo;
     memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    int32_t nodeRet = PrintAndGetDeviceNodeInfo(len, deviceId, &nodeInfo);
-
+    int32_t ret = PrintAndGetDeviceNodeInfo(len, deviceId, &nodeInfo);
     uint32_t msgId = GenerateMsgId();
     if (msgId == 0) {
         LNN_LOGE(LNN_EVENT, "generate msgId failed");
@@ -2456,26 +2433,30 @@ int32_t LnnPostConversationData(const char *deviceId, const ConversationBusiness
     char peerDevTypeStr[INT64_TO_STR_MAX_LEN] = { 0 };
     ConDataEventParam param = { deviceId, info, len, nodeInfo.deviceInfo.deviceTypeId, peerDevTypeStr };
     uint64_t beginTime = InitConverDataEventExtra(&param, &extra);
-    const char *peerDeviceId = (nodeRet == SOFTBUS_OK) ? nodeInfo.deviceInfo.deviceUdid : deviceId;
-    int32_t ret = AddAckWaitItem(msgId, peerDeviceId, info);
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
-
     SendMsgData msgData = {data, len};
-    ret = SOFTBUS_NETWORK_NOT_SUPPORT;
-    if (nodeRet == SOFTBUS_OK && IsSupportNearField(&nodeInfo)) {
-        ret = LnnSendCtrlMsgByNearField(data, len, nodeInfo.networkId, info);
-        LNN_LOGI(LNN_EVENT, "send by near field ret=%{public}d", ret);
-        if (ret != SOFTBUS_OK && IsLocalDevicePc()) {
-            DfxRecordPostConversationData(beginTime, ret, &extra);
-            RemoveAckWaitItem(msgId, true);
+    if (ret == SOFTBUS_OK) {
+        ret = AddAckWaitItem(msgId, nodeInfo.deviceInfo.deviceUdid, info);
+        if (ret != SOFTBUS_OK) {
             return ret;
         }
+        ret = SOFTBUS_NETWORK_NOT_SUPPORT;
+        if (IsSupportNearField(&nodeInfo)) {
+            ret = LnnSendCtrlMsgByNearField(data, len, nodeInfo.networkId, info);
+            LNN_LOGI(LNN_EVENT, "send by near field ret=%{public}d", ret);
+        }
+        if (ret != SOFTBUS_OK && IsSupportFarField(&nodeInfo)) {
+            ret = LnnSendCtrlMsgByFarField(&msgData, nodeInfo.deviceInfo.deviceUdid, info, nullptr, &extra);
+            LNN_LOGI(LNN_EVENT, "send by far field ret=%{public}d", ret);
+        }
+    } else {
+        ret = AddAckWaitItem(msgId, deviceId, info);
+        if (ret != SOFTBUS_OK) {
+            return ret;
+        }
+        LNN_LOGI(LNN_EVENT, "device not found, just try send far field");
+        ret = LnnSendCtrlMsgByFarField(&msgData, deviceId, info, nullptr, &extra);
     }
-    if (ret != SOFTBUS_OK && IsSupportFarField((nodeRet == SOFTBUS_OK) ? &nodeInfo : nullptr)) {
-        ret = LnnSendCtrlMsgByFarField(&msgData, peerDeviceId, info, nullptr, &extra);
-    }
+
     if (ret != SOFTBUS_OK) {
         DfxRecordPostConversationData(beginTime, ret, &extra);
         RemoveAckWaitItem(msgId, true);
