@@ -250,5 +250,35 @@
     "PROCESS_NAME": [
       "caas_service"
     ]
+  },
+  {
+    "INTERFACE_NAME": "SPEC_OBJECT_CMD_ENABLE_META_PLUGIN",
+    "PROCESS_NAME": [
+      "watch_system_service"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SPEC_OBJECT_CMD_DISABLE_META_PLUGIN",
+    "PROCESS_NAME": [
+      "watch_system_service"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SPEC_OBJECT_CMD_GET_META_PLUGIN_STATE",
+    "PROCESS_NAME": [
+      "watch_system_service"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SPEC_OBJECT_CMD_REGISTER_META_PLUGIN_LISTENER",
+    "PROCESS_NAME": [
+      "watch_system_service"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SPEC_OBJECT_CMD_UNREGISTER_META_PLUGIN_LISTENER",
+    "PROCESS_NAME": [
+      "watch_system_service"
+    ]
   }
 ]
