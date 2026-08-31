@@ -15,6 +15,9 @@
 
 #include "lnn_data_cloud_sync.h"
 
+#include <errno.h>
+#include <limits.h>
+#include <stdlib.h>
 #include <securec.h>
 
 #include "anonymizer.h"
@@ -51,6 +54,36 @@
 #define KV_DATA_REGISTER_RETRY_DELAY_MS 1000
 
 static int32_t g_dbId = 0;
+
+static bool ParseSignedNumber(const char *value, int64_t *result)
+{
+    if (value == NULL || result == NULL || *value == '\0') {
+        return false;
+    }
+    errno = 0;
+    char *end = NULL;
+    long long parsed = strtoll(value, &end, SOFTBUS_STRTOLL_BASE);
+    if (errno == ERANGE || end == value || *end != '\0') {
+        return false;
+    }
+    *result = (int64_t)parsed;
+    return true;
+}
+
+static bool ParseUnsignedNumber(const char *value, uint64_t *result)
+{
+    if (value == NULL || result == NULL || *value == '\0' || *value == '-') {
+        return false;
+    }
+    errno = 0;
+    char *end = NULL;
+    unsigned long long parsed = strtoull(value, &end, SOFTBUS_STRTOLL_BASE);
+    if (errno == ERANGE || end == value || *end != '\0') {
+        return false;
+    }
+    *result = (uint64_t)parsed;
+    return true;
+}
 
 typedef struct {
     int32_t stateVersion;
@@ -166,31 +199,63 @@ static int32_t DBDeviceBasicInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName
 
 static int32_t DBNumInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName, const char *value)
 {
+    int64_t signedValue = 0;
+    uint64_t unsignedValue = 0;
     if (strcmp(fieldName, DEVICE_INFO_STATE_VERSION) == 0) {
-        cacheInfo->stateVersion = atoi(value);
+        if (!ParseSignedNumber(value, &signedValue) || signedValue < INT32_MIN || signedValue > INT32_MAX) {
+            return SOFTBUS_INVALID_PARAM;
+        }
+        cacheInfo->stateVersion = (int32_t)signedValue;
         LNN_LOGI(LNN_BUILDER, "success. stateVersion=%{public}d", cacheInfo->stateVersion);
     } else if (strcmp(fieldName, DEVICE_INFO_TRANSPORT_PROTOCOL) == 0) {
-        cacheInfo->supportedProtocols = atoll(value);
+        if (!ParseUnsignedNumber(value, &unsignedValue)) {
+            return SOFTBUS_INVALID_PARAM;
+        }
+        cacheInfo->supportedProtocols = unsignedValue;
     } else if (strcmp(fieldName, DEVICE_INFO_WIFI_VERSION) == 0) {
-        cacheInfo->wifiVersion = atoll(value);
+        if (!ParseSignedNumber(value, &signedValue)) {
+            return SOFTBUS_INVALID_PARAM;
+        }
+        cacheInfo->wifiVersion = signedValue;
     } else if (strcmp(fieldName, DEVICE_INFO_BLE_VERSION) == 0) {
-        cacheInfo->bleVersion = atoll(value);
+        if (!ParseSignedNumber(value, &signedValue)) {
+            return SOFTBUS_INVALID_PARAM;
+        }
+        cacheInfo->bleVersion = signedValue;
     } else if (strcmp(fieldName, DEVICE_INFO_ACCOUNT_ID) == 0) {
-        cacheInfo->accountId = atoll(value);
+        if (!ParseSignedNumber(value, &signedValue)) {
+            return SOFTBUS_INVALID_PARAM;
+        }
+        cacheInfo->accountId = signedValue;
     } else if (strcmp(fieldName, DEVICE_INFO_FEATURE) == 0) {
-        cacheInfo->feature = (uint64_t)atoll(value);
+        if (!ParseUnsignedNumber(value, &unsignedValue)) {
+            return SOFTBUS_INVALID_PARAM;
+        }
+        cacheInfo->feature = unsignedValue;
         LNN_LOGI(LNN_BUILDER, "success. feature=%{public}" PRIu64 "", cacheInfo->feature);
     } else if (strcmp(fieldName, DEVICE_INFO_CONN_SUB_FEATURE) == 0) {
-        cacheInfo->connSubFeature = atoll(value);
+        if (!ParseUnsignedNumber(value, &unsignedValue)) {
+            return SOFTBUS_INVALID_PARAM;
+        }
+        cacheInfo->connSubFeature = unsignedValue;
         LNN_LOGI(LNN_BUILDER, "success. connSubFeature=%{public}" PRIu64 "", cacheInfo->connSubFeature);
     } else if (strcmp(fieldName, DEVICE_INFO_AUTH_CAP) == 0) {
-        cacheInfo->authCapacity = (uint32_t)atoi(value);
+        if (!ParseUnsignedNumber(value, &unsignedValue) || unsignedValue > UINT32_MAX) {
+            return SOFTBUS_INVALID_PARAM;
+        }
+        cacheInfo->authCapacity = (uint32_t)unsignedValue;
         LNN_LOGI(LNN_BUILDER, "success. authCapacity=%{public}u", cacheInfo->authCapacity);
     } else if (strcmp(fieldName, DEVICE_INFO_HB_CAP) == 0) {
-        cacheInfo->heartbeatCapacity = (uint32_t)atoi(value);
+        if (!ParseUnsignedNumber(value, &unsignedValue) || unsignedValue > UINT32_MAX) {
+            return SOFTBUS_INVALID_PARAM;
+        }
+        cacheInfo->heartbeatCapacity = (uint32_t)unsignedValue;
         LNN_LOGI(LNN_BUILDER, "success. heartbeatCapacity=%{public}u", cacheInfo->heartbeatCapacity);
     } else if (strcmp(fieldName, DEVICE_INFO_SLE_RANGE_CAP) == 0) {
-        cacheInfo->sleRangeCapacity = (uint32_t)atoi(value);
+        if (!ParseUnsignedNumber(value, &unsignedValue) || unsignedValue > UINT32_MAX) {
+            return SOFTBUS_INVALID_PARAM;
+        }
+        cacheInfo->sleRangeCapacity = (uint32_t)unsignedValue;
         LNN_LOGI(LNN_BUILDER, "success. sleRangeCapacity=%{public}u", cacheInfo->sleRangeCapacity);
     }
     LNN_LOGD(LNN_BUILDER, "success.");
