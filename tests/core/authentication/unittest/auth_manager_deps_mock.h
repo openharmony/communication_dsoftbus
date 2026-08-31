@@ -115,7 +115,7 @@ public:
         const uint8_t *data, bool isServer, DeviceMessageParse *messageParse) = 0;
     virtual int32_t AuthSessionProcessDevInfoDataByConnId(uint64_t connId, bool isServer,
         const uint8_t *data, uint32_t len) = 0;
-    virtual int32_t AuthSessionProcessCloseAck(int64_t authSeq, const uint8_t *data, uint32_t len) = 0;
+    virtual int32_t AuthSessionProcessCloseAck(uint64_t connId, int64_t authSeq, const uint8_t *data, uint32_t len) = 0;
     virtual int32_t AuthSessionProcessCloseAckByConnId(uint64_t connId, bool isServer,
         const uint8_t *data, uint32_t len) = 0;
     virtual uint32_t AuthGetUkDecryptSize(uint32_t inLen) = 0;
@@ -156,6 +156,8 @@ public:
     virtual int32_t FindAuthRequestByConnInfo(const AuthConnInfo *connInfo, AuthRequest *request) = 0;
     virtual int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, ConnSideType sideType) = 0;
     virtual int32_t AuthSessionProcessDevInfoData(int64_t authSeq, const uint8_t *data, uint32_t len) = 0;
+    virtual int32_t AuthSessionProcessDevInfoDataByAuthSeqAndConnId(
+        uint64_t connId, int64_t authSeq, const uint8_t *data, uint32_t len) = 0;
     virtual int32_t GetFd(uint64_t connId) = 0;
     virtual void LnnClearAuthExchangeUdidPacked(const char *networkId) = 0;
     virtual uint64_t GenConnId(int32_t connType, int32_t id) = 0;
@@ -225,7 +227,7 @@ public:
     MOCK_METHOD5(IsDeviceMessagePacket, bool (const AuthConnInfo *, const AuthDataHead *,
         const uint8_t *, bool, DeviceMessageParse *));
     MOCK_METHOD4(AuthSessionProcessDevInfoDataByConnId, int32_t (uint64_t, bool, const uint8_t *, uint32_t));
-    MOCK_METHOD3(AuthSessionProcessCloseAck, int32_t (int64_t, const uint8_t *, uint32_t));
+    MOCK_METHOD4(AuthSessionProcessCloseAck, int32_t (uint64_t, int64_t, const uint8_t *, uint32_t));
     MOCK_METHOD4(AuthSessionProcessCloseAckByConnId, int32_t (uint64_t, bool, const uint8_t *, uint32_t));
     MOCK_METHOD1(AuthGetUkDecryptSize, uint32_t (uint32_t));
     MOCK_METHOD5(AuthDecryptByUkId, int32_t (int32_t, const uint8_t *, uint32_t, uint8_t *, uint32_t *));
@@ -262,6 +264,8 @@ public:
     MOCK_METHOD2(FindAuthRequestByConnInfo, int32_t (const AuthConnInfo *, AuthRequest *));
     MOCK_METHOD3(ConnectAuthDevice, int32_t (uint32_t, const AuthConnInfo *, ConnSideType));
     MOCK_METHOD3(AuthSessionProcessDevInfoData, int32_t (int64_t, const uint8_t *, uint32_t));
+    MOCK_METHOD4(AuthSessionProcessDevInfoDataByAuthSeqAndConnId, int32_t (
+        uint64_t, int64_t, const uint8_t *, uint32_t));
     MOCK_METHOD1(GetFd, int32_t (uint64_t));
     MOCK_METHOD1(LnnClearAuthExchangeUdidPacked, void (const char *));
     MOCK_METHOD2(GenConnId, uint64_t (int32_t, int32_t));
