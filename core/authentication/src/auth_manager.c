@@ -32,6 +32,7 @@
 #include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_tcp_socket.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_init_monitor.h"
 
@@ -2501,4 +2502,34 @@ bool IsNeedReOpenAuthConnection(const char *uuid)
     }
     ReleaseAuthLock();
     return false;
+}
+
+int32_t AuthUpdateTcpKeepaliveByConnInfo(const char *uuid, bool isStartwifiKeepalive)
+{
+    if (uuid == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!RequireAuthLock()) {
+        AUTH_LOGE(AUTH_CONN, "require auth lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    int32_t ret = SOFTBUS_AUTH_NOT_FOUND;
+    AuthManager *auth[AUTH_COUNT] = { NULL, NULL };
+    auth[0] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_WIFI, false);
+    auth[1] = FindAuthManagerByUuid(uuid, AUTH_LINK_TYPE_WIFI, true);
+    for (uint32_t i = 0; i < AUTH_COUNT; i++) {
+        if (auth[i] == NULL) {
+            continue;
+        }
+        int32_t fd = GetFd(auth[i]->connId[AUTH_LINK_TYPE_WIFI]);
+        LNN_LOGI(AUTH_CONN, "set fd=%{public}d keepalive status=%{public}d", fd, isStartwifiKeepalive);
+        ret = ConnSetTcpKeepaliveState(fd, isStartwifiKeepalive);
+        if (ret != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_CONN, "auth update tcp keepalive option fail");
+            break;
+        }
+    }
+    ReleaseAuthLock();
+    return ret;
 }

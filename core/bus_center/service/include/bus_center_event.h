@@ -78,6 +78,8 @@ void LnnNotifyHBRepeat(void);
 
 void LnnNotifyUserSwitchEvent(SoftBusUserSwitchState state);
 
+void LnnNotifyUserSleepStateEvent(SoftBusUserSleepState state);
+
 void LnnNotifyDataShareStateChangeEvent(SoftBusDataShareState state);
 
 

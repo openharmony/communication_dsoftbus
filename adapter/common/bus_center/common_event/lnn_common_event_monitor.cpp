@@ -35,6 +35,8 @@
 static const int32_t DELAY_LEN = 1000;
 static const int32_t RETRY_MAX = 20;
 
+#define COMMON_EVENT_USER_SLEEP_STATE_CHANGED "COMMON_EVENT_USER_SLEEP_STATE_CHANGED"
+
 #ifdef DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER
 struct LnnMultiScreenStateNode {
     int64_t screenId;
@@ -193,6 +195,16 @@ static void HandleUserSwitched(const CommonEventData &data)
     LnnNotifyUserSwitchEvent(SOFTBUS_USER_SWITCHED);
 }
 
+static void HandleUserSleepStateChange(const CommonEventData &data)
+{
+    bool isSleep = data.GetWant().GetBoolParam("isSleep", false);
+    if (isSleep) {
+        LnnNotifyUserSleepStateEvent(SOFTBUS_USER_SLEEP);
+    } else {
+        LnnNotifyUserSleepStateEvent(SOFTBUS_USER_WAKE);
+    }
+}
+
 class CommonEventMonitor : public CommonEventSubscriber {
 public:
     explicit CommonEventMonitor(const CommonEventSubscribeInfo &subscriberInfo);
@@ -221,6 +233,7 @@ CommonEventMonitor::CommonEventMonitor(const CommonEventSubscribeInfo &subscribe
     eventHandlers_[COMMON_EVENT_MULTI_SCREEN_ON] = HandleMultiScreenOn;
 #endif
     eventHandlers_[CommonEventSupport::COMMON_EVENT_USER_SWITCHED] = HandleUserSwitched;
+    eventHandlers_[COMMON_EVENT_USER_SLEEP_STATE_CHANGED] = HandleUserSleepStateChange;
 }
 
 void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
@@ -259,6 +272,7 @@ int32_t SubscribeEvent::SubscribeCommonEvent()
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DATA_SHARE_READY);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
+    matchingSkills.AddEvent(COMMON_EVENT_USER_SLEEP_STATE_CHANGED);
     CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     subscriber_ = std::make_shared<CommonEventMonitor>(subscriberInfo);
     if (!CommonEventManager::SubscribeCommonEvent(subscriber_)) {

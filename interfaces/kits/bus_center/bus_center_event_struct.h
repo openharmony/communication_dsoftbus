@@ -72,6 +72,7 @@ typedef enum {
     LNN_EVENT_VIR_CONN_REPORT_SH,
     LNN_EVENT_ACCOUNT_SWITCH_CHECK,
     LNN_EVENT_ACCOUNT_ACL_CHANGE,
+    LNN_EVENT_USER_SLEEP_STATE_CHANGED,
     LNN_EVENT_TYPE_MAX,
 } LnnEventType;
 
@@ -143,6 +144,12 @@ typedef enum {
     SOFTBUS_USER_SWITCHED,
     SOFTBUS_USER_SWITCH_UNKNOWN,
 } SoftBusUserSwitchState;
+
+typedef enum {
+    SOFTBUS_USER_SLEEP,
+    SOFTBUS_USER_WAKE,
+    SOFTBUS_USER_SLEEP_UNKNOWN,
+} SoftBusUserSleepState;
 
 typedef enum {
     SOFTBUS_DATA_SHARE_READY,
@@ -248,6 +255,11 @@ typedef struct {
     uint8_t status;
     int32_t userId;
 } LnnMonitorHbStateChangedEvent;
+
+typedef struct {
+    LnnEventBasicInfo basic;
+    uint8_t status;
+} LnnMonitorUserSleepChangedEvent;
 
 typedef struct {
     LnnEventBasicInfo basic;

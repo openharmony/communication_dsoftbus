@@ -16,6 +16,7 @@
 #include "lnn_network_manager.h"
 
 #include "anonymizer.h"
+#include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
@@ -818,6 +819,52 @@ static void NetAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
+static int32_t SleepStateUpdateWifiKeepAlive(bool isStartwifiKeepalive)
+{
+    int32_t infoNum = 0;
+    NodeBasicInfo *info = NULL;
+    int32_t ret = LnnGetAllOnlineNodeInfo(&info, &infoNum);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR, LNN_BUILDER,
+        "get all online node info fail");
+    LNN_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_NO_ONLINE_DEVICE, LNN_BUILDER, "none online node");
+    LNN_CHECK_AND_RETURN_RET_LOGE(infoNum != 0, SOFTBUS_NO_ONLINE_DEVICE, LNN_BUILDER, "none online node");
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    for (int32_t i = 0; i < infoNum; ++i) {
+        if (LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "get nodeInfo fail");
+            continue;
+        }
+        if (!LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_WIFI)) {
+            continue;
+        }
+        AuthUpdateTcpKeepaliveByConnInfo(nodeInfo.uuid, isStartwifiKeepalive);
+    }
+    SoftBusFree(info);
+    return SOFTBUS_OK;
+}
+
+static void UserSleepChangeEventHandler(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_USER_SLEEP_STATE_CHANGED) {
+        LNN_LOGE(LNN_BUILDER, "not interest event");
+        return;
+    }
+    const LnnMonitorUserSleepChangedEvent *event = (const LnnMonitorUserSleepChangedEvent *)info;
+    SoftBusUserSleepState userSleepState = (SoftBusUserSleepState)event->status;
+    LNN_LOGI(LNN_BUILDER, "userSleepState=%{public}d", userSleepState);
+    switch (userSleepState) {
+        case SOFTBUS_USER_SLEEP:
+            SleepStateUpdateWifiKeepAlive(false);
+            break;
+        case SOFTBUS_USER_WAKE:
+            SleepStateUpdateWifiKeepAlive(true);
+            break;
+        default:
+            return;
+    }
+}
+
 static int32_t RegistProtocolManager(void)
 {
     int32_t ret = SOFTBUS_NOT_IMPLEMENT;
@@ -881,6 +928,10 @@ static int32_t LnnRegisterEvent(void)
     }
     if (LnnRegisterEventHandler(LNN_EVENT_CONSTRAINT_ENABLE, NetConstraintStateEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "Net regist constraint evt handler fail");
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
+    }
+    if (LnnRegisterEventHandler(LNN_EVENT_USER_SLEEP_STATE_CHANGED, UserSleepChangeEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "register user sleep change event handler failed");
         return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
     return SOFTBUS_OK;
@@ -1037,6 +1088,7 @@ void LnnDeinitNetworkManager(void)
     LnnUnregisterEventHandler(LNN_EVENT_DATA_SHARE_STATE_CHANGE, DataShareStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_DEVICE_RISK_STATE_CHANGED, NetDeviceRiskStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_CONSTRAINT_ENABLE, NetConstraintStateEventHandler);
+    LnnUnregisterEventHandler(LNN_EVENT_USER_SLEEP_STATE_CHANGED, UserSleepChangeEventHandler);
     (void)SoftBusMutexDestroy(&g_dataShareLock);
 }
 
