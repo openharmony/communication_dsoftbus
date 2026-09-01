@@ -3044,6 +3044,10 @@ int32_t TransDisableConnBrIdleCheck(int32_t channelId)
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+    if (connectType == CONNECT_TYPE_MAX) {
+        TRANS_LOGE(TRANS_CTRL, "proxy channel not found by channelId=%{public}d", channelId);
+        return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND;
+    }
     UpdateOption option;
     (void)memset_s(&option, sizeof(UpdateOption), 0, sizeof(UpdateOption));
     if (connectType == CONNECT_BLE) {
