@@ -1033,6 +1033,7 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransDisableConnBrIdleCheckTest001
     ASSERT_TRUE(proxyChannelInfo != nullptr);
     proxyChannelInfo->channelId = TEST_CHANNEL_ID;
     proxyChannelInfo->connId = 99;
+    proxyChannelInfo->type = CONNECT_BR;
 
     ListAdd(&g_proxyChannelList->list, &(proxyChannelInfo->node));
 
