@@ -33,7 +33,9 @@ public:
     SoftbusProxychannelTransceiverPagingInterface() {};
     virtual ~SoftbusProxychannelTransceiverPagingInterface() {};
     virtual int32_t TransParseMessageHeadType(char *data, int32_t len, ProxyMessage *msg) = 0;
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     virtual int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg) = 0;
+#endif
     virtual int32_t TransProxyGetChannelByCheckInfo(
         const PagingListenCheckInfo *checkInfo, ProxyChannelInfo *chan, bool isClient) = 0;
     virtual bool TransPagingHasListenAndGetInfoPacked(ProxyChannelInfo *info) = 0;
@@ -48,7 +50,9 @@ public:
     SoftbusProxychannelTransceiverPagingInterfaceMock();
     ~SoftbusProxychannelTransceiverPagingInterfaceMock() override;
     MOCK_METHOD3(TransParseMessageHeadType, int32_t (char *data, int32_t len, ProxyMessage *msg));
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     MOCK_METHOD3(TransPagingParseMessage, int32_t (char *data, int32_t len, ProxyMessage *msg));
+#endif
     MOCK_METHOD3(TransProxyGetChannelByCheckInfo, int32_t (
         const PagingListenCheckInfo *checkInfo, ProxyChannelInfo *chan, bool isClient));
     MOCK_METHOD1(TransPagingHasListenAndGetInfoPacked, bool (ProxyChannelInfo *info));

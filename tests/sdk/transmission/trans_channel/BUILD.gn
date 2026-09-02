@@ -75,7 +75,7 @@ if (defined(ohos_lite)) {
   trans_sdk_proxy_test_deps =
       [
         "$dsoftbus_root_path/dfx:softbus_dfx",
-        "$dsoftbus_root_path/tests/sdk:softbus_client_static"
+        "$dsoftbus_root_path/tests/sdk:softbus_client_static",
       ]
 
   module_output_path = "dsoftbus/soft_bus/transmission"
@@ -110,7 +110,10 @@ if (defined(ohos_lite)) {
   module_output_path = "dsoftbus/soft_bus/transmission"
   ohos_unittest("ClientTransProxyFileCommonTest") {
     module_out_path = module_output_path
-    sources = [ "proxy/client_trans_proxy_file_common_test.cpp" ]
+    sources = [
+      "proxy/client_trans_proxy_file_common_test.cpp",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/src/client_trans_proxy_file_common.c",
+    ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += trans_sdk_proxy_test_inc
     deps = trans_sdk_test_common_deps
@@ -145,6 +148,10 @@ if (defined(ohos_lite)) {
       debug = false
     }
     module_out_path = module_output_path
+    defines = []
+    if (dsoftbus_feature_trans_proxy_file) {
+      defines += [ "DSOFTBUS_FEATURE_TRANS_PROXY_FILE" ]
+    }
     sources = [ "proxy/client_trans_proxy_manager_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += trans_sdk_proxy_test_inc
@@ -319,7 +326,10 @@ if (defined(ohos_lite)) {
       debug = false
     }
     module_out_path = module_output_path
-    sources = [ "proxy/client_trans_proxy_file_manager_test.cpp" ]
+    sources = [
+      "proxy/client_trans_proxy_file_manager_test.cpp",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/src/client_trans_proxy_file_common.c",
+    ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += [
       "$dsoftbus_root_path/components/nstackx/fillp/include",
@@ -437,6 +447,10 @@ if (defined(ohos_lite)) {
       debug = false
     }
     module_out_path = module_output_path
+    defines = []
+    if (dsoftbus_feature_trans_file) {
+      defines += [ "DSOFTBUS_FEATURE_TRANS_FILE" ]
+    }
     sources = [ "manager/client_trans_channel_manager_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += [
@@ -598,11 +612,8 @@ if (defined(ohos_lite)) {
     deps = [
       ":ClientTransChannelCallbackTest",
       ":ClientTransChannelManagerTest",
-      ":ClientTransPendingTest",
-      ":ClientTransProxyD2DTest",
       ":ClientTransProxyFileCommonTest",
       ":ClientTransProxyFileManagerMockTest",
-      ":ClientTransProxyFileManagerTest",
       ":ClientTransProxyManagerMockTest",
       ":ClientTransUdpManagerTest",
       ":TransClientProxyFileManagerMockTest",
@@ -617,6 +628,15 @@ if (defined(ohos_lite)) {
       "udp/distributed_stream:distributed_stream_test",
       "udp/file:unittest",
     ]
+    if (dsoftbus_feature_trans_proxy_channel && dsoftbus_feature_trans_file) {
+      deps += [ ":ClientTransProxyFileManagerTest" ]
+    }
+    if (dsoftbus_feature_trans_proxy_channel) {
+      deps += [
+        ":ClientTransPendingTest",
+        ":ClientTransProxyD2DTest",
+      ]
+    }
     if (dsoftbus_feature_trans_udp == true) {
       if (dsoftbus_feature_trans_udp_stream == true) {
         if (!defined(ohos_lite)) {
@@ -624,13 +644,16 @@ if (defined(ohos_lite)) {
             ":ClientTransStreamTest",
             ":ClientTransUdpStreamInterfaceTest",
             ":StreamAdaptorTest",
-            ":ClientTransProxyManagerTest",
             ":ClientTransUdpManagerStaticTest",
             "tcp_direct:unittest",
             "udp/stream/libsoftbus_stream:unittest",
           ]
         }
       }
+    }
+    if (dsoftbus_feature_trans_proxy_channel && dsoftbus_feature_trans_udp == true &&
+        dsoftbus_feature_trans_udp_stream == true && !defined(ohos_lite)) {
+      deps += [ ":ClientTransProxyManagerTest" ]
     }
   }
 }

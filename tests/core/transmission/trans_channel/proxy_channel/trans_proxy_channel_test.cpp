@@ -268,6 +268,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckHandshakeTest001, TestSize.Level1)
     TestDelTestProxyChannel();
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 /**
  * @tc.name: TransProxyKeepaliveTest001
  * @tc.desc: improve branch coverage, use the wrong or normal parameter..
@@ -372,6 +373,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckKeepaliveTest002, TestSize.Level1)
 
     TestDelTestProxyChannel();
 }
+#endif
 
 /**
  * @tc.name: TransProxyResetPeerTest001

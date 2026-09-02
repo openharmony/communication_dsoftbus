@@ -720,6 +720,7 @@ int32_t TransOnSessionClosed(int32_t channelId, int32_t channelType, ShutdownRea
     return SOFTBUS_OK;
 }
 
+#ifdef DSOFTBUS_FEATURE_TRANS_FILE
 static int32_t ProcessReceivedFileData(
     int32_t sessionId, int32_t channelId, const char *data, uint32_t len, SessionPktType type)
 {
@@ -736,6 +737,39 @@ static int32_t ProcessReceivedFileData(
         return ret;
     }
     return SOFTBUS_OK;
+}
+#endif
+
+static void HandleBytesReceived(int32_t sessionId, const void *data, uint32_t len,
+    const SessionListenerAdapter *sessionCallback, const ISocketListener *listener)
+{
+    if ((data == NULL) || (sessionCallback == NULL) || (listener == NULL)) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return;
+    }
+    if (sessionCallback->isSocketListener) {
+        if (listener->OnBytes != NULL) {
+            listener->OnBytes(sessionId, data, len);
+        }
+    } else if (sessionCallback->session.OnBytesReceived != NULL) {
+        sessionCallback->session.OnBytesReceived(sessionId, data, len);
+    }
+}
+
+static void HandleMessageReceived(int32_t sessionId, const void *data, uint32_t len,
+    const SessionListenerAdapter *sessionCallback, const ISocketListener *listener)
+{
+    if ((data == NULL) || (sessionCallback == NULL) || (listener == NULL)) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return;
+    }
+    if (sessionCallback->isSocketListener) {
+        if (listener->OnMessage != NULL) {
+            listener->OnMessage(sessionId, data, len);
+        }
+    } else if (sessionCallback->session.OnMessageReceived != NULL) {
+        sessionCallback->session.OnMessageReceived(sessionId, data, len);
+    }
 }
 
 int32_t TransOnDataReceived(int32_t channelId, int32_t channelType, const void *data, uint32_t len, SessionPktType type)
@@ -757,22 +791,10 @@ int32_t TransOnDataReceived(int32_t channelId, int32_t channelType, const void *
     }
     switch (type) {
         case TRANS_SESSION_BYTES:
-            if (sessionCallback.isSocketListener) {
-                if (listener->OnBytes != NULL) {
-                    listener->OnBytes(sessionId, data, len);
-                }
-            } else if (sessionCallback.session.OnBytesReceived != NULL) {
-                sessionCallback.session.OnBytesReceived(sessionId, data, len);
-            }
+            HandleBytesReceived(sessionId, data, len, &sessionCallback, listener);
             break;
         case TRANS_SESSION_MESSAGE:
-            if (sessionCallback.isSocketListener) {
-                if (listener->OnMessage != NULL) {
-                    listener->OnMessage(sessionId, data, len);
-                }
-            } else if (sessionCallback.session.OnMessageReceived != NULL) {
-                sessionCallback.session.OnMessageReceived(sessionId, data, len);
-            }
+            HandleMessageReceived(sessionId, data, len, &sessionCallback, listener);
             break;
         case TRANS_SESSION_FILE_FIRST_FRAME:
         case TRANS_SESSION_FILE_ONGOINE_FRAME:
@@ -783,10 +805,15 @@ int32_t TransOnDataReceived(int32_t channelId, int32_t channelType, const void *
         case TRANS_SESSION_FILE_RESULT_FRAME:
         case TRANS_SESSION_FILE_ACK_REQUEST_SENT:
         case TRANS_SESSION_FILE_ACK_RESPONSE_SENT:
+#ifdef DSOFTBUS_FEATURE_TRANS_FILE
             if (channelType == CHANNEL_TYPE_PROXY) {
                 return ProcessReceivedFileData(sessionId, channelId, (char *)data, len, type);
             }
             break;
+#else
+            TRANS_LOGW(TRANS_FILE, "file not support, type=%{public}d", type);
+            return SOFTBUS_FUNC_NOT_SUPPORT;
+#endif
         default:
             TRANS_LOGE(TRANS_FILE, "revc unknown session type = %{public}d", type);
             return SOFTBUS_TRANS_INVALID_SESSION_TYPE;

@@ -197,7 +197,9 @@ void ClientDestroySession(const ListNode *destroyList, ShutdownReason reason)
             SoftBusFree(destroyNode);
             continue;
         }
+#ifdef DSOFTBUS_FEATURE_TRANS_FILE
         (void)ClientDeleteRecvFileList(id);
+#endif
         (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType, id);
         if (destroyNode->OnSessionClosed != NULL) {
             destroyNode->OnSessionClosed(id);
@@ -837,7 +839,9 @@ void ClientCleanUpIdleTimeoutSocket(const ListNode *destroyList)
     DestroySessionInfo *destroyNodeNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(destroyNode, destroyNodeNext, destroyList, DestroySessionInfo, node) {
         int32_t id = destroyNode->sessionId;
+#ifdef DSOFTBUS_FEATURE_TRANS_FILE
         (void)ClientDeleteRecvFileList(id);
+#endif
         (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType, id);
         TRANS_LOGI(TRANS_SDK, "session is idle, sessionId=%{public}d", id);
         if (destroyNode->OnShutdown != NULL) {

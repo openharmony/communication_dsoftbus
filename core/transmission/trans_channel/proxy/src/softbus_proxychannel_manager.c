@@ -189,6 +189,7 @@ static int32_t TransGetLocalConfig(int32_t channelType, int32_t businessType, ui
     return SOFTBUS_OK;
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 int32_t TransPagingUpdateDataConfig(AppInfo *info)
 {
     if (info == NULL) {
@@ -291,7 +292,9 @@ int32_t TransPagingUpdatePidAndData(int32_t channelId, int32_t pid, char *data, 
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
+#endif
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 static int32_t TransUpdateAuthSeqByChannelId(int32_t channelId, int32_t reqId)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_proxyChannelList != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL,
@@ -377,6 +380,7 @@ void TransPagingBadKeyRetry(int32_t channelId)
         TRANS_LOGE(TRANS_CTRL, "AuthGenApplyKey fail, ret=%{public}d", ret);
     }
 }
+#endif
 
 static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
 {
@@ -723,6 +727,7 @@ static int32_t TransProxyDelByChannelId(int32_t channelId, ProxyChannelInfo *cha
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 int32_t TransPagingResetChan(ProxyChannelInfo *chanInfo)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(chanInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "chanInfo is null");
@@ -752,6 +757,7 @@ int32_t TransPagingResetChan(ProxyChannelInfo *chanInfo)
 
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
+#endif
 
 static int32_t TransProxyResetChan(ProxyChannelInfo *chanInfo)
 {
@@ -1047,6 +1053,7 @@ static void TransProxyReportAuditEvent(ProxyChannelInfo *info, SoftbusAuditType 
     TRANS_AUDIT(AUDIT_SCENE_OPEN_SESSION, extra);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 int32_t TransPagingHandshakeUnPackErrMsg(ProxyChannelInfo *chan, const ProxyMessage *msg, int32_t *errCode)
 {
     if (errCode == NULL || chan == NULL || msg == NULL) {
@@ -1072,6 +1079,7 @@ int32_t TransPagingHandshakeUnPackErrMsg(ProxyChannelInfo *chan, const ProxyMess
     cJSON_Delete(root);
     return SOFTBUS_OK;
 }
+#endif
 
 static int32_t TransProxyHandshakeUnpackErrMsg(ProxyChannelInfo *info, const ProxyMessage *msg, int32_t *errCode)
 {
@@ -1340,6 +1348,7 @@ static int32_t CheckProxyChannelPermission(const ProxyMessage *msg, ProxyChannel
         return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     if (chan->appInfo.appType == APP_TYPE_NORMAL && chan->appInfo.callingTokenId != TOKENID_NOT_SET) {
         if (chan->appInfo.osType != OH_OS_TYPE) {
             (void)strcpy_s(chan->appInfo.peerNetWorkId, NETWORK_ID_BUF_LEN, chan->appInfo.peerData.deviceId);
@@ -1356,6 +1365,12 @@ static int32_t CheckProxyChannelPermission(const ProxyMessage *msg, ProxyChannel
             TRANS_LOGI(TRANS_CTRL, "not support acl check");
         }
     }
+#else
+    if (chan->appInfo.appType == APP_TYPE_NORMAL) {
+        TRANS_LOGE(TRANS_CTRL, "normal proxy channel not support, feature disabled");
+        return SOFTBUS_FUNC_NOT_SUPPORT;
+    }
+#endif
 
     if (TransCheckServerPermission(chan->appInfo.myData.sessionName, chan->appInfo.peerData.sessionName) !=
         SOFTBUS_OK) {
@@ -1554,6 +1569,7 @@ static int32_t TransProxySaveAndOnOpen(ProxyChannelInfo *chan, int32_t channelId
         TRANS_LOGE(TRANS_CTRL, "AddChanItem fail");
         goto EXIT_RELEASE;
     }
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     if (tmpChan.appInfo.appType == APP_TYPE_NORMAL) {
         ret = CheckCollabRelation(&(tmpChan.appInfo), tmpChan.channelId, CHANNEL_TYPE_PROXY);
         if (ret == SOFTBUS_OK) {
@@ -1565,6 +1581,13 @@ static int32_t TransProxySaveAndOnOpen(ProxyChannelInfo *chan, int32_t channelId
             return ret;
         }
     }
+#else
+    if (tmpChan.appInfo.appType == APP_TYPE_NORMAL) {
+        ret = SOFTBUS_FUNC_NOT_SUPPORT;
+        TRANS_LOGE(TRANS_CTRL, "normal proxy channel not support, feature disabled");
+        goto EXIT_RELEASE;
+    }
+#endif
     ret = TransServerProxyChannelOpened(&tmpChan, extra, channelId);
     return ret;
 EXIT_RELEASE:
@@ -1762,7 +1785,9 @@ static int32_t TransHandleD2DProxyChannelOpened(
 {
     if (LnnIsOsAccountConstraint()) {
         TRANS_LOGE(TRANS_CTRL, "block mode: channelId=%{public}d", channelId);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
         (void)TransPagingAckHandshake(chan, SOFTBUS_TRANS_BLOCK_MODE_REJECTED);
+#endif
         (void)OnProxyChannelClosed(chan->channelId, &(chan->appInfo));
         TransProxyDelChanByChanId(chan->channelId);
         return SOFTBUS_TRANS_BLOCK_MODE_REJECTED;
@@ -1774,6 +1799,7 @@ static int32_t TransHandleD2DProxyChannelOpened(
         TransProxyDelChanByChanId(chan->channelId);
         return ret;
     }
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     ret = TransPagingAckHandshake(chan, openResult);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL,
@@ -1782,6 +1808,9 @@ static int32_t TransHandleD2DProxyChannelOpened(
         TransProxyDelChanByChanId(chan->channelId);
         return ret;
     }
+#else
+    (void)openResult;
+#endif
     return OnProxyChannelBind(chan->channelId, &chan->appInfo);
 }
 
@@ -1869,7 +1898,11 @@ void TransAsyncProxyChannelTask(int32_t channelId)
     if (curCount >= LOOPER_REPLY_CNT_MAX) {
         TRANS_LOGE(TRANS_CTRL, "Open proxy channel timeout, channelId=%{public}d", channelId);
         if (chan.isD2D) {
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
             (void)TransPagingAckHandshake(&chan, SOFTBUS_TRANS_OPEN_CHANNEL_NEGTIATE_TIMEOUT);
+#else
+            TRANS_LOGE(TRANS_CTRL, "paging ack handshake not support, feature disabled");
+#endif
         } else {
             (void)TransProxyAckHandshake(chan.connId, &chan, SOFTBUS_TRANS_OPEN_CHANNEL_NEGTIATE_TIMEOUT);
         }
@@ -2039,7 +2072,9 @@ void TransProxyProcessKeepAlive(const ProxyMessage *msg)
         return;
     }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     TransProxyAckKeepalive(info);
+#endif
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
     (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0,
         sizeof(info->appInfo.sinkSessionKey));
@@ -2163,6 +2198,7 @@ int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, cons
     return SOFTBUS_OK;
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 int32_t TransProxyCreatePagingChanInfo(ProxyChannelInfo *chan)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(chan != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "channel info is null");
@@ -2171,6 +2207,7 @@ int32_t TransProxyCreatePagingChanInfo(ProxyChannelInfo *chan)
         TRANS_CTRL, "trans proxy add channelId fail. channelId=%{public}d", chan->channelId);
     return SOFTBUS_OK;
 }
+#endif
 
 static void TransProxyUpdateBlePriority(int32_t channelId, uint32_t connId, BlePriority priority)
 {
@@ -2873,6 +2910,7 @@ int32_t TransProxySetAuthHandleByChanId(int32_t channelId, AuthHandle authHandle
     return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND;
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 int32_t TransProxyGetChannelByCheckInfo(const PagingListenCheckInfo *checkInfo, ProxyChannelInfo *chan, bool isClient)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(
@@ -2897,6 +2935,7 @@ int32_t TransProxyGetChannelByCheckInfo(const PagingListenCheckInfo *checkInfo, 
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
+#endif
 
 int32_t TransProxyGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tokenId, int32_t pid)
 {

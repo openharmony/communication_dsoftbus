@@ -41,10 +41,12 @@ int32_t TransProxyGetSendMsgChanInfo(int32_t channelId, ProxyChannelInfo *chanIn
     return GetSoftbusProxychannelControlPagingInterface()->TransProxyGetSendMsgChanInfo(channelId, chanInfo);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 char *TransPagingPackHandShakeMsg(ProxyChannelInfo *info)
 {
     return GetSoftbusProxychannelControlPagingInterface()->TransPagingPackHandShakeMsg(info);
 }
+#endif
 
 int32_t TransPagingPackMessage(PagingProxyMessage *msg, ProxyDataInfo *dataInfo, ProxyChannelInfo *chan, bool needHash)
 {
@@ -70,10 +72,12 @@ int32_t AuthFindApplyKey(
         info, applyKey, accountHash, accountHashLen);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 char *TransPagingPackHandshakeAckMsg(ProxyChannelInfo *chan)
 {
     return GetSoftbusProxychannelControlPagingInterface()->TransPagingPackHandshakeAckMsg(chan);
 }
+#endif
 
 int32_t TransProxyPackMessage(ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo)
 {
@@ -100,15 +104,19 @@ char *TransProxyPackIdentity(const char *identity)
     return GetSoftbusProxychannelControlPagingInterface()->TransProxyPackIdentity(identity);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 char *TransProxyPagingPackChannelId(int16_t channelId)
 {
     return GetSoftbusProxychannelControlPagingInterface()->TransProxyPagingPackChannelId(channelId);
 }
+#endif
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 char *TransPagingPackHandshakeErrMsg(int32_t errCode, int32_t channelId)
 {
     return GetSoftbusProxychannelControlPagingInterface()->TransPagingPackHandshakeErrMsg(errCode, channelId);
 }
+#endif
 
 void AuthGetLatestIdByUuid(const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle)
 {

@@ -71,6 +71,7 @@ int32_t TransParseMessageHeadType(char *data, int32_t len, ProxyMessage *msg)
     return SOFTBUS_OK;
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 static int32_t TransPagingParseHandshakeMessageHead(char *data, int32_t len, ProxyMessage *msg,
     uint8_t *accountHash, uint8_t *udidHash)
 {
@@ -100,6 +101,7 @@ static void TransPagingParseMessageHead(char *data, int32_t len, ProxyMessage *m
     msg->data = data + PAGING_CHANNEL_HEAD_LEN;
     msg->dataLen = len - PAGING_CHANNEL_HEAD_LEN;
 }
+#endif
 
 void PackProxyExternalMessageHead(const ProxyExternalMessageHead *msgHead, uint8_t *buf, uint32_t size)
 {
@@ -404,6 +406,7 @@ static int32_t TransProxyParseMessageNoDecrypt(ProxyMessage *msg)
     return SOFTBUS_OK;
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 static bool TransUnPackPagingExtraData(cJSON *root, void *extraData)
 {
     char extraDataStr[EXTRA_DATA_STR_MAX_LEN] = {0};
@@ -1058,6 +1061,7 @@ int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg)
     SoftBusFree(msg->data);
     return SOFTBUS_OK;
 }
+#endif
 
 static int32_t DecryptProxyMessage(ProxyMessage *msg, AuthHandle *auth)
 {
@@ -1228,6 +1232,7 @@ int32_t PackEncryptedExternalMessage(
     return SOFTBUS_OK;
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 int32_t TransPagingPackMessage(PagingProxyMessage *msg, ProxyDataInfo *dataInfo, ProxyChannelInfo *chan, bool needHash)
 {
     if (msg == NULL || dataInfo == NULL || chan == NULL) {
@@ -1263,6 +1268,7 @@ int32_t TransPagingPackMessage(PagingProxyMessage *msg, ProxyDataInfo *dataInfo,
     dataInfo->outLen = size;
     return SOFTBUS_OK;
 }
+#endif
 
 int32_t TransProxyPackMessage(
     ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo)
@@ -1284,6 +1290,7 @@ int32_t TransProxyPackMessage(
     return SOFTBUS_OK;
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 static int32_t PackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
 {
     // fastTransData is NULL, just fill fastTransDataSize
@@ -1356,6 +1363,7 @@ char *TransPagingPackHandshakeErrMsg(int32_t errCode, int32_t channelId)
     cJSON_Delete(root);
     return buf;
 }
+#endif
 
 char *TransProxyPackHandshakeErrMsg(int32_t errCode)
 {
@@ -1396,6 +1404,7 @@ static bool TransProxyAddJsonObject(cJSON *root, ProxyChannelInfo *info)
     return true;
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 static bool TransPackPagingExtraData(cJSON *root, void *extraData)
 {
     char extraDataStr[EXTRA_DATA_STR_MAX_LEN] = { 0 };
@@ -1413,7 +1422,6 @@ char *TransPagingPackHandshakeMsg(ProxyChannelInfo *info)
         TRANS_LOGE(TRANS_CTRL, "invalid param.");
         return NULL;
     }
-
     cJSON *root = cJSON_CreateObject();
     if (root == NULL) {
         TRANS_LOGE(TRANS_CTRL, "create json object failed.");
@@ -1443,6 +1451,30 @@ char *TransPagingPackHandshakeMsg(ProxyChannelInfo *info)
     cJSON_Delete(root);
     return buf;
 }
+#endif
+
+static bool PackAuthHandshakeFields(cJSON *root, AppInfo *appInfo)
+{
+    if (strlen(appInfo->reqId) == 0 && GenerateRandomStr(appInfo->reqId, REQ_ID_SIZE_MAX) != SOFTBUS_OK) {
+        return false;
+    }
+    if (!AddStringToJsonObject(root, JSON_KEY_REQUEST_ID, appInfo->reqId)) {
+        return false;
+    }
+    return AddStringToJsonObject(root, JSON_KEY_PKG_NAME, appInfo->myData.pkgName);
+}
+
+static bool PackInnerHandshakeFields(cJSON *root, AppInfo *appInfo, SessionKeyBase64 *sessionBase64)
+{
+    int32_t ret = SoftBusBase64Encode((uint8_t *)sessionBase64->sessionKeyBase64,
+        sizeof(sessionBase64->sessionKeyBase64), &(sessionBase64->len),
+        (uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "mbedtls_base64_encode FAIL ret=%{public}d", ret);
+        return false;
+    }
+    return AddStringToJsonObject(root, JSON_KEY_SESSION_KEY, sessionBase64->sessionKeyBase64);
+}
 
 char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
 {
@@ -1465,28 +1497,20 @@ char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info)
     }
     (void)cJSON_AddTrueToObject(root, JSON_KEY_HAS_PRIORITY);
     if (appInfo->appType == APP_TYPE_NORMAL) {
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
         if (PackHandshakeMsgForNormal(&sessionBase64, appInfo, root) != SOFTBUS_OK) {
             goto EXIT;
         }
+#else
+        TRANS_LOGE(TRANS_CTRL, "normal proxy channel not support, feature disabled");
+        goto EXIT;
+#endif
     } else if (appInfo->appType == APP_TYPE_AUTH) {
-        if (strlen(appInfo->reqId) == 0 && GenerateRandomStr(appInfo->reqId, REQ_ID_SIZE_MAX) != SOFTBUS_OK) {
-            goto EXIT;
-        }
-        if (!AddStringToJsonObject(root, JSON_KEY_REQUEST_ID, appInfo->reqId)) {
-            goto EXIT;
-        }
-        if (!AddStringToJsonObject(root, JSON_KEY_PKG_NAME, appInfo->myData.pkgName)) {
+        if (!PackAuthHandshakeFields(root, appInfo)) {
             goto EXIT;
         }
     } else {
-        int32_t ret = SoftBusBase64Encode((uint8_t *)sessionBase64.sessionKeyBase64,
-            sizeof(sessionBase64.sessionKeyBase64), &(sessionBase64.len),
-            (uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey));
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "mbedtls_base64_encode FAIL ret=%{public}d", ret);
-            goto EXIT;
-        }
-        if (!AddStringToJsonObject(root, JSON_KEY_SESSION_KEY, sessionBase64.sessionKeyBase64)) {
+        if (!PackInnerHandshakeFields(root, appInfo, &sessionBase64)) {
             goto EXIT;
         }
     }
@@ -1496,6 +1520,7 @@ EXIT:
     return buf;
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 static int32_t AddSinkSessionKeyToHandshakeAckMsg(cJSON *root, const AppInfo *appInfo)
 {
     (void)AddStringToJsonObject(root, JSON_KEY_SINK_ACL_ACCOUNT_ID, appInfo->myData.accountId);
@@ -1557,6 +1582,24 @@ char *TransPagingPackHandshakeAckMsg(ProxyChannelInfo *chan)
     return buf;
 }
 
+static bool PackNormalAckFields(cJSON *root, const AppInfo *appInfo, ProxyChannelInfo *chan)
+{
+    if (!AddNumberToJsonObject(root, JSON_KEY_UID, appInfo->myData.uid) ||
+        !AddNumberToJsonObject(root, JSON_KEY_PID, appInfo->myData.pid) ||
+        !AddStringToJsonObject(root, JSON_KEY_PKG_NAME, appInfo->myData.pkgName) ||
+        !AddNumberToJsonObject(root, JSON_KEY_ENCRYPT, appInfo->encrypt) ||
+        !AddNumberToJsonObject(root, JSON_KEY_ALGORITHM, appInfo->algorithm) ||
+        !AddNumberToJsonObject(root, JSON_KEY_CRC, appInfo->crc) ||
+        !AddNumber16ToJsonObject(root, JSON_KEY_FIRST_DATA_SIZE, appInfo->fastTransDataSize) ||
+        !AddStringToJsonObject(root, JSON_KEY_SRC_BUS_NAME, appInfo->myData.sessionName) ||
+        !AddStringToJsonObject(root, JSON_KEY_DST_BUS_NAME, appInfo->peerData.sessionName)) {
+        return false;
+    }
+    (void)AddNumberToJsonObject(root, JSON_KEY_MY_HANDLE_ID, appInfo->myHandleId);
+    return AddSinkSessionKeyToHandshakeAckMsg(root, &chan->appInfo) == SOFTBUS_OK;
+}
+#endif
+
 char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(chan != NULL, NULL, TRANS_CTRL, "invalid param.");
@@ -1580,30 +1623,22 @@ char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
     }
     (void)cJSON_AddTrueToObject(root, JSON_KEY_HAS_PRIORITY);
     if (appInfo->appType == APP_TYPE_NORMAL) {
-        if (!AddNumberToJsonObject(root, JSON_KEY_UID, appInfo->myData.uid) ||
-            !AddNumberToJsonObject(root, JSON_KEY_PID, appInfo->myData.pid) ||
-            !AddStringToJsonObject(root, JSON_KEY_PKG_NAME, appInfo->myData.pkgName) ||
-            !AddNumberToJsonObject(root, JSON_KEY_ENCRYPT, appInfo->encrypt) ||
-            !AddNumberToJsonObject(root, JSON_KEY_ALGORITHM, appInfo->algorithm) ||
-            !AddNumberToJsonObject(root, JSON_KEY_CRC, appInfo->crc) ||
-            !AddNumber16ToJsonObject(root, JSON_KEY_FIRST_DATA_SIZE, appInfo->fastTransDataSize) ||
-            !AddStringToJsonObject(root, JSON_KEY_SRC_BUS_NAME, appInfo->myData.sessionName) ||
-            !AddStringToJsonObject(root, JSON_KEY_DST_BUS_NAME, appInfo->peerData.sessionName)) {
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
+        if (!PackNormalAckFields(root, appInfo, chan)) {
             cJSON_Delete(root);
             return NULL;
         }
-        (void)AddNumberToJsonObject(root, JSON_KEY_MY_HANDLE_ID, appInfo->myHandleId);
-        if (AddSinkSessionKeyToHandshakeAckMsg(root, &chan->appInfo) != SOFTBUS_OK) {
-            cJSON_Delete(root);
-            return NULL;
-        }
+#else
+        TRANS_LOGE(TRANS_CTRL, "normal proxy channel not support, feature disabled");
+        cJSON_Delete(root);
+        return NULL;
+#endif
     } else if (appInfo->appType == APP_TYPE_AUTH) {
         if (!AddStringToJsonObject(root, JSON_KEY_PKG_NAME, appInfo->myData.pkgName)) {
             cJSON_Delete(root);
             return NULL;
         }
     }
-
     char *buf = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
     return buf;
@@ -1666,6 +1701,7 @@ static int32_t GetSinkSessionKeyFromHandshakeAckMsg(cJSON *root, AppInfo *appInf
     return DecryptAndAddSinkSessionKey(root, appInfo);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 static void GetNoramlInfoFromHandshakeAckMsg(cJSON *root, ProxyChannelInfo *chanInfo)
 {
     if (!GetJsonObjectNumberItem(root, JSON_KEY_UID, &chanInfo->appInfo.peerData.uid) ||
@@ -1680,6 +1716,7 @@ static void GetNoramlInfoFromHandshakeAckMsg(cJSON *root, ProxyChannelInfo *chan
         TRANS_LOGW(TRANS_CTRL, "unpack handshake ack old version");
     }
 }
+#endif
 
 int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo, int32_t len)
 {
@@ -1711,12 +1748,20 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
         cJSON_Delete(root);
         return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     }
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     if (chanInfo->appInfo.appType == APP_TYPE_NORMAL) {
         GetNoramlInfoFromHandshakeAckMsg(root, chanInfo);
         if (!GetJsonObjectInt32Item(root, JSON_KEY_MY_HANDLE_ID, &chanInfo->appInfo.peerHandleId)) {
             chanInfo->appInfo.peerHandleId = -1;
         }
     }
+#else
+    if (chanInfo->appInfo.appType == APP_TYPE_NORMAL) {
+        TRANS_LOGE(TRANS_CTRL, "normal proxy channel not support, feature disabled");
+        cJSON_Delete(root);
+        return SOFTBUS_FUNC_NOT_SUPPORT;
+    }
+#endif
 
     if (!GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME, chanInfo->appInfo.peerData.pkgName,
                                  sizeof(chanInfo->appInfo.peerData.pkgName))) {
@@ -1733,6 +1778,7 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
     return SOFTBUS_OK;
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 static int32_t UnpackPackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
 {
     (void)LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, appInfo->peerNetWorkId, NETWORK_ID_BUF_LEN);
@@ -1835,6 +1881,7 @@ static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo,
         root, JSON_KEY_SOURCE_ACL_EXTRA_INFO, (appInfo->extraAccessInfo), EXTRA_ACCESS_INFO_LEN_MAX);
     return SOFTBUS_OK;
 }
+#endif
 
 static int32_t TransProxyUnpackAuthHandshakeMsg(cJSON *root, AppInfo *appInfo)
 {
@@ -1904,10 +1951,16 @@ int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, in
         goto ERR_EXIT;
     }
     if (appInfo->appType == APP_TYPE_NORMAL) {
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
         ret = TransProxyUnpackNormalHandshakeMsg(root, appInfo, sessionKey, BASE64KEY);
         if (ret != SOFTBUS_OK) {
             goto ERR_EXIT;
         }
+#else
+        ret = SOFTBUS_FUNC_NOT_SUPPORT;
+        TRANS_LOGE(TRANS_CTRL, "normal proxy channel not support, feature disabled");
+        goto ERR_EXIT;
+#endif
     } else if (appInfo->appType == APP_TYPE_AUTH) {
         ret = TransProxyUnpackAuthHandshakeMsg(root, appInfo);
         if (ret != SOFTBUS_OK) {
@@ -1932,6 +1985,7 @@ ERR_EXIT:
     return ret;
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 char *TransProxyPagingPackChannelId(int16_t channelId)
 {
     if (channelId <= 0) {
@@ -1957,6 +2011,7 @@ char *TransProxyPagingPackChannelId(int16_t channelId)
     cJSON_Delete(root);
     return buf;
 }
+#endif
 
 char *TransProxyPackIdentity(const char *identity)
 {

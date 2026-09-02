@@ -25,11 +25,15 @@ extern "C" {
 int32_t TransProxySendInnerMessage(ProxyChannelInfo *info, const char *payLoad, uint32_t payLoadLen, int32_t priority);
 int32_t TransProxyHandshake(ProxyChannelInfo *info);
 int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t retCode);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 void TransProxyKeepalive(uint32_t connId, const ProxyChannelInfo *info);
 int32_t TransProxyAckKeepalive(ProxyChannelInfo *info);
+#endif
 int32_t TransProxyResetPeer(ProxyChannelInfo *info);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 int32_t TransPagingHandshake(int32_t channelId, uint8_t *authKey, uint32_t keyLen);
 int32_t TransPagingAckHandshake(ProxyChannelInfo *chan, int32_t retCode);
+#endif
 #ifdef __cplusplus
 }
 #endif

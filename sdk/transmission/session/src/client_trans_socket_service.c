@@ -52,6 +52,12 @@ static int32_t CheckSocketInfoIsValid(const SocketInfo *info)
         TRANS_LOGE(TRANS_SDK, "invalid peerNetworkId.");
         return SOFTBUS_INVALID_PARAM;
     }
+#ifndef DSOFTBUS_FEATURE_TRANS_FILE
+    if (info->dataType == DATA_TYPE_FILE) {
+        TRANS_LOGE(TRANS_SDK, "file not support, trans_file feature disabled");
+        return SOFTBUS_FUNC_NOT_SUPPORT;
+    }
+#endif
     return SOFTBUS_OK;
 }
 
