@@ -161,6 +161,7 @@ static int32_t SetCipherOfHandshakeMsg(ProxyChannelInfo *info, uint8_t *cipher)
     return SOFTBUS_OK;
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 static void TransUpdateSlePowerLevel(uint32_t connId, ConnectSlePowerLevel level)
 {
     UpdateOption option = {
@@ -192,7 +193,9 @@ static void TransPagingHandshakeEvent(int32_t channelId, ProxyChannelInfo *info)
     };
     TRANS_EVENT(EVENT_SCENE_PAGING_CONNECT, EVENT_STAGE_PAGING_SOURCE_HANDSHAKE_START, extra);
 }
+#endif
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 int32_t TransPagingHandshake(int32_t channelId, uint8_t *authKey, uint32_t keyLen)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(keyLen != 0 && keyLen <= SESSION_KEY_LENGTH && authKey != NULL,
@@ -235,6 +238,7 @@ int32_t TransPagingHandshake(int32_t channelId, uint8_t *authKey, uint32_t keyLe
     TransPagingHandshakeEvent(channelId, &info);
     return SOFTBUS_OK;
 }
+#endif
 
 int32_t TransProxyHandshake(ProxyChannelInfo *info)
 {
@@ -283,6 +287,7 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
     return SOFTBUS_OK;
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 static int32_t TransPagingGetAuthKey(ProxyChannelInfo *chan, PagingProxyMessage *msg)
 {
     RequestBusinessInfo businessInfo;
@@ -324,7 +329,9 @@ static void ReportPagingAckHandshakeExtra(const ProxyChannelInfo *chan, int32_t 
     extra.result = (retCode == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
     TRANS_EVENT(EVENT_SCENE_PAGING_CONNECT, EVENT_STAGE_PAGING_SINK_HANDSHAKE_END, extra);
 }
+#endif
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 int32_t TransPagingAckHandshake(ProxyChannelInfo *chan, int32_t retCode)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(chan != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param.");
@@ -375,6 +382,7 @@ int32_t TransPagingAckHandshake(ProxyChannelInfo *chan, int32_t retCode)
     ReportPagingAckHandshakeExtra(chan, ret);
     return SOFTBUS_OK;
 }
+#endif
 
 int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t retCode)
 {
@@ -417,6 +425,7 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t 
     return SOFTBUS_OK;
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 void TransProxyKeepalive(uint32_t connId, const ProxyChannelInfo *info)
 {
     if (info == NULL) {
@@ -453,7 +462,9 @@ void TransProxyKeepalive(uint32_t connId, const ProxyChannelInfo *info)
         return;
     }
 }
+#endif
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 int32_t TransProxyAckKeepalive(ProxyChannelInfo *info)
 {
     if (info == NULL) {
@@ -491,7 +502,9 @@ int32_t TransProxyAckKeepalive(ProxyChannelInfo *info)
     }
     return SOFTBUS_OK;
 }
+#endif
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 static void TransPagingResetBadkeyDisConnection(uint32_t connId)
 {
     TRANS_LOGW(TRANS_CTRL, "paging reset bad key dis connect, connId=%{public}u", connId);
@@ -517,7 +530,9 @@ static void TransPagingResetBadkeyDisConnection(uint32_t connId)
     TRANS_CHECK_AND_RETURN_LOGE(
         ret == SOFTBUS_OK, TRANS_CTRL, "ConnDisconnectDeviceAllConn fail, ret=%{public}d", ret);
 }
+#endif
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 int32_t TransPagingReset(ProxyChannelInfo *info)
 {
     char *payLoad = NULL;
@@ -553,6 +568,7 @@ int32_t TransPagingReset(ProxyChannelInfo *info)
     }
     return SOFTBUS_OK;
 }
+#endif
 
 int32_t TransProxyResetPeer(ProxyChannelInfo *info)
 {
@@ -561,9 +577,11 @@ int32_t TransProxyResetPeer(ProxyChannelInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
     TRANS_LOGI(TRANS_CTRL, "send reset msg myChannelId=%{public}d, peerChannelId=%{public}d", info->myId, info->peerId);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     if (info->isD2D) {
         return TransPagingReset(info);
     }
+#endif
     char *payLoad = NULL;
     ProxyDataInfo dataInfo = {0};
     ProxyMessageHead msgHead = {0};

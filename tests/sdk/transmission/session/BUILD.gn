@@ -171,6 +171,10 @@ ohos_unittest("TransClientSessionCallbackTest") {
     debug = false
   }
   module_out_path = module_output_path
+  defines = []
+  if (dsoftbus_feature_trans_file) {
+    defines += [ "DSOFTBUS_FEATURE_TRANS_FILE" ]
+  }
   sources = [ "client_trans_session_callback_test.cpp" ]
 
   include_dirs = [
@@ -287,6 +291,10 @@ ohos_unittest("TransClientSessionCallbackExTest") {
 
 ohos_unittest("TransClientMsgServiceTest") {
   module_out_path = module_output_path
+  defines = []
+  if (dsoftbus_feature_trans_file) {
+    defines += [ "DSOFTBUS_FEATURE_TRANS_FILE" ]
+  }
   sources = [ "client_trans_message_service_test.cpp" ]
 
   include_dirs = [
@@ -396,6 +404,10 @@ ohos_unittest("TransClientSessionTest") {
     blocklist = "$dsoftbus_root_path/tests/cfi_blocklist.txt"
   }
   module_out_path = module_output_path
+  defines = []
+  if (dsoftbus_feature_trans_file) {
+    defines += [ "DSOFTBUS_FEATURE_TRANS_FILE" ]
+  }
   sources = [ "client_trans_session_test.cpp" ]
 
   include_dirs = [

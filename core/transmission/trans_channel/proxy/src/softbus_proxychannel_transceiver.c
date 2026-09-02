@@ -48,7 +48,9 @@
 #define WAIT_LISTEN_CHECK_NUM       (50)
 
 static SoftBusList *g_proxyConnectionList = NULL;
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 static SoftBusList *g_proxyPagingWaitList = NULL;
+#endif
 const char *g_transProxyLoopName = "transProxyLoopName";
 SoftBusHandler g_transLoopHandler = { 0 };
 
@@ -207,6 +209,7 @@ static int32_t TransProxyResetAndCloseConn(ProxyChannelInfo *chan)
     return SOFTBUS_OK;
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 static void TransProxyLoopMsgHandlerEx(SoftBusMessage *msg)
 {
     TRANS_CHECK_AND_RETURN_LOGE(msg != NULL, TRANS_MSG, "param invalid");
@@ -223,6 +226,7 @@ static void TransProxyLoopMsgHandlerEx(SoftBusMessage *msg)
             break;
     }
 }
+#endif
 
 static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
 {
@@ -257,7 +261,9 @@ static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
         case LOOP_KEEPALIVE_MSG:
             chan = (ProxyChannelInfo *)msg->obj;
             TRANS_CHECK_AND_RETURN_LOGE(chan != NULL, TRANS_MSG, "LOOP_KEEPALIVE_MSG, chan is null");
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
             TransProxyKeepalive(chan->connId, chan);
+#endif
             break;
         case LOOP_RESETPEER_MSG:
             chan = (ProxyChannelInfo *)msg->obj;
@@ -271,7 +277,9 @@ static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
             break;
         }
         default:
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
             TransProxyLoopMsgHandlerEx(msg);
+#endif
             break;
     }
 }
@@ -407,6 +415,7 @@ void TransProxyPostOpenClosedMsgToLoop(const ProxyChannelInfo *chan)
     g_transLoopHandler.looper->PostMessage(g_transLoopHandler.looper, msg);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 void TransProxyPagingHandshakeMsgToLoop(int32_t channelId, uint8_t *authKey, uint32_t keyLen)
 {
     if (authKey == NULL) {
@@ -423,6 +432,7 @@ void TransProxyPagingHandshakeMsgToLoop(int32_t channelId, uint8_t *authKey, uin
     }
     g_transLoopHandler.looper->PostMessage(g_transLoopHandler.looper, msg);
 }
+#endif
 
 static int32_t TransProxyLoopInit(void)
 {
@@ -977,10 +987,12 @@ static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
         return;
     }
     if (msg.msgHead.type >= PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE) {
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
         ret = TransPagingParseMessage(data, len, &msg);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "parse paging data failed.");
         }
+#endif
         return;
     }
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
@@ -1023,11 +1035,13 @@ int32_t TransProxyTransInit(void)
         TRANS_LOGE(TRANS_INIT, "create observer list failed");
         return SOFTBUS_MALLOC_ERR;
     }
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     g_proxyPagingWaitList = CreateSoftBusList();
     if (g_proxyPagingWaitList == NULL) {
         TRANS_LOGE(TRANS_INIT, "create paging handshake list failed");
         return SOFTBUS_MALLOC_ERR;
     }
+#endif
 
     ret = TransProxyLoopInit();
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "create loopInit fail");
@@ -1230,6 +1244,7 @@ void TransProxyNegoSessionKeySucc(int32_t channelId)
     SoftBusFree(channelInfo);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 int32_t TransPagingLoadSaFail(const uint32_t businessFlag)
 {
     if (SoftBusMutexLock(&g_proxyPagingWaitList->lock) != SOFTBUS_OK) {
@@ -1248,6 +1263,7 @@ int32_t TransPagingLoadSaFail(const uint32_t businessFlag)
     (void)SoftBusMutexUnlock(&g_proxyPagingWaitList->lock);
     return SOFTBUS_TRANS_PAGING_WAIT_LISTEN_NOT_FOUND;
 }
+
 
 int32_t TransPagingWaitListenStatus(const uint32_t businessFlag, PagingWaitListenStatus status)
 {
@@ -1428,3 +1444,4 @@ int32_t TransCheckPagingListenState(const PagingListenCheckInfo *checkInfo)
     }
     return SOFTBUS_OK;
 }
+#endif

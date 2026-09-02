@@ -87,5 +87,20 @@ int32_t TransSetSocketFileListener(const char *sessionName, SocketFileCallbackFu
     (void)sessionName;
     (void)fileCallback;
     (void)isReceiver;
+    return SOFTBUS_OK;
+}
+
+void TransCloseReserveFileChannel(int32_t dfileId, struct sockaddr_storage *addr, socklen_t addrLen, int32_t type)
+{
+    (void)dfileId;
+    (void)addr;
+    (void)addrLen;
+    (void)type;
+}
+
+int32_t NotifyTransLimitChanged(int32_t channelId, uint8_t tos)
+{
+    (void)channelId;
+    (void)tos;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }

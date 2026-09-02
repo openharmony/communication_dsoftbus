@@ -143,6 +143,7 @@ static int32_t OnSessionOpenedErr(int32_t sessionId, int32_t result)
     return SOFTBUS_NOT_FIND;
 }
 
+#ifdef DSOFTBUS_FEATURE_TRANS_FILE
 static int32_t OnReceiveFileStarted(int32_t sessionId, const char *files, int32_t fileCnt)
 {
     TRANS_LOGI(TRANS_TEST, "receive file start, sessionId=%{public}d", sessionId);
@@ -176,6 +177,7 @@ int32_t OnSendFileFinished(int32_t sessionId, const char *firstFile)
     TRANS_LOGI(TRANS_TEST, "send file finished, sessionId=%{public}d", sessionId);
     return SOFTBUS_OK;
 }
+#endif
 
 static ISessionListener g_sessionlistener = {
     .OnSessionOpened = OnSessionOpened,
@@ -186,6 +188,7 @@ static ISessionListener g_sessionlistener = {
     .OnQosEvent = OnQosEvent,
 };
 
+#ifdef DSOFTBUS_FEATURE_TRANS_FILE
 static IFileReceiveListener g_fileRecvListener = {
     .OnReceiveFileStarted = OnReceiveFileStarted,
     .OnReceiveFileProcess = OnReceiveFileProcess,
@@ -198,6 +201,7 @@ static IFileSendListener g_fileSendListener = {
     .OnSendFileFinished = OnSendFileFinished,
     .OnFileTransError = OnFileTransError
 };
+#endif
 
 static void TestGenerateCommParam(SessionParam *sessionParam)
 {
@@ -747,6 +751,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest15, TestSize.Level1)
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 
+#ifdef DSOFTBUS_FEATURE_TRANS_FILE
 /*
  * @tc.name: TransClientSessionTest16
  * @tc.desc: test TransClientSession
@@ -798,6 +803,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest17, TestSize.Level1)
     ret = SetFileSendListener(g_pkgName, g_sessionName, &g_fileSendListener);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+#endif
 
 /*
  * @tc.name: TransClientSessionTest18

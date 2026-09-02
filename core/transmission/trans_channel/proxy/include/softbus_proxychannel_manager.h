@@ -81,17 +81,19 @@ int32_t TransProxyGetProxyChannelInfoByChannelId(int32_t channelId, ProxyChannel
 int32_t TransDealProxyCheckCollabResult(int32_t channelId, int32_t checkResult, pid_t callingPid);
 int32_t TransProxyGetAppInfoById(int16_t channelId, AppInfo *appInfo);
 
-int32_t TransProxyCreatePagingChanInfo(ProxyChannelInfo *chan);
 int32_t TransProxyGetProxyChannelIdByAuthReq(uint32_t reqId, int32_t *channelId);
+void TransProxyProcessErrMsg(ProxyChannelInfo *info, int32_t errCode);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
+int32_t TransProxyCreatePagingChanInfo(ProxyChannelInfo *chan);
 int32_t TransPagingResetChan(ProxyChannelInfo *chanInfo);
 char *TransPagingPackHandshakeMsg(ProxyChannelInfo *info);
 int32_t TransPagingHandshakeUnPackErrMsg(ProxyChannelInfo *chan, const ProxyMessage *msg, int32_t *errCode);
 int32_t TransProxyGetChannelByCheckInfo(const PagingListenCheckInfo *checkInfo, ProxyChannelInfo *chan, bool isClient);
-void TransProxyProcessErrMsg(ProxyChannelInfo *info, int32_t errCode);
 int32_t TransPagingUpdatePagingChannelInfo(ProxyChannelInfo *info);
 int32_t TransPagingUpdatePidAndData(int32_t channelId, int32_t pid, char *data, uint32_t len);
 void TransPagingBadKeyRetry(int32_t channelId);
 int32_t TransPagingUpdateDataConfig(AppInfo *info);
+#endif
 int32_t TransProxyD2dGetSleMac(int32_t channelId, int32_t pid, char *sleMac, uint32_t macLen);
 void TransProxyUnRegQosInfo(uint32_t connId, int32_t channelId, bool isD2d);
 int32_t TransDisableConnBrIdleCheck(int32_t channelId);

@@ -38,7 +38,10 @@ ohos_fuzztest("ClientTransProxyFileCommonFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
 
-  sources = [ "clienttransproxyfilecommon_fuzzer.cpp" ]
+  sources = [
+    "clienttransproxyfilecommon_fuzzer.cpp",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/src/client_trans_proxy_file_common.c",
+  ]
 
   deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
 

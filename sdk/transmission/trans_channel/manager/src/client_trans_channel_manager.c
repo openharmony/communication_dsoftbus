@@ -202,6 +202,7 @@ int32_t ClientTransChannelSendStream(int32_t channelId, int32_t channelType, con
     return ret;
 }
 
+#ifdef DSOFTBUS_FEATURE_TRANS_FILE
 int32_t ClientTransChannelSendFile(int32_t channelId, int32_t channelType, const char *sFileList[],
     const char *dFileList[], uint32_t fileCnt)
 {
@@ -211,14 +212,20 @@ int32_t ClientTransChannelSendFile(int32_t channelId, int32_t channelType, const
             ret = TransUdpChannelSendFile(channelId, sFileList, dFileList, fileCnt);
             break;
         case CHANNEL_TYPE_PROXY:
+#ifdef DSOFTBUS_FEATURE_TRANS_PROXY_FILE
             ret = TransProxyChannelSendFile(channelId, sFileList, dFileList, fileCnt);
             break;
+#else
+            TRANS_LOGW(TRANS_FILE, "Proxy SendFile not support, trans_proxy_file feature disabled");
+            return SOFTBUS_FUNC_NOT_SUPPORT;
+#endif
         default:
             TRANS_LOGE(TRANS_FILE, "unsupport channelType=%{public}d.", channelType);
             return SOFTBUS_TRANS_CHANNEL_TYPE_INVALID;
     }
     return ret;
 }
+#endif
 
 void DeleteFileListener(const char *sessionName)
 {

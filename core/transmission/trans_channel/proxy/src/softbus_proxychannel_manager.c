@@ -1759,6 +1759,7 @@ int32_t TransDealProxyChannelOpenResult(
             TransProxyDelChanByChanId(chan.channelId);
             return ret;
         }
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
         ret = TransPagingAckHandshake(&chan, openResult);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL,
@@ -1767,6 +1768,9 @@ int32_t TransDealProxyChannelOpenResult(
             TransProxyDelChanByChanId(chan.channelId);
             return ret;
         }
+#else
+        (void)openResult;
+#endif
         return OnProxyChannelBind(chan.channelId, &chan.appInfo);
     }
     (void)TransProxyUpdateSinkAccessInfo(channelId, accessInfo);
@@ -1836,7 +1840,9 @@ void TransAsyncProxyChannelTask(int32_t channelId)
     if (curCount >= LOOPER_REPLY_CNT_MAX) {
         TRANS_LOGE(TRANS_CTRL, "Open proxy channel timeout, channelId=%{public}d", channelId);
         if (chan.isD2D) {
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
             (void)TransPagingAckHandshake(&chan, SOFTBUS_TRANS_OPEN_CHANNEL_NEGTIATE_TIMEOUT);
+#endif
         } else {
             (void)TransProxyAckHandshake(chan.connId, &chan, SOFTBUS_TRANS_OPEN_CHANNEL_NEGTIATE_TIMEOUT);
         }

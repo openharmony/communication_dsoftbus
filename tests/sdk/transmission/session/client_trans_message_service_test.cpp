@@ -378,6 +378,7 @@ HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest04, TestSize.Level1
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 
+#ifdef DSOFTBUS_FEATURE_TRANS_FILE
 /**
  * @tc.name: TransClientMsgServiceTest05
  * @tc.desc: Transmission sdk message service send file with different parameters.
@@ -413,6 +414,7 @@ HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest05, TestSize.Level1
     EXPECT_EQ(ret, SOFTBUS_TRANS_CHANNEL_TYPE_INVALID);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
+#endif
 
 /**
  * @tc.name: CheckSendLenForBoosterTest01
@@ -539,11 +541,19 @@ HWTEST_F(TransClientMsgServiceTest, SendMessageAsyncTest01, TestSize.Level1)
         g_sessionName, CHANNEL_TYPE_PROXY, BUSINESS_TYPE_D2D_MESSAGE, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     ret = SendMessageAsync(sessionId, dataSeq, data, len);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND);
+#else
+    EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
+#endif
 
     len = TRANS_TEST_BEYOND_MAX_MSG_LEN;
     ret = SendMessageAsync(sessionId, dataSeq, data, len);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND);
+#else
+    EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
+#endif
 
     len = TRANS_TEST_DEFAULT_MAX_MSG_LEN;
     ret = SendMessageAsync(sessionId, dataSeq, data, len);

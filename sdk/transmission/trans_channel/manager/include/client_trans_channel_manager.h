@@ -38,8 +38,10 @@ int32_t ClientTransChannelSendMessage(int32_t channelId, int32_t type, const voi
 int32_t ClientTransChannelSendStream(int32_t channelId, int32_t type, const StreamData *data,
     const StreamData *ext, const StreamFrameInfo *param);
 
+#ifdef DSOFTBUS_FEATURE_TRANS_FILE
 int32_t ClientTransChannelSendFile(int32_t channelId, int32_t type, const char *sFileList[],
     const char *dFileList[], uint32_t fileCnt);
+#endif
 
 void DeleteFileListener(const char *sessionName);
 
