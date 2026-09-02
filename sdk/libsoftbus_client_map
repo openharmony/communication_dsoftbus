@@ -265,6 +265,7 @@
         "EnableMetaPlugin";
         "DisableMetaPlugin";
         "GetMetaPluginState";
+        "SetActionResourcePolicy";
     local:
         *;
 };

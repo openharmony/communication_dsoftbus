@@ -280,5 +280,11 @@
     "PROCESS_NAME": [
       "watch_system_service"
     ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_SET_ACTION_RESOURCE",
+    "PROCESS_NAME": [
+      "CollaborationFwk"
+    ]
   }
 ]
