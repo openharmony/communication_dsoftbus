@@ -67,6 +67,9 @@ declare_args() {
   dsoftbus_feature_lnn_usb_ncm = false
   dsoftbus_feature_trans_mintp = false
   dsoftbus_feature_lnn_d2d_auth = true
+  dsoftbus_feature_lnn_auth_ext = true
+  dsoftbus_feature_lnn_net_builder_ext = true
+  dsoftbus_feature_lnn_ledger_ext = true
   dsoftbus_feature_trans_io_uring = false
   dsoftbus_feature_lnn_push = false
   dsoftbus_feature_multi_foreground_user = false
