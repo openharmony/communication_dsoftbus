@@ -261,11 +261,23 @@ if (defined(ohos_lite)) {
 
         "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
         "$cjson_shared_path",
         "$ipc_single_path",
         "$samgr_path",
       ]
+      if (!dsoftbus_feature_conn_pv1 && !dsoftbus_feature_conn_pv2 && !dsoftbus_feature_conn_hv1
+            && !dsoftbus_feature_conn_hv2 && !dsoftbus_feature_conn_hv2c) {
+        sources += [
+          "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_manager_virtual.c",
+        ]
+        include_dirs += [
+          "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+        ]
+      } else {
+        deps += [
+          "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
+        ]
+      }
       external_deps = [
         "bounds_checking_function:libsec_shared",
         "device_auth:deviceauth_sdk",
