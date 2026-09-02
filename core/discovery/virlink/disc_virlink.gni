@@ -13,11 +13,16 @@
 
 import("../../../dsoftbus.gni")
 
-disc_virlink_src = [
-  "$dsoftbus_root_path/core/discovery/virlink/adapter/disc_virLink_adapter.c",
-]
-disc_virlink_inc = [
-  "$dsoftbus_root_path/core/discovery/virlink/adapter",
-  "$dsoftbus_root_path/interfaces/kits/disc",
-]
-disc_virlink_deps = [ ]
+disc_virlink_src = []
+disc_virlink_inc = []
+disc_virlink_deps = []
+
+if (!dsoftbus_feature_inner_disc_virlink) {
+  disc_virlink_src += ["$dsoftbus_root_path/core/discovery/virlink/adapter/disc_virLink_adapter_virlink.c"]
+} else {
+  disc_virlink_src += ["$dsoftbus_root_path/core/discovery/virlink/adapter/disc_virLink_adapter.c"]
+  disc_virlink_inc += [
+    "$dsoftbus_root_path/core/discovery/virlink/adapter",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+  ]
+}
