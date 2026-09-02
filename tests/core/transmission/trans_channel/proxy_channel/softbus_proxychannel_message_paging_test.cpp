@@ -29,10 +29,12 @@
 using namespace testing;
 using namespace testing::ext;
 
-static const char *TEST_DATA = "TEST_";
 #define TEST_LEN 10
 #define DATA_LEN 5
 #define TEST_CHANNEL_ID 1058
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
+static const char *TEST_DATA = "TEST_";
+#endif
 
 namespace OHOS {
 
@@ -89,6 +91,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransParseMessageHeadTypeTest001,
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 /**@
  * @tc.name: TransUnPackPagingExtraDataTest001
  * @tc.desc: test proxy open proxy channel, use wrong param.
@@ -1532,4 +1535,5 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingParseMessageTest009, T
     int32_t ret = TransPagingParseMessage(data, len, &msg);
     EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
 }
+#endif
 } // namespace OHOS

@@ -522,7 +522,9 @@ HWTEST_F(TransProxySessionTest, TransProxyHandshakeTest003, TestSize.Level1)
     char *payLoad = static_cast<char *>(SoftBusCalloc(32));
     ASSERT_TRUE(payLoad != nullptr);
     (void)strcpy_s(payLoad, 32, "testpayload");
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     TransPagingHandshakeEvent(TEST_NUMBER_256, nullptr);
+#endif
 
     SoftbusTransProxyNetworkMock networkObj;
     char *payLoadPtr = payLoad;
@@ -562,6 +564,7 @@ HWTEST_F(TransProxySessionTest, TransProxyHandshakeTest004, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 /**
   * @tc.name: TransProxyKeepaliveTest001
   * @tc.desc: TransProxyKeepalive
@@ -651,6 +654,7 @@ HWTEST_F(TransProxySessionTest, TransProxyResetPeerTest001, TestSize.Level1)
     int32_t ret = TransProxyAckKeepalive(&proxyChannelInfo);
     EXPECT_EQ(ret, SOFTBUS_TRANS_PACK_LEEPALIVE_ACK_FAILED);
 }
+#endif
 
 /**
   * @tc.name: TransProxyPackHandshakeErrMsgTest001

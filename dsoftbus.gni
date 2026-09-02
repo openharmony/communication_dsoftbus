@@ -202,6 +202,22 @@ if (dsoftbus_feature_trans_mintp) {
   defines += [ "DSOFTBUS_FEATURE_TRANS_MINTP" ]
 }
 
+if (dsoftbus_feature_trans_file) {
+  defines += [ "DSOFTBUS_FEATURE_TRANS_FILE" ]
+}
+
+if (dsoftbus_feature_trans_udp_file) {
+  defines += [ "DSOFTBUS_FEATURE_TRANS_UDP_FILE" ]
+}
+
+if (dsoftbus_feature_trans_proxy_file) {
+  defines += [ "DSOFTBUS_FEATURE_TRANS_PROXY_FILE" ]
+}
+
+if (dsoftbus_feature_trans_proxy_channel) {
+  defines += [ "DSOFTBUS_FEATURE_PROXY_CHANNEL" ]
+}
+
 if (dsoftbus_feature_multi_foreground_user) {
   defines += [ "DSOFTBUS_FEATURE_MULTI_FOREGROUND_USER" ]
 }

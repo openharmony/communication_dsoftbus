@@ -776,6 +776,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyAckHandshakeTest003, TestSize
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 /*
  * @tc.name: TransProxyKeepaliveTest001
  * @tc.desc: test proxy keepalive with inner app type.
@@ -843,6 +844,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyAckKeepaliveTest002, TestSize
     int32_t ret = TransProxyAckKeepalive(&chanInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
+#endif
 
 /*
  * @tc.name: TransProxyResetPeerTest001

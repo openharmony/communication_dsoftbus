@@ -833,6 +833,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyCloseChannelTest001, TestS
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
+#ifdef DSOFTBUS_FEATURE_TRANS_PROXY_FILE
 /*
  * @tc.name: TransProxyChannelSendFileTest001
  * @tc.desc: TransProxyChannelSendFile returns SOFTBUS_INVALID_PARAM with null
@@ -884,6 +885,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendFileTest003, TestSize
     int32_t ret = TransProxyChannelSendFile(channelId, sFileList, dFileList, fileCnt);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
+#endif
 
 /*
  * @tc.name: ClientTransProxyGetInfoByChannelIdTest001

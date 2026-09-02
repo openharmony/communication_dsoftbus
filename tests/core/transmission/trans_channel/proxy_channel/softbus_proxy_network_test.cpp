@@ -203,10 +203,12 @@ HWTEST_F(SoftbusProxyNetworkTest, TransNotifyNetworkingChannelOpenedTest001, Tes
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test app type is normal and get network id fail */
     appInfo.appType = APP_TYPE_NORMAL;
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     ret = OnProxyChannelOpened(channelId, &appInfo, isServer);
     EXPECT_NE(SOFTBUS_OK, ret);
     ret = OnProxyChannelOpened(channelId, &appInfo, isServer);
     EXPECT_NE(SOFTBUS_OK, ret);
+#endif
     /* test app type is inner */
     appInfo.appType = APP_TYPE_INNER;
     ret = OnProxyChannelOpened(channelId, &appInfo, isServer);

@@ -128,6 +128,7 @@ HWTEST_F(SoftbusProxyChannelMetaNodeMessageTest, TransProxyParseMessage_MetaNode
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 /*
  * @tc.name: TransProxyParseMessage_NonMetaNode001
  * @tc.desc: Test TransProxyParseMessage when isSupportConcurrentMetaNode is false.
@@ -146,6 +147,7 @@ HWTEST_F(SoftbusProxyChannelMetaNodeMessageTest, TransProxyParseMessage_NonMetaN
     /* May fail due to decrypt, but routing to 8B parse path is verified */
     EXPECT_NE(ret, SOFTBUS_OK);
 }
+#endif
 
 /*
  * @tc.name: PackPlaintextMetaNodeMessage001

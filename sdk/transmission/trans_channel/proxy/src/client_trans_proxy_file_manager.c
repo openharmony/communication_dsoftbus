@@ -993,7 +993,8 @@ static int32_t HandleFileSendingProcess(
     return ret;
 }
 
-int32_t ProxyChannelSendFile(int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
+static int32_t ProxyChannelSendFile(
+    int32_t channelId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
     TRANS_LOGI(TRANS_FILE, "proxy send file trans start");
     if (fileCnt == 0 || fileCnt > MAX_SEND_FILE_NUM) {
@@ -1902,20 +1903,10 @@ static int32_t CheckFrameLength(int32_t channelId, uint32_t frameLength, int32_t
     return frameLength > *packetSize ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
 }
 
-int32_t ProcessRecvFileFrameData(int32_t sessionId, int32_t channelId, const FileFrame *oneFrame)
+static int32_t ProcessFileFrameByType(
+    int32_t sessionId, int32_t channelId, const FileFrame *oneFrame, int32_t osType, uint32_t packetSize)
 {
-    if (oneFrame == NULL) {
-        TRANS_LOGE(TRANS_FILE, "invalid param.");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    int32_t osType = OHOS_TYPE_UNKNOWN;
-    uint32_t packetSize;
-    int32_t ret = ClientTransProxyGetOsTypeByChannelId(channelId, &osType);
-    ret = CheckFrameLength(channelId, oneFrame->frameLength, osType, &packetSize);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_FILE, "frameLength is invalid sessionId=%{public}d, osType=%{public}d", sessionId, osType);
-        return ret;
-    }
+    int32_t ret = SOFTBUS_FILE_ERR;
     switch (oneFrame->frameType) {
         case TRANS_SESSION_FILE_FIRST_FRAME:
             ret = CreateFileFromFrame(sessionId, channelId, oneFrame, osType, packetSize);
@@ -1927,8 +1918,8 @@ int32_t ProcessRecvFileFrameData(int32_t sessionId, int32_t channelId, const Fil
         case TRANS_SESSION_FILE_LAST_FRAME:
             ret = WriteFrameToFile(sessionId, oneFrame);
             if (ret != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_FILE, "write frame fail ret=%{public}d, sessionId=%{public}d, osType=%{public}d",
-                    ret, sessionId, osType);
+                TRANS_LOGE(TRANS_FILE, "write frame fail ret=%{public}d, sessionId=%{public}d, osType=%{public}d", ret,
+                    sessionId, osType);
             }
             break;
         case TRANS_SESSION_FILE_ACK_REQUEST_SENT:
@@ -1953,6 +1944,23 @@ int32_t ProcessRecvFileFrameData(int32_t sessionId, int32_t channelId, const Fil
             return SOFTBUS_FILE_ERR;
     }
     return ret;
+}
+
+static int32_t ProcessRecvFileFrameData(int32_t sessionId, int32_t channelId, const FileFrame *oneFrame)
+{
+    if (oneFrame == NULL) {
+        TRANS_LOGE(TRANS_FILE, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t osType = OHOS_TYPE_UNKNOWN;
+    uint32_t packetSize;
+    int32_t ret = ClientTransProxyGetOsTypeByChannelId(channelId, &osType);
+    ret = CheckFrameLength(channelId, oneFrame->frameLength, osType, &packetSize);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "frameLength is invalid sessionId=%{public}d, osType=%{public}d", sessionId, osType);
+        return ret;
+    }
+    return ProcessFileFrameByType(sessionId, channelId, oneFrame, osType, packetSize);
 }
 
 int32_t ProcessFileFrameData(int32_t sessionId, int32_t channelId, const char *data, uint32_t len, int32_t type)

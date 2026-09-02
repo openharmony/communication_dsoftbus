@@ -16,6 +16,17 @@ import("../../common/mock/mock.gni")
 
 softbus_proxy_channel_manager_ut_sources = [ "$dsoftbus_test_path/core/transmission/trans_channel/proxy_channel/softbus_proxychannel_manager_test.cpp" ]
 
+# Feature macro isolation: the test directly includes softbus_proxychannel_manager.c
+# which contains #ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL guards. These defines must be
+# propagated to the test compilation so the guarded branches match the product config.
+softbus_proxy_channel_manager_ut_defines = []
+if (dsoftbus_feature_trans_proxy_channel) {
+  softbus_proxy_channel_manager_ut_defines += [ "DSOFTBUS_FEATURE_PROXY_CHANNEL" ]
+}
+if (dsoftbus_feature_trans_file) {
+  softbus_proxy_channel_manager_ut_defines += [ "DSOFTBUS_FEATURE_TRANS_FILE" ]
+}
+
 softbus_proxy_channel_manager_ut_include_dirs = [
   "$dsoftbus_core_path/adapter/bus_center/include",
   "$dsoftbus_core_path/adapter/transmission/include",

@@ -51,6 +51,8 @@
       "dsoftbus_feature_trans_udp_stream",
       "dsoftbus_feature_trans_udp",
       "dsoftbus_feature_trans_proxy_file",
+      "dsoftbus_feature_trans_file",
+      "dsoftbus_feature_trans_proxy_channel",
       "dsoftbus_feature_trans_qos",
       "dsoftbus_feature_trans_htp",
       "dsoftbus_feature_trans_br_proxy",

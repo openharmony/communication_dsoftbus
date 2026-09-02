@@ -140,7 +140,11 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenedTest002, TestSize.L
     EXPECT_EQ(SOFTBUS_OK, ret);
     info.channelType = CHANNEL_TYPE_PROXY;
     ret = TransOnChannelOpened(g_sessionName, &info);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
+#else
+    EXPECT_EQ(SOFTBUS_FUNC_NOT_SUPPORT, ret);
+#endif
 }
 
 /**
@@ -217,7 +221,11 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelOpenFailedTest001, TestSi
     int32_t ret = TransOnChannelOpenFailed(channelId, CHANNEL_TYPE_AUTH, SOFTBUS_MEM_ERR);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransOnChannelOpenFailed(channelId, CHANNEL_TYPE_PROXY, SOFTBUS_MEM_ERR);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     EXPECT_EQ(SOFTBUS_OK, ret);
+#else
+    EXPECT_EQ(SOFTBUS_FUNC_NOT_SUPPORT, ret);
+#endif
 }
 
 /**
@@ -291,7 +299,11 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelClosedTest002, TestSize.L
 {
     int32_t channelId = 1;
     int32_t ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_PROXY, MESSAGE_TYPE_NOMAL, SHUTDOWN_REASON_UNKNOWN);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     EXPECT_EQ(SOFTBUS_OK, ret);
+#else
+    EXPECT_EQ(SOFTBUS_FUNC_NOT_SUPPORT, ret);
+#endif
     ret = TransOnChannelClosed(channelId, CHANNEL_TYPE_PROXY, MESSAGE_TYPE_CLOSE_ACK, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 }
@@ -369,7 +381,11 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelMsgReceivedTest002, TestS
     int32_t channelId = 1;
     const void *data = static_cast<const void *>("test");
     int32_t ret = TransOnChannelMsgReceived(channelId, CHANNEL_TYPE_PROXY, data, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID, ret);
+#else
+    EXPECT_EQ(SOFTBUS_FUNC_NOT_SUPPORT, ret);
+#endif
     ret = TransOnChannelMsgReceived(channelId, CHANNEL_TYPE_TCP_DIRECT, data, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -468,7 +484,11 @@ HWTEST_F(ClientTransChannelCallbackTest, TransOnChannelBindTest002, TestSize.Lev
 {
     const int32_t channelId = 1;
     int32_t ret = TransOnChannelBind(channelId, CHANNEL_TYPE_PROXY);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     EXPECT_EQ(SOFTBUS_OK, ret);
+#else
+    EXPECT_EQ(SOFTBUS_FUNC_NOT_SUPPORT, ret);
+#endif
     ret = TransOnChannelBind(channelId, CHANNEL_TYPE_AUTH);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
