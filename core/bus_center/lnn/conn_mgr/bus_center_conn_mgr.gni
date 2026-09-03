@@ -13,7 +13,11 @@
 
 import("../../../../dsoftbus.gni")
 
-bus_center_conn_mgr_src = [ "$dsoftbus_root_path/core/bus_center/lnn/conn_mgr/src/lnn_connection_interface.c" ]
+if (dsoftbus_feature_lnn_frame && dsoftbus_feature_lnn_ledger_ext) {
+  bus_center_conn_mgr_src = [ "$dsoftbus_root_path/core/bus_center/lnn/conn_mgr/src/lnn_connection_interface.c" ]
+} else {
+  bus_center_conn_mgr_src = [ "$dsoftbus_root_path/core/bus_center/lnn/conn_mgr/src/lnn_connection_interface_virtual.c" ]
+}
 
 bus_center_conn_mgr_inc = [ "$dsoftbus_root_path/interfaces/kits/lnn" ]
 
