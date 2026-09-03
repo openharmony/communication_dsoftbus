@@ -224,7 +224,7 @@ int32_t TransOpenSession(const SessionParam *param, TransInfo *info)
         TRANS_LOGE(TRANS_CTRL, "SessionParam check failed");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (!IsValidStringSafe(param->groupId, GROUP_ID_SIZE_MAX)) {
+    if (param->groupId == NULL || strnlen(param->groupId, GROUP_ID_SIZE_MAX) >= GROUP_ID_SIZE_MAX) {
         TRANS_LOGE(TRANS_CTRL, "invalid groupId");
         return SOFTBUS_TRANS_SESSION_GROUP_INVALID;
     }
