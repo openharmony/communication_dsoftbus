@@ -167,6 +167,8 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
             break;
         case CHANNEL_TYPE_UDP:
             ret = TransOnUdpChannelOpened(sessionName, channel, &udpPort, &accessInfo);
+            TRANS_LOGI(TRANS_SDK, "enableMultipath=%{public}d, isMultiNeg=%{public}d",
+                channel->enableMultipath, channel->isMultiNeg);
             break;
         default:
             TRANS_LOGE(TRANS_SDK, "[client] invalid type.");
@@ -176,8 +178,6 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
     int32_t channelId = channel->channelId;
     int32_t channelType = channel->channelType;
     int32_t openResult = ret;
-    TRANS_LOGI(TRANS_SDK, "enableMultipath=%{public}d, isMultiNeg=%{public}d",
-        channel->enableMultipath, channel->isMultiNeg);
     if (channel->isServer) {
         if (channelType == CHANNEL_TYPE_UDP && udpPort > 0) {
             ret = TransSendUdpChannelOpenedDataToCore(channelId, channelType, openResult, udpPort, &accessInfo);
@@ -188,7 +188,9 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
         TransSetUdpChannelSessionId(channel->channelId, channel->sessionId);
         (void)UpdateMultiPathSessionInfo(channel->sessionId, channel);
     }
-    if (ret == SOFTBUS_OK) {
+    if (ret == SOFTBUS_OK || !channel->isServer || channel->connectType == CONNECT_BR ||
+        channel->connectType == CONNECT_BLE || channel->connectType == CONNECT_P2P ||
+        channel->connectType == CONNECT_HML) {
         AddSocketResource(sessionName, channel);
     }
     return ret;

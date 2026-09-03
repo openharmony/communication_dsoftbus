@@ -69,8 +69,6 @@ static void TransTcpDataTlvUnpack(TcpDataTlvPacketHead *data)
 
 static int32_t TransResizeDataBuffer(DataBuf *oldBuf, uint32_t pkgLen)
 {
-    TRANS_LOGI(TRANS_CTRL, "Resize Data Buffer channelId=%{public}d, pkgLen=%{public}d",
-        oldBuf->channelId, pkgLen);
     char *newBuf = (char *)SoftBusCalloc(pkgLen);
     if (newBuf == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc err pkgLen=%{public}u", pkgLen);
@@ -86,7 +84,7 @@ static int32_t TransResizeDataBuffer(DataBuf *oldBuf, uint32_t pkgLen)
     oldBuf->data = newBuf;
     oldBuf->size = pkgLen;
     oldBuf->w = newBuf + bufLen;
-    TRANS_LOGI(TRANS_CTRL, "TransResizeDataBuffer ok");
+    TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, pkgLen=%{public}d", oldBuf->channelId, pkgLen);
     return SOFTBUS_OK;
 }
 
@@ -184,8 +182,7 @@ int32_t TransTdcUnPackAllData(int32_t channelId, DataBuf *node, bool *flag)
         return SOFTBUS_OK;
     }
     if (bufLen < DC_DATA_HEAD_SIZE) {
-        TRANS_LOGW(TRANS_CTRL,"head bufLen not enough, recv biz head next time\
-            channelId=%{public}d, bufLen=%{public}u", channelId, bufLen);
+        TRANS_LOGW(TRANS_CTRL,"head incomplete channelId=%{public}d, bufLen=%{public}u", channelId, bufLen);
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
     TcpDataPacketHead *pktHead = (TcpDataPacketHead *)(node->data);
@@ -319,8 +316,7 @@ int32_t TransTdcUnPackAllTlvData(
     }
     TransTcpDataTlvUnpack(head);
     if (bufLen < *headSize) {
-        TRANS_LOGW(TRANS_CTRL, "head bufLen not enough, recv biz head next time\
-            channelId=%{public}d, bufLen=%{public}u", channelId, bufLen);
+        TRANS_LOGW(TRANS_CTRL, "head incomplete channelId=%{public}d, bufLen=%{public}u", channelId, bufLen);
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
     if (head->magicNumber != MAGIC_NUMBER) {

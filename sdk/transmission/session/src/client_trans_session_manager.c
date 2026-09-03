@@ -440,7 +440,7 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const c
     if (g_clientSessionServerList->cnt >= MAX_SESSION_SERVER_NUMBER) {
         ShowClientSessionServer();
         UnlockClientSessionServerList();
-        TRANS_LOGE(TRANS_SDK, "ClientAddSessionServer: client server num reach max");
+        TRANS_LOGE(TRANS_SDK, "client server num reach max");
         return SOFTBUS_INVALID_NUM;
     }
 
@@ -2491,7 +2491,7 @@ int32_t ClientGetSessionCallbackAdapterByName(const char *sessionName, SessionLi
     UnlockClientSessionServerList();
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGE(TRANS_SDK, "SessionCallbackAdapter not found, sessionName=%{public}s", AnonymizeWrapper(tmpName));
+    TRANS_LOGE(TRANS_SDK, "session not found, sessionName=%{public}s", AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
     return SOFTBUS_NOT_FIND;
 }
@@ -2749,7 +2749,7 @@ int32_t ClientRawStreamEncryptDefOptGet(const char *sessionName, bool *isEncrypt
     UnlockClientSessionServerList();
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
-    TRANS_LOGE(TRANS_SDK, "not found ClientSessionServer by sessionName=%{public}s", AnonymizeWrapper(tmpName));
+    TRANS_LOGE(TRANS_SDK, "not found session by sessionName=%{public}s", AnonymizeWrapper(tmpName));
     AnonymizeFree(tmpName);
     return SOFTBUS_TRANS_SESSION_SERVER_NOT_FOUND;
 }
@@ -3953,9 +3953,9 @@ bool IsMultiPathSession(const char *sessionName, int32_t *multipathSessionId)
     ret = GetMultiPathSession(sessionName, &serverNode, &sessionNode);
     if (ret != SOFTBUS_OK) {
         UnlockClientSessionServerList();
-        TRANS_LOGI(TRANS_SDK, "current session is not a multiPath session");
         return false;
     }
+    TRANS_LOGI(TRANS_SDK, "current session is multiPath session");
     *multipathSessionId = sessionNode->sessionId;
     UnlockClientSessionServerList();
     return true;
@@ -4125,7 +4125,7 @@ int32_t ClientSetKeyTypeBySocket(int32_t socket, int32_t keyType)
     ret = ClientCheckSetKeyTypePermission(sessionNode);
     if (ret != SOFTBUS_OK) {
         UnlockClientSessionServerList();
-        TRANS_LOGE(TRANS_SDK, "ClientCheckSetKeyTypePermission fail, socket=%{public}d ret=%{public}d", socket, ret);
+        TRANS_LOGE(TRANS_SDK, "checkPermission fail, socket=%{public}d ret=%{public}d", socket, ret);
         return ret;
     }
     sessionNode->keyType = keyType;
@@ -4169,7 +4169,7 @@ int32_t TransGetKeyTypeBySocketId(int32_t socket, int32_t *keyType)
     ret = ClientCheckGetKeyTypePermission(sessionNode);
     if (ret != SOFTBUS_OK) {
         UnlockClientSessionServerList();
-        TRANS_LOGE(TRANS_SDK, "ClientCheckGetKeyTypePermission fail, socket=%{public}d ret=%{public}d", socket, ret);
+        TRANS_LOGE(TRANS_SDK, "checkPermission fail, socket=%{public}d ret=%{public}d", socket, ret);
         return ret;
     }
     *keyType = sessionNode->keyType;

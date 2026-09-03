@@ -369,10 +369,10 @@ int32_t GetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle)
 
 int32_t TransDelSessionConnById(int32_t channelId)
 {
-    TRANS_LOGW(TRANS_CTRL, "channelId=%{public}d", channelId);
     SessionConn *item = NULL;
     SessionConn *next = NULL;
     if (GetSessionConnLock() != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_CTRL, "get lock fail, channelId=%{public}d", channelId);
         return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_sessionConnList->list, SessionConn, node) {
@@ -398,6 +398,7 @@ int32_t TransDelSessionConnById(int32_t channelId)
         }
     }
     ReleaseSessionConnLock();
+    TRANS_LOGE(TRANS_CTRL, "not found sessionConn, channelId=%{public}d", channelId);
     return SOFTBUS_TRANS_TDC_CHANNEL_NOT_FOUND;
 }
 

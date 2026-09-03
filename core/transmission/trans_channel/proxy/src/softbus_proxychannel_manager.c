@@ -1967,7 +1967,7 @@ static void TransProxyProcessResetMsgHelper(const ProxyChannelInfo *info, const 
         int32_t errCode = ((msg->msgHead.cipher & BAD_CIPHER) == BAD_CIPHER) ?
             SOFTBUS_TRANS_BAD_KEY : SOFTBUS_TRANS_HANDSHAKE_ERROR;
         TransProxyUnPackRestErrMsg(msg->data, &errCode, msg->dataLen);
-        TRANS_LOGE(TRANS_CTRL, "TransProxyProcessResetMsg errCode=%{public}d", errCode);
+        TRANS_LOGE(TRANS_CTRL, "errCode=%{public}d", errCode);
         TransProxyOpenProxyChannelFail(info->channelId, &(info->appInfo), errCode);
     } else if (info->status == PROXY_CHANNEL_STATUS_COMPLETED) {
         TransEventExtra extra = {

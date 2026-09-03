@@ -168,7 +168,7 @@ void StopHmlListener(ListenerModule module)
         return;
     }
     if (StopBaseListener(module) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "StopHmlListener stop listener fail. module=%{public}d", module);
+        TRANS_LOGE(TRANS_CTRL, "stop listener fail. module=%{public}d", module);
     }
     DelHmlListenerByMoudle(module);
     (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
@@ -397,7 +397,7 @@ static void AnonymizeLogHmlListenerInfo(const char *ip, const char *peerUuid)
     char *tmpUuid = NULL;
     Anonymize(ip, &tmpIp);
     Anonymize(peerUuid, &tmpUuid);
-    TRANS_LOGI(TRANS_CTRL, "StartHmlListener: ip=%{public}s, peerUuid=%{public}s.", AnonymizeWrapper(tmpIp),
+    TRANS_LOGI(TRANS_CTRL, "ip=%{public}s, peerUuid=%{public}s.", AnonymizeWrapper(tmpIp),
         AnonymizeWrapper(tmpUuid));
     AnonymizeFree(tmpIp);
     AnonymizeFree(tmpUuid);
@@ -436,7 +436,7 @@ static int32_t StartHmlListener(const char *ip, int32_t *port, const char *peerU
     if (item == NULL) {
         StopHmlListener(moudleType);
         (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
-        TRANS_LOGE(TRANS_CTRL, "HmlListenerInfo malloc fail");
+        TRANS_LOGE(TRANS_CTRL, "malloc fail");
         return SOFTBUS_MALLOC_ERR;
     }
     item->myPort = *port;
@@ -444,7 +444,7 @@ static int32_t StartHmlListener(const char *ip, int32_t *port, const char *peerU
     item->protocol = protocol;
     if (strncpy_s(item->myIp, IP_LEN, ip, IP_LEN) != EOK ||
         strncpy_s(item->peerUuid, UUID_BUF_LEN, peerUuid, UUID_BUF_LEN) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "HmlListenerInfo copy ip or peer uuid failed.");
+        TRANS_LOGE(TRANS_CTRL, "copy ip or peer uuid failed.");
         SoftBusFree(item);
         StopHmlListener(moudleType);
         (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
@@ -453,7 +453,7 @@ static int32_t StartHmlListener(const char *ip, int32_t *port, const char *peerU
     ListAdd(&(g_hmlListenerList->list), &(item->node));
     g_hmlListenerList->cnt++;
     (void)SoftBusMutexUnlock(&g_hmlListenerList->lock);
-    TRANS_LOGI(TRANS_CTRL, "StartHmlListener succ, port=%{public}d, protocol=%{public}u", *port, protocol);
+    TRANS_LOGI(TRANS_CTRL, "succ, port=%{public}d, protocol=%{public}u", *port, protocol);
     return SOFTBUS_OK;
 }
 
@@ -559,8 +559,7 @@ static void OnChannelOpenFail(int32_t channelId, int32_t errCode)
 
 static int32_t SendAuthData(AuthHandle authHandle, int32_t module, int32_t flag, int64_t seq, const char *data)
 {
-    TRANS_LOGI(TRANS_CTRL,
-        "SendAuthData: authId=%{public}" PRId64 ", model=%{public}d, flag=%{public}d, seq=%{public}" PRId64,
+    TRANS_LOGI(TRANS_CTRL, "authId=%{public}" PRId64 ", model=%{public}d, flag=%{public}d, seq=%{public}" PRId64,
         authHandle.authId, module, flag, seq);
     AuthTransData dataInfo = {
         .module = module,
@@ -570,7 +569,7 @@ static int32_t SendAuthData(AuthHandle authHandle, int32_t module, int32_t flag,
         .data = (const uint8_t *)data,
     };
     int32_t ret = AuthPostTransData(authHandle, &dataInfo);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "AuthPostTransData failed.");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "postData failed.");
     return SOFTBUS_OK;
 }
 
@@ -579,13 +578,13 @@ static int32_t VerifyP2p(AuthHandle authHandle, int64_t seq, VerifyP2pInfo *info
     TRANS_LOGI(TRANS_CTRL, "authId=%{public}" PRId64 ", port=%{public}d", authHandle.authId, info->myPort);
     char *msg = VerifyP2pPack(info);
     if (msg == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "verifyp2p pack fail");
+        TRANS_LOGE(TRANS_CTRL, "pack fail");
         return SOFTBUS_CREATE_JSON_ERR;
     }
     int32_t ret = SendAuthData(authHandle, MODULE_P2P_LISTEN, MSG_FLAG_REQUEST, (int64_t)seq, msg);
     cJSON_free(msg);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "VerifyP2p send auth data fail");
+        TRANS_LOGE(TRANS_CTRL, "send auth data fail");
         return ret;
     }
     return SOFTBUS_OK;
@@ -677,7 +676,7 @@ EXIT_ERR:
 
 static void OnAuthConnOpenFailed(uint32_t requestId, int32_t reason)
 {
-    TRANS_LOGW(TRANS_CTRL, "OnAuthConnOpenFailed: reqId=%{public}u, reason=%{public}d", requestId, reason);
+    TRANS_LOGW(TRANS_CTRL, "reqId=%{public}u, reason=%{public}d", requestId, reason);
     SessionConn *conn = NULL;
     int32_t channelId;
 
@@ -1329,7 +1328,7 @@ static int32_t OpenNewAuthConn(const AppInfo *appInfo, SessionConn *conn, Connec
     }
     int32_t ret = OpenAuthConn(appInfo->peerData.deviceId, conn->requestId, conn->isMeta, type);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "OpenP2pDirectChannel open auth conn fail");
+        TRANS_LOGE(TRANS_CTRL, "open auth conn fail");
         return ret;
     }
     return SOFTBUS_OK;
@@ -1456,9 +1455,8 @@ static int32_t BuildSessionConn(const AppInfo *appInfo, SessionConn **conn)
 static int32_t TransStartTimeSync(SessionConn *conn)
 {
     int32_t ret = SOFTBUS_OK;
-    if (!conn->appInfo.isFlashLight && IsSupportDeterministicTrans(conn->appInfo.peerNetWorkId) &&
-        IsHmlIpAddr(conn->appInfo.myData.addr) && conn->appInfo.isLowLatency &&
-        conn->appInfo.businessType == BUSINESS_TYPE_BYTE) {
+    if (!conn->appInfo.isFlashLight && conn->appInfo.isLowLatency && conn->appInfo.businessType == BUSINESS_TYPE_BYTE &&
+        IsHmlIpAddr(conn->appInfo.myData.addr) && IsSupportDeterministicTrans(conn->appInfo.peerNetWorkId)) {
         ret = LnnIpcStartTimeSync(conn->appInfo.myData.pkgName, conn->appInfo.myData.pid, conn->appInfo.peerNetWorkId,
             HIGH_ACCURACY, SHORT_PERIOD);
         if (ret != SOFTBUS_OK) {

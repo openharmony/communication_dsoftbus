@@ -277,14 +277,14 @@ static int32_t PackBytes(int32_t channelId, const char *data, TdcPacketHead *pac
 {
     AuthHandle authHandle = { 0 };
     if (GetAuthHandleByChanId(channelId, &authHandle) != SOFTBUS_OK || authHandle.authId == AUTH_INVALID_ID) {
-        TRANS_LOGE(TRANS_BYTES, "PackBytes get auth id fail");
+        TRANS_LOGE(TRANS_BYTES, "get auth id fail");
         return SOFTBUS_NOT_FIND;
     }
 
     uint8_t *encData = (uint8_t *)buffer + DC_MSG_PACKET_HEAD_SIZE;
     uint32_t encDataLen = bufLen - DC_MSG_PACKET_HEAD_SIZE;
     if (AuthEncrypt(&authHandle, (const uint8_t *)data, packetHead->dataLen, encData, &encDataLen) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_BYTES, "PackBytes encrypt fail");
+        TRANS_LOGE(TRANS_BYTES, "encrypt fail");
         return SOFTBUS_ENCRYPT_ERR;
     }
     packetHead->dataLen = encDataLen;
@@ -303,13 +303,13 @@ static int32_t PackExternalBytes(
 {
     AuthHandle authHandle = { 0 };
     if (GetAuthHandleByChanId(channelId, &authHandle) != SOFTBUS_OK || authHandle.authId == AUTH_INVALID_ID) {
-        TRANS_LOGE(TRANS_BYTES, "PackExternalBytes get auth id fail");
+        TRANS_LOGE(TRANS_BYTES, "get auth id fail");
         return SOFTBUS_NOT_FIND;
     }
     uint8_t *encData = (uint8_t *)buffer + DC_MSG_PACKET_EXTERNAL_HEAD_SIZE;
     uint32_t encDataLen = bufLen - DC_MSG_PACKET_EXTERNAL_HEAD_SIZE;
     if (AuthEncrypt(&authHandle, (const uint8_t *)data, packetHead->dataLen, encData, &encDataLen) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_BYTES, "PackExternalBytes encrypt fail");
+        TRANS_LOGE(TRANS_BYTES, "encrypt fail");
         return SOFTBUS_ENCRYPT_ERR;
     }
     packetHead->dataLen = encDataLen;
@@ -1188,17 +1188,18 @@ static int32_t HandleDataBusReply(
     if (conn->appInfo.routeType == WIFI_P2P) {
         if (conn->appInfo.osType == OTHER_OS_TYPE) {
             if ((strncpy_s(conn->appInfo.peerNetWorkId, DEVICE_ID_SIZE_MAX,
-                conn->appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX)) == EOK) {
-                TRANS_LOGI(TRANS_CTRL, "get networkId by deviceId");
-                LaneUpdateP2pAddressByIp(conn->appInfo.peerData.addr, conn->appInfo.peerNetWorkId);
+                conn->appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX)) != EOK) {
+                TRANS_LOGI(TRANS_CTRL, "get networkId by deviceId fail");
+                return SOFTBUS_STRCPY_ERR;
             }
         } else {
             if (LnnGetNetworkIdByUuid(conn->appInfo.peerData.deviceId, conn->appInfo.peerNetWorkId,
-                DEVICE_ID_SIZE_MAX) == SOFTBUS_OK) {
-                TRANS_LOGI(TRANS_CTRL, "get networkId by uuid");
-                LaneUpdateP2pAddressByIp(conn->appInfo.peerData.addr, conn->appInfo.peerNetWorkId);
+                DEVICE_ID_SIZE_MAX) != SOFTBUS_OK) {
+                TRANS_LOGI(TRANS_CTRL, "get networkId by uuid fail");
+                return SOFTBUS_NETWORK_NOT_FOUND;
             }
         }
+        LaneUpdateP2pAddressByIp(conn->appInfo.peerData.addr, conn->appInfo.peerNetWorkId);
     }
     return SOFTBUS_OK;
 }

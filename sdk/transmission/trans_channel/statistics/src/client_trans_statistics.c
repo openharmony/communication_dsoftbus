@@ -53,12 +53,7 @@ static void CreateSocketResource(SocketResource *item, const char *sessionName, 
 
 void AddSocketResource(const char *sessionName, const ChannelInfo *channel)
 {
-    if (sessionName == NULL || channel == NULL || channel->isServer) {
-        TRANS_LOGE(TRANS_SDK, "invalid param");
-        return;
-    }
-    if (channel->connectType != CONNECT_BR && channel->connectType != CONNECT_BLE &&
-        channel->connectType != CONNECT_P2P && channel->connectType != CONNECT_HML) {
+    if (sessionName == NULL || channel == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param");
         return;
     }
