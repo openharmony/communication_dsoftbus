@@ -17,6 +17,7 @@
 
 #include <securec.h>
 
+#include "softbus_conn_interface_struct.h"
 #include "client_trans_auth_manager.h"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_manager.h"
