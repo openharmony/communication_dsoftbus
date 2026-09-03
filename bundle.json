@@ -68,6 +68,7 @@
       "dsoftbus_feature_lnn_lane_mgr",
       "dsoftbus_feature_lnn_power_ctrl",
       "dsoftbus_feature_lnn_lane_qos",
+      "dsoftbus_feature_lnn_lane_small",
       "dsoftbus_feature_lnn_frame",
       "dsoftbus_feature_vtp",
       "dsoftbus_feature_dfile",
