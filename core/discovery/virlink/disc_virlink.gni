@@ -18,7 +18,7 @@ disc_virlink_inc = []
 disc_virlink_deps = []
 
 if (!dsoftbus_feature_inner_disc_virlink) {
-  disc_virlink_src += ["$dsoftbus_root_path/core/discovery/virlink/adapter/disc_virLink_adapter_virlink.c"]
+  disc_virlink_src += ["$dsoftbus_root_path/core/discovery/virlink/adapter/disc_virLink_adapter_virtual.c"]
 } else {
   disc_virlink_src += ["$dsoftbus_root_path/core/discovery/virlink/adapter/disc_virLink_adapter.c"]
   disc_virlink_inc += [
