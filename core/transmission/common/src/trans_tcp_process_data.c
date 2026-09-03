@@ -182,7 +182,7 @@ int32_t TransTdcUnPackAllData(int32_t channelId, DataBuf *node, bool *flag)
         return SOFTBUS_OK;
     }
     if (bufLen < DC_DATA_HEAD_SIZE) {
-        TRANS_LOGW(TRANS_CTRL,"head incomplete channelId=%{public}d, bufLen=%{public}u", channelId, bufLen);
+        TRANS_LOGW(TRANS_CTRL, "head incomplete channelId=%{public}d, bufLen=%{public}u", channelId, bufLen);
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
     TcpDataPacketHead *pktHead = (TcpDataPacketHead *)(node->data);
