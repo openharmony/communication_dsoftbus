@@ -18,6 +18,7 @@
 
 #include "client_trans_statistics.c"
 #include "softbus_adapter_mem.h"
+#include "softbus_conn_interface_struct.h"
 #include "trans_network_statistics.h"
 
 using namespace testing::ext;
