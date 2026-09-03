@@ -35,3 +35,24 @@ if (!dsoftbus_feature_inner_disc_broadcast) {
 } else {
   dsoftbus_feature_inner_disc_ble = true
 }
+
+# deal usb
+if (!dsoftbus_feature_disc_usb || !dsoftbus_feature_deps_usb_manager) {
+  dsoftbus_feature_inner_disc_usb = false
+} else {
+  dsoftbus_feature_inner_disc_usb = true
+}
+
+# deal nfc
+if (!dsoftbus_feature_disc_nfc) {
+  dsoftbus_feature_inner_disc_nfc = false
+} else {
+  dsoftbus_feature_inner_disc_nfc = true
+}
+
+# deal virlink
+if (!dsoftbus_feature_disc_virlink) {
+  dsoftbus_feature_inner_disc_virlink = false
+} else {
+  dsoftbus_feature_inner_disc_virlink = true
+}

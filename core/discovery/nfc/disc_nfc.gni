@@ -19,7 +19,12 @@ nfc_disc_inc = [
   "$dsoftbus_root_path/core/discovery/nfc/dispatcher/include",
 ]
 
-nfc_disc_src = [
-  "$dsoftbus_root_path/core/discovery/nfc/dispatcher/src/disc_nfc_dispatcher.c",
-]
-nfc_disc_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
+nfc_disc_src = []
+nfc_disc_deps = []
+
+if (!dsoftbus_feature_inner_disc_nfc) {
+  nfc_disc_src += ["$dsoftbus_root_path/core/discovery/nfc/dispatcher/src/disc_nfc_dispatcher_virtual.c"]
+} else {
+  nfc_disc_src += ["$dsoftbus_root_path/core/discovery/nfc/dispatcher/src/disc_nfc_dispatcher.c"]
+  nfc_disc_deps += [ "$dsoftbus_dfx_path:softbus_dfx" ]
+}
