@@ -138,6 +138,18 @@ if (dsoftbus_feature_disc_share_coap && dsoftbus_feature_inner_disc_coap) {
   defines += [ "DSOFTBUS_FEATURE_DISC_SHARE_COAP" ]
 }
 
+if (dsoftbus_feature_disc_usb && dsoftbus_feature_inner_disc_usb) {
+  defines += [ "DSOFTBUS_FEATURE_DISC_USB" ]
+}
+
+if (dsoftbus_feature_disc_nfc && dsoftbus_feature_inner_disc_nfc) {
+  defines += [ "DSOFTBUS_FEATURE_DISC_NFC" ]
+}
+
+if (dsoftbus_feature_disc_virlink && dsoftbus_feature_inner_disc_virlink) {
+  defines += [ "DSOFTBUS_FEATURE_DISC_VIRLINK" ]
+}
+
 if (defined(global_parts_info) &&
     !defined(global_parts_info.distributeddatamgr_kv_store)) {
   dsoftbus_feature_lnn_cloud_sync = false
