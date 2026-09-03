@@ -48,6 +48,25 @@ void LnnStopOfflineTimingByHeartbeat(const char *networkId, ConnectionAddrType a
     LNN_LOGI(LNN_HEART_BEAT, "heartbeat stop offline timing by heartbeat");
 }
 
+void LnnStopOfflineTimingBySleHb(const char *networkId, ConnectionAddrType addrType)
+{
+    (void)networkId;
+    (void)addrType;
+
+    LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub stop offline timing by sle heartbeat");
+}
+
+void HbEnableDiscovery(void)
+{
+    LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub enable discovery");
+}
+
+int32_t RiskDeviceLeaveLnn(void)
+{
+    LNN_LOGI(LNN_HEART_BEAT, "heartbeat stub risk device leave lnn");
+    return SOFTBUS_OK;
+}
+
 int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
 {
     (void)pkgName;
@@ -133,6 +152,11 @@ void LnnUnregDataLevelChangeCb(void) { }
 bool LnnIsCloudSyncEnd(void)
 {
     return true;
+}
+
+int32_t LnnClearAllNode(void)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 bool IsHeartbeatEnable(void)

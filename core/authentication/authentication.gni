@@ -50,10 +50,20 @@ if (dsoftbus_feature_lnn_frame) {
     "$authentication_path/src/auth_session_json.c",
     "$authentication_path/src/auth_session_message.c",
     "$authentication_path/src/auth_interface.c",
-    "$authentication_path/src/auth_pre_link.c",
-    "$authentication_path/userkey/auth_uk_manager.c",
-    "$authentication_path/userkey/auth_user_common_key.c",
   ]
+
+  if (dsoftbus_feature_lnn_frame && dsoftbus_feature_lnn_auth_ext) {
+    auth_server_src += [
+      "$authentication_path/userkey/auth_uk_manager.c",
+      "$authentication_path/userkey/auth_user_common_key.c",
+      "$authentication_path/src/auth_pre_link.c",
+    ]
+  } else {
+    auth_server_src += [
+      "$authentication_path/userkey/auth_uk_virtual.c",
+      "$authentication_path/src/auth_pre_link_virtual.c",
+    ]
+  }
 
   if (defined(ohos_lite) && ohos_kernel_type == "liteos_m") {
     auth_server_src += [ "$authentication_path/src/virtual/auth_identity_service_adapter_virtual.c" ]

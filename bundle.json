@@ -76,7 +76,10 @@
       "dsoftbus_feature_coap",
       "dsoftbus_feature_lnn_usb_ncm",
       "dsoftbus_feature_trans_mintp",
-      "dsoftbus_feature_lnn_d2d_auth"
+      "dsoftbus_feature_lnn_d2d_auth",
+      "dsoftbus_feature_lnn_auth_ext",
+      "dsoftbus_feature_lnn_net_builder_ext",
+      "dsoftbus_feature_lnn_ledger_ext"
     ],
     "rom": "3000KB",
     "ram": "40MB",
