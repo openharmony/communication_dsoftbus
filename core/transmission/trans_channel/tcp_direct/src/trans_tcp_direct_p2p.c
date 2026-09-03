@@ -1094,8 +1094,8 @@ static int32_t StartTransP2pDirectListener(ConnectType type, SessionConn *conn, 
             TRANS_LOGE(TRANS_CTRL, "start htp falied, degrade to TCP protocol");
             conn->appInfo.fdProtocol = LNN_PROTOCOL_IP;
         }
-    } else if (IsSupportDeterministicTrans(conn->appInfo.peerNetWorkId) && IsHmlIpAddr(conn->appInfo.myData.addr) &&
-        conn->appInfo.isLowLatency && conn->appInfo.businessType == BUSINESS_TYPE_BYTE) {
+    } else if (conn->appInfo.isLowLatency && conn->appInfo.businessType == BUSINESS_TYPE_BYTE &&
+        IsHmlIpAddr(conn->appInfo.myData.addr) && IsSupportDeterministicTrans(conn->appInfo.peerNetWorkId)) {
         conn->appInfo.fdProtocol = LNN_PROTOCOL_DETTP;
     }
 

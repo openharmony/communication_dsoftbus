@@ -23,7 +23,6 @@
 #include "client_trans_socket_manager.h"
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_conn_interface.h"
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
