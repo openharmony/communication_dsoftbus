@@ -162,7 +162,8 @@
   {
     "INTERFACE_NAME": "EX_OBJ_CMD_SET_PRE_LINK_PARAM",
     "PROCESS_NAME": [
-      "CollaborationFwk"
+      "CollaborationFwk",
+      "car_distributed_engine"
     ]
   },
   {
@@ -279,6 +280,12 @@
     "INTERFACE_NAME": "SPEC_OBJECT_CMD_UNREGISTER_META_PLUGIN_LISTENER",
     "PROCESS_NAME": [
       "watch_system_service"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_GET_ACTION_ID_BY_SERVICE_ID",
+    "PROCESS_NAME": [
+      "device_manager"
     ]
   }
 ]
