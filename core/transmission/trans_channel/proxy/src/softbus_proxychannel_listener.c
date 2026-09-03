@@ -107,7 +107,6 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
 {
     ChannelInfo info = {0};
     int32_t ret;
-    char buf[NETWORK_ID_BUF_LEN] = {0};
 
     GetProxyChannelInfo(channelId, appInfo, isServer, &info);
     if (appInfo->isD2D) {
@@ -115,6 +114,8 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
         return TransProxyOnChannelOpened(appInfo->myData.pkgName, appInfo->myData.pid,
             appInfo->myData.sessionName, &info);
     }
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
+    char buf[NETWORK_ID_BUF_LEN] = { 0 };
     if (appInfo->appType != APP_TYPE_AUTH) {
         ret = LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
         if (ret != SOFTBUS_OK) {
@@ -134,6 +135,9 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     } else {
         info.peerDeviceId = (char *)appInfo->peerData.deviceId;
     }
+#else
+    info.peerDeviceId = (char *)appInfo->peerData.deviceId;
+#endif
     info.isSupportTlv = GetCapabilityBit(appInfo->channelCapability, TRANS_CAPABILITY_TLV_OFFSET);
     GetOsTypeByNetworkId(info.peerDeviceId, &info.osType);
     ret = TransProxyOnChannelOpened(appInfo->myData.pkgName, appInfo->myData.pid, appInfo->myData.sessionName, &info);
@@ -244,6 +248,7 @@ static int32_t TransProxyNotifyOpenFailedByType(
 
 int32_t OnProxyChannelBind(int32_t channelId, const AppInfo *appInfo)
 {
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     int32_t ret = SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     if (appInfo == NULL) {
         TRANS_LOGE(TRANS_CTRL, "proxy channel bind app info invalid channelId=%{public}d", channelId);
@@ -251,9 +256,9 @@ int32_t OnProxyChannelBind(int32_t channelId, const AppInfo *appInfo)
     }
     switch (appInfo->appType) {
         case APP_TYPE_NORMAL:
-        case APP_TYPE_AUTH:
             ret = TransProxyOnChannelBind(appInfo->myData.pkgName, appInfo->myData.pid, channelId);
             break;
+        case APP_TYPE_AUTH:
         case APP_TYPE_INNER:
             ret = SOFTBUS_OK;
             break;
@@ -264,6 +269,11 @@ int32_t OnProxyChannelBind(int32_t channelId, const AppInfo *appInfo)
     TRANS_LOGI(
         TRANS_CTRL, "channelId=%{public}d, ret=%{public}d, appType=%{public}d", channelId, ret, appInfo->appType);
     return ret;
+#else
+    (void)channelId;
+    (void)appInfo;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+#endif
 }
 
 static void TransNotifyAlarm(const AppInfo *appInfo, int32_t errCode)

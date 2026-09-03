@@ -22,7 +22,6 @@
 #include "client_bus_center_manager.h"
 #include "client_trans_channel_manager.h"
 #include "client_trans_file_listener.h"
-#include "client_trans_proxy_file_manager.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_udp_manager.h"

@@ -2029,6 +2029,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyFillDataConfigTest002, TestSi
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 /*
  * @tc.name: TransProxyFillChannelInfoTest001
  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null appInfo
@@ -2057,6 +2058,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyFillChannelInfoTest001, TestS
     ReleaseChannelInfo(chan);
     SoftBusFree(msg);
 }
+#endif
 
 /*
  * @tc.name: TransProxySetAuthHandleByChanId001

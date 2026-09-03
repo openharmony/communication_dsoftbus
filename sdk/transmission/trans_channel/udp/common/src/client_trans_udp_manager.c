@@ -21,7 +21,9 @@
 #include "client_trans_socket_manager.h"
 #include "client_trans_stream.h"
 #include "g_enhance_sdk_func.h"
+#ifdef DSOFTBUS_FEATURE_TRANS_UDP_FILE
 #include "nstackx_dfile.h"
+#endif
 #include "securec.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
@@ -204,7 +206,12 @@ static int32_t OnUdpChannelOpened(int32_t channelId, SocketAccessInfo *accessInf
             type = TYPE_STREAM;
             break;
         case BUSINESS_TYPE_FILE:
+#ifdef DSOFTBUS_FEATURE_TRANS_UDP_FILE
             type = TYPE_FILE;
+#else
+            TRANS_LOGE(TRANS_SDK, "file channel not support, trans_udp_file feature disabled");
+            return SOFTBUS_FUNC_NOT_SUPPORT;
+#endif
             break;
         default:
             TRANS_LOGE(TRANS_SDK, "unsupport businessType=%{public}d.", channel.businessType);
@@ -376,6 +383,7 @@ int32_t TransOnUdpChannelOpened(
             }
             break;
         case BUSINESS_TYPE_FILE:
+#ifdef DSOFTBUS_FEATURE_TRANS_UDP_FILE
             ret = TransOnFileChannelOpened(sessionName, channel, udpPort, accessInfo);
             if (ret < SOFTBUS_OK) {
                 (void)TransAddSecondPathFail(channel->channelId);
@@ -389,6 +397,10 @@ int32_t TransOnUdpChannelOpened(
                 return ret;
             }
             ret = SOFTBUS_OK;
+#else
+            TRANS_LOGE(TRANS_SDK, "file channel not support, trans_udp_file feature disabled");
+            ret = SOFTBUS_FUNC_NOT_SUPPORT;
+#endif
             break;
         default:
             (void)TransDeleteUdpChannel(channel->channelId);
@@ -408,7 +420,11 @@ static int32_t TransDeleteBusinnessChannel(UdpChannel *channel)
             }
             break;
         case BUSINESS_TYPE_FILE:
+#ifdef DSOFTBUS_FEATURE_TRANS_UDP_FILE
             TransCloseFileChannel(channel->dfileId);
+#else
+            TRANS_LOGW(TRANS_SDK, "file channel close skipped, trans_udp_file feature disabled");
+#endif
             break;
         default:
             TRANS_LOGE(TRANS_SDK, "unsupport businessType=%{public}d.", channel->businessType);
@@ -532,12 +548,14 @@ static int32_t CloseUdpChannel(int32_t channelId, ShutdownReason reason)
         return SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED;
     }
     if (channel.businessType == BUSINESS_TYPE_FILE) {
+#ifdef DSOFTBUS_FEATURE_TRANS_UDP_FILE
         TRANS_LOGD(TRANS_SDK, "close udp channel get file list start");
         int32_t ret = NSTACKX_DFileSessionGetFileList(channel.dfileId);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "close udp channel to get file list failed. channelId=%{public}d, ret=%{public}d",
                 channelId, ret);
         }
+#endif
     }
     return CloseUdpChannelProc(&channel, channelId, reason);
 }
@@ -568,7 +586,9 @@ static int32_t CloseReserveUdpChannel(int32_t channelId, ShutdownReason reason, 
     }
     if (delSecondPath) {
         TRANS_LOGI(TRANS_SDK, "dfileId=%{public}d remove second path", channel.dfileId);
+#ifdef DSOFTBUS_FEATURE_TRANS_UDP_FILE
         TransCloseReserveFileChannel(channel.dfileId, &(channel.addr), channel.addrLen, routeType);
+#endif
     }
     return SOFTBUS_OK;
 }
@@ -795,7 +815,9 @@ int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback)
         TRANS_LOGE(TRANS_INIT, "trans udp pending init failed.");
         return SOFTBUS_TRANS_SERVER_INIT_FAILED;
     }
+#ifdef DSOFTBUS_FEATURE_TRANS_UDP_FILE
     NSTACKX_DFileRegisterLogCallback(NstackxLogInnerImpl);
+#endif
     RegisterFileCb(&g_udpChannelCb);
     g_udpChannelMgr = CreateSoftBusList();
     if (g_udpChannelMgr == NULL) {
@@ -931,6 +953,7 @@ static int32_t TransSendLimitChangeDataToCore(int32_t channelId, uint8_t tos, in
 
 int32_t TransLimitChange(int32_t channelId, uint8_t tos)
 {
+#ifdef DSOFTBUS_FEATURE_TRANS_UDP_FILE
     if (tos != FILE_PRIORITY_BK && tos != FILE_PRIORITY_BE) {
         TRANS_LOGE(TRANS_FILE, "invalid ip tos");
         return SOFTBUS_INVALID_PARAM;
@@ -968,6 +991,10 @@ int32_t TransLimitChange(int32_t channelId, uint8_t tos)
     int32_t setTosResult = NSTACKX_DFileSetSessionOpt(channel.dfileId, &dfileOpt);
     ret = TransSendLimitChangeDataToCore(channelId, tos, setTosResult);
     return ret;
+#else
+    TRANS_LOGE(TRANS_SDK, "file channel not support, trans_udp_file feature disabled");
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+#endif
 }
 
 int32_t TransUdpOnCloseAckReceived(int32_t channelId)
@@ -978,6 +1005,7 @@ int32_t TransUdpOnCloseAckReceived(int32_t channelId)
 // trigger file event FILE_EVENT_TRANS_STATUS when link down
 int32_t ClientEmitFileEvent(int32_t channelId)
 {
+#ifdef DSOFTBUS_FEATURE_TRANS_UDP_FILE
     UdpChannel channel;
     (void)memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
     int32_t ret = TransGetUdpChannel(channelId, &channel);
@@ -994,6 +1022,10 @@ int32_t ClientEmitFileEvent(int32_t channelId)
         }
     }
     return ret;
+#else
+    TRANS_LOGE(TRANS_SDK, "file channel not support, trans_udp_file feature disabled");
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+#endif
 }
 
 int32_t TransSetUdpChannelSessionId(int32_t channelId, int32_t sessionId)

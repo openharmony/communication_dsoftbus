@@ -59,6 +59,11 @@ ohos_fuzztest("SoftBusProxyChannelManagerExtFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
 
+  defines = []
+  if (dsoftbus_feature_trans_proxy_channel) {
+    defines += [ "DSOFTBUS_FEATURE_PROXY_CHANNEL" ]
+  }
+
   sources = [ "softbusproxychannelmanagerext_fuzzer.cpp" ]
 
   deps = [

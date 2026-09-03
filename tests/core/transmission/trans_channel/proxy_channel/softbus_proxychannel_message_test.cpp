@@ -665,6 +665,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyResetPeerTest001, TestSize.Le
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 /*
  * @tc.name: TransProxyPackFastDataTest001
  * @tc.desc: test trans proxy pack fast data
@@ -776,6 +777,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackFastDataHeadTest001, Test
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(dataInfo);
 }
+#endif
 
 /*
  * @tc.name: FastDataPackPacketHeadTest001
