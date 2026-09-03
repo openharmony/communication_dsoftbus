@@ -1190,13 +1190,13 @@ static int32_t HandleDataBusReply(
             if ((strncpy_s(conn->appInfo.peerNetWorkId, DEVICE_ID_SIZE_MAX,
                 conn->appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX)) != EOK) {
                 TRANS_LOGI(TRANS_CTRL, "get networkId by deviceId fail");
-                return SOFTBUS_STRCPY_ERR;
+                return SOFTBUS_OK;
             }
         } else {
             if (LnnGetNetworkIdByUuid(conn->appInfo.peerData.deviceId, conn->appInfo.peerNetWorkId,
                 DEVICE_ID_SIZE_MAX) != SOFTBUS_OK) {
                 TRANS_LOGI(TRANS_CTRL, "get networkId by uuid fail");
-                return SOFTBUS_NETWORK_NOT_FOUND;
+                return SOFTBUS_OK;
             }
         }
         LaneUpdateP2pAddressByIp(conn->appInfo.peerData.addr, conn->appInfo.peerNetWorkId);
