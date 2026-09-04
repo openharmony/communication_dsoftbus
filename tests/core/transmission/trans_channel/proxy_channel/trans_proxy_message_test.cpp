@@ -1411,6 +1411,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyAckHandshakeTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 /**
   * @tc.name: TransProxyKeepAliveTest001
   * @tc.desc: test proxy keepalive and keepalive ack message.
@@ -1453,6 +1454,7 @@ HWTEST_F(TransProxyMessageTest, TransProxyKeepAliveTest001, TestSize.Level1)
     ret = TransProxyAckKeepalive(&chanInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+#endif
 
 /**
   * @tc.name: TransProxyResetPeerTest001

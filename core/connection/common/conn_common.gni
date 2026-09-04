@@ -25,11 +25,6 @@ conn_common_inc = [
 ]
 conn_common_src = [
   "$dsoftbus_root_path/core/connection/common/src/softbus_conn_common.c",
-  "$dsoftbus_root_path/core/connection/common/src/softbus_conn_async_helper.c",
-  "$dsoftbus_root_path/core/connection/common/src/softbus_conn_bytes_delivery.c",
-  "$dsoftbus_root_path/core/connection/common/src/softbus_conn_fair_priority_queue.c",
-  "$dsoftbus_root_path/core/connection/common/src/softbus_rc_collection.c",
-  "$dsoftbus_root_path/core/connection/common/src/softbus_rc_object.c",
 ]
 
 if (dsoftbus_feature_conn_tcp_comm) {
@@ -47,9 +42,27 @@ if (dsoftbus_feature_conn_tcp_comm) {
     "$dsoftbus_root_path/core/connection/common/src/softbus_datahead_transform.c",
     "$dsoftbus_root_path/core/connection/common/src/softbus_socket.c",
     "$dsoftbus_root_path/core/connection/common/src/softbus_tcp_socket.c",
-    "$dsoftbus_root_path/core/connection/common/src/softbus_usb_tcp_socket.c",
     "$dsoftbus_root_path/core/connection/common/src/softbus_mintp_socket.c",
   ]
+  if (defined(ohos_lite) && (ohos_kernel_type == "linux" || ohos_kernel_type == "liteos_a")) {
+    conn_common_src += [
+      "$dsoftbus_root_path/core/connection/common/src/softbus_usb_tcp_socket_virtual.c",
+      "$dsoftbus_root_path/core/connection/common/src/softbus_rc_collection_virtual.c",
+      "$dsoftbus_root_path/core/connection/common/src/softbus_rc_object_virtual.c",
+      "$dsoftbus_root_path/core/connection/common/src/softbus_conn_async_helper_virtual.c",
+      "$dsoftbus_root_path/core/connection/common/src/softbus_conn_bytes_delivery_virtual.c",
+      "$dsoftbus_root_path/core/connection/common/src/softbus_conn_fair_priority_queue_virtual.c",
+    ]
+  } else {
+    conn_common_src += [
+      "$dsoftbus_root_path/core/connection/common/src/softbus_usb_tcp_socket.c",
+      "$dsoftbus_root_path/core/connection/common/src/softbus_rc_collection.c",
+      "$dsoftbus_root_path/core/connection/common/src/softbus_rc_object.c",
+      "$dsoftbus_root_path/core/connection/common/src/softbus_conn_async_helper.c",
+      "$dsoftbus_root_path/core/connection/common/src/softbus_conn_bytes_delivery.c",
+      "$dsoftbus_root_path/core/connection/common/src/softbus_conn_fair_priority_queue.c",
+    ]
+  }
   if (defined(ohos_lite) && ohos_kernel_type == "liteos_m") {
     conn_common_src += [ "$dsoftbus_root_path/core/connection/common/src/softbus_select_event_implement.c" ]
   } else {

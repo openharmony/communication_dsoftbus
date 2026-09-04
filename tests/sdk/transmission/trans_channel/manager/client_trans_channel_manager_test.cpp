@@ -271,7 +271,11 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelAsyncSendBytesTest003,
     uint32_t dataSeq = 1;
 
     int32_t ret = ClientTransChannelAsyncSendBytes(channelId, CHANNEL_TYPE_PROXY, data, TEST_DATA_LENGTH, dataSeq);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+#else
+    EXPECT_EQ(SOFTBUS_FUNC_NOT_SUPPORT, ret);
+#endif
 }
 
 /**
@@ -334,7 +338,11 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendMessageTest003, Te
     const char *data = "test";
 
     int32_t ret = ClientTransChannelSendMessage(channelId, CHANNEL_TYPE_PROXY, data, TEST_DATA_LENGTH);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+#else
+    EXPECT_EQ(SOFTBUS_FUNC_NOT_SUPPORT, ret);
+#endif
 }
 
 /**
@@ -424,6 +432,7 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendStreamTest003, Tes
     EXPECT_EQ(SOFTBUS_TRANS_CHANNEL_TYPE_INVALID, ret);
 }
 
+#ifdef DSOFTBUS_FEATURE_TRANS_FILE
 /**
  * @tc.name: ClientTransChannelSendFileTest001
  * @tc.desc: ClientTransChannelSendFile with UDP channel type
@@ -474,6 +483,7 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendFileTest003, TestS
     int32_t ret = ClientTransChannelSendFile(channelId, CHANNEL_TYPE_BUTT, sFileList, dFileList, fileCnt);
     EXPECT_EQ(SOFTBUS_TRANS_CHANNEL_TYPE_INVALID, ret);
 }
+#endif
 
 /**
  * @tc.name: ClientTransChannelAsyncSendMessageTest001
@@ -510,7 +520,11 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelAsyncSendMessageTest00
     uint16_t dataSeq = 1;
 
     int32_t ret = ClientTransChannelAsyncSendMessage(channelId, CHANNEL_TYPE_PROXY, data, TEST_DATA_LENGTH, dataSeq);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+#else
+    EXPECT_EQ(SOFTBUS_FUNC_NOT_SUPPORT, ret);
+#endif
 }
 
 /**

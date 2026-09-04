@@ -420,6 +420,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, SetCipherOfHandshakeMsgTest010, T
     EXPECT_EQ(cipher & ENCRYPTED, ENCRYPTED);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 /*
  * @tc.name: TransPagingHandshakeEventTest001
  * @tc.desc: test TransPagingHandshakeEvent with null info does not crash
@@ -449,6 +450,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingHandshakeEventTest002,
     TransPagingHandshakeEvent(TEST_CHANNEL_ID, &info);
     SUCCEED();
 }
+#endif
 
 /*
  * @tc.name: TransProxySendEncryptInnerMessageTest001
@@ -1109,6 +1111,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyAckHandshakeTest008, Te
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 /*
  * @tc.name: TransProxyKeepaliveTest001
  * @tc.desc: test TransProxyKeepalive with null info does not crash
@@ -1377,6 +1380,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyAckKeepaliveTest006, Te
     int32_t ret = TransProxyAckKeepalive(&info);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+#endif
 
 /*
  * @tc.name: TransPagingHandshakeTest001
@@ -1415,6 +1419,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingHandshakeTest002, Test
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 /*
  * @tc.name: TransPagingHandshakeTest003
  * @tc.desc: test TransPagingHandshake when TransPagingPackMessage fails
@@ -1562,6 +1567,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingGetAuthKeyTest004, Tes
     int32_t ret = TransPagingGetAuthKey(&chan, &msg);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+#endif
 
 /*
  * @tc.name: TransPagingAckHandshakeTest001
@@ -1578,6 +1584,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingAckHandshakeTest001, T
     EXPECT_NE(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR, ret);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 /*
  * @tc.name: TransPagingAckHandshakeTest002
  * @tc.desc: test TransPagingAckHandshake errMsg payload null
@@ -1760,6 +1767,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransPagingAckHandshakeTest009, T
     int32_t ret = TransPagingAckHandshake(&chan, retCode);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+#endif
 
 /*
  * @tc.name: TransProxyResetPeerTest001
@@ -1776,6 +1784,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyResetPeerTest001, TestS
     EXPECT_NE(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 /*
  * @tc.name: TransPagingResetTest001
  * @tc.desc: test TransPagingReset ConvertBytesToHexString fails
@@ -1845,6 +1854,7 @@ HWTEST_F(SoftbusProxyChannelControlPagingTest, TransProxyResetPeerTest003, TestS
     int32_t ret = TransProxyResetPeer(&chan);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+#endif
 
 /*
  * @tc.name: TransProxyResetPeerTest004

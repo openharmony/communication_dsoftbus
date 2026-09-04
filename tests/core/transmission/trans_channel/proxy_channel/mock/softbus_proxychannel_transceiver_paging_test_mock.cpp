@@ -42,10 +42,12 @@ int32_t TransParseMessageHeadType(char *data, int32_t len, ProxyMessage *msg)
     return GetSoftbusProxychannelTransceiverPagingInterface()->TransParseMessageHeadType(data, len, msg);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg)
 {
     return GetSoftbusProxychannelTransceiverPagingInterface()->TransPagingParseMessage(data, len, msg);
 }
+#endif
 
 int32_t TransProxyGetChannelByCheckInfo(const PagingListenCheckInfo *checkInfo, ProxyChannelInfo *chan, bool isClient)
 {

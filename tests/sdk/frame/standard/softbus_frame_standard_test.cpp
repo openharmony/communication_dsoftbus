@@ -1923,7 +1923,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnProfileDeletedInnerTest002, TestSize.Lev
 
 /**
  * @tc.name: OnProfileDeletedInnerTest003
- * @tc.desc: OnProfileDeletedInner, ReadInt64 serviceId fails returns SOFTBUS_TRANS_PROXY_READINT_FAILED
+ * @tc.desc: OnProfileDeletedInner, ReadInt64 serviceId fails returns SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1934,12 +1934,12 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnProfileDeletedInnerTest003, TestSize.Lev
     MessageParcel reply;
     data.WriteInt32(2);
     data.WriteInt64(1001);
-    EXPECT_EQ(g_stub->OnProfileDeletedInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+    EXPECT_EQ(g_stub->OnProfileDeletedInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
 }
 
 /**
  * @tc.name: OnProfileDeletedInnerTest004
- * @tc.desc: OnProfileDeletedInner, all fields are valid returns SOFTBUS_OK
+ * @tc.desc: OnProfileDeletedInner, all fields are valid returns SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1951,7 +1951,7 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnProfileDeletedInnerTest004, TestSize.Lev
     data.WriteInt32(2);
     data.WriteInt64(1001);
     data.WriteInt64(1002);
-    EXPECT_EQ(g_stub->OnProfileDeletedInner(data, reply), SOFTBUS_OK);
+    EXPECT_EQ(g_stub->OnProfileDeletedInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
 }
 
 /**
@@ -1973,7 +1973,8 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnRemoteRequestProfileDeletedTest001, Test
 
 /**
  * @tc.name: OnRemoteRequestProfileDeletedTest002
- * @tc.desc: OnRemoteRequest with CLIENT_ON_PROFILE_DELETED, valid token and data returns SOFTBUS_OK
+ * @tc.desc: OnRemoteRequest with CLIENT_ON_PROFILE_DELETED, valid token and data returns
+ *          SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1987,6 +1988,6 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnRemoteRequestProfileDeletedTest002, Test
     data.WriteInterfaceToken(g_stub->GetDescriptor());
     data.WriteInt32(1);
     data.WriteInt64(1001);
-    EXPECT_EQ(g_stub->OnRemoteRequest(code, data, reply, option), SOFTBUS_OK);
+    EXPECT_EQ(g_stub->OnRemoteRequest(code, data, reply, option), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
 }
 } // namespace OHOS

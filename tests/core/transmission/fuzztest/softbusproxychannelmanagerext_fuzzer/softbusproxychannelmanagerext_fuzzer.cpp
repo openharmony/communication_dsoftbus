@@ -146,6 +146,7 @@ void TransProxyGetAppInfoTypeTest(FuzzedDataProvider &provider)
     (void)TransProxyGetAppInfoType(myId, identity, &appType);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 void TransPagingUpdatePagingChannelInfoTest(FuzzedDataProvider &provider)
 {
     ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
@@ -208,6 +209,7 @@ void TransPagingBadKeyRetryTest(FuzzedDataProvider &provider)
     (void)memset_s(&tmpInfo, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
     (void)TransProxyDelByChannelId(channelId, &tmpInfo);
 }
+#endif
 
 void TransProxyDelChanByChanIdTest(FuzzedDataProvider &provider)
 {
@@ -293,6 +295,7 @@ void TransProxyProcessErrMsgTest(FuzzedDataProvider &provider)
     (void)TransProxyDelChanByChanId(info->channelId);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 void TransPagingHandshakeUnPackErrMsgTest(FuzzedDataProvider &provider)
 {
     ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
@@ -315,6 +318,7 @@ void TransPagingHandshakeUnPackErrMsgTest(FuzzedDataProvider &provider)
     }
     (void)TransProxyDelChanByChanId(info->channelId);
 }
+#endif
 
 void SelectRouteTypeTest(FuzzedDataProvider &provider)
 {
@@ -491,7 +495,9 @@ void TransProxyCloseChannelByRequestIdTest(FuzzedDataProvider &provider)
     PagingListenCheckInfo checkInfo;
     checkInfo.businessFlag = provider.ConsumeIntegral<uint32_t>();
     checkInfo.channelId = provider.ConsumeIntegral<int32_t>();
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     (void)TransProxyGetChannelByCheckInfo(&checkInfo, &info1, info->appInfo.isClient);
+#endif
     (void)TransProxyGetPrivilegeCloseList(&privilegeCloseList, info->appInfo.callingTokenId, info->appInfo.myData.pid);
     (void)TransProxyResetReplyCnt(info->channelId);
     channelId = provider.ConsumeIntegral<int32_t>();
@@ -581,13 +587,16 @@ void TransOnGenSuccessTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    uint8_t applyKey[MAX_LEN] = { 0 };
     (void)TransProxyCreateChanInfo(info, info->channelId, &appInfo);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
+    uint8_t applyKey[MAX_LEN] = { 0 };
     (void)TransOnGenSuccess(info->authReqId, applyKey, MAX_LEN);
     (void)TransOnGenFailed(info->authReqId, 0);
+#endif
     (void)TransProxyDelChanByChanId(channelId);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 void TransPagingResetChanTest(FuzzedDataProvider &provider)
 {
     ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
@@ -609,6 +618,7 @@ void TransPagingResetChanTest(FuzzedDataProvider &provider)
     (void)TransPagingResetChan(&chanInfo);
     (void)TransProxyDelChanByChanId(channelId);
 }
+#endif
 
 void TransProxyResetChanTest(FuzzedDataProvider &provider)
 {
@@ -820,13 +830,17 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     FuzzedDataProvider provider(data, size);
     OHOS::ChanIsEqualTest(provider);
     OHOS::TransProxyGetAppInfoTypeTest(provider);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     OHOS::TransPagingUpdatePagingChannelInfoTest(provider);
     OHOS::TransPagingUpdatePidAndDataTest(provider);
     OHOS::TransPagingBadKeyRetryTest(provider);
+#endif
     OHOS::TransProxyDelChanByChanIdTest(provider);
     OHOS::TransProxyGetSendMsgChanInfoTest(provider);
     OHOS::TransProxyProcessErrMsgTest(provider);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     OHOS::TransPagingHandshakeUnPackErrMsgTest(provider);
+#endif
     OHOS::SelectRouteTypeTest(provider);
     OHOS::CheckAndGenerateSinkSessionKeyTest(provider);
     OHOS::TransHandleProxyChannelOpenedTest(provider);
@@ -837,7 +851,9 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransDealProxyCheckCollabResultTest(provider);
     OHOS::TransProxyTimerItemProcTest(provider);
     OHOS::TransOnGenSuccessTest(provider);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     OHOS::TransPagingResetChanTest(provider);
+#endif
     OHOS::TransProxyResetChanTest(provider);
     OHOS::TransProxyGetRecvMsgChanInfoTest(provider);
     OHOS::FindConfigTypeTest(provider);

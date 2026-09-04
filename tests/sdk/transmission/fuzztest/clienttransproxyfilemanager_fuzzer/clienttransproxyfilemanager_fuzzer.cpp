@@ -23,6 +23,7 @@
 #include <unistd.h>
 
 #include "client_trans_proxy_file_manager.h"
+#include "client_trans_proxy_manager.h"
 #include "client_trans_pending.h"
 #include "client_trans_proxy_file_common.h"
 #include "client_trans_session_manager.h"
@@ -58,11 +59,10 @@ void ClientTransProxyFileManagerTest(const uint8_t *data, size_t size)
     GenerateInt32(channelId);
     GenerateInt32(sessionId);
     GenerateUint32(fileCnt);
-    const FileFrame oneFrame = {0};
 
-    ProxyChannelSendFile(channelId, sFileList, dFileList, fileCnt);
+    TransProxyChannelSendFile(channelId, sFileList, dFileList, fileCnt);
 
-    ProcessRecvFileFrameData(sessionId, channelId, &oneFrame);
+    ProcessFileFrameData(sessionId, channelId, nullptr, 0, 0);
     DataGenerator::Clear();
 }
 } // namespace OHOS

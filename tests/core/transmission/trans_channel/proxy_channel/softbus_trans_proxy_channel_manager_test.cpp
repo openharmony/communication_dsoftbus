@@ -996,6 +996,7 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransDealProxyCheckCollabResultTes
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 /*
  * @tc.name: TransPagingUpdateDataConfigTest001
  * @tc.desc: TransProxyResetReplyCnt
@@ -1020,6 +1021,7 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransPagingUpdateDataConfigTest001
     ret = TransPagingUpdateDataConfig(&appInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+#endif
 
 /*
  * @tc.name: TransDisableConnBrIdleCheckTest001
@@ -1033,6 +1035,7 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransDisableConnBrIdleCheckTest001
     ASSERT_TRUE(proxyChannelInfo != nullptr);
     proxyChannelInfo->channelId = TEST_CHANNEL_ID;
     proxyChannelInfo->connId = 99;
+    proxyChannelInfo->type = CONNECT_BR;
 
     ListAdd(&g_proxyChannelList->list, &(proxyChannelInfo->node));
 

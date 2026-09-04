@@ -446,6 +446,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest05, TestS
     SoftBusFree(sessionParam);
 }
 
+#ifdef DSOFTBUS_FEATURE_TRANS_FILE
 /*
  * @tc.name: TransClientSessionCallbackTest06
  * @tc.desc: Transmission sdk session callback process receive file data
@@ -475,6 +476,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest06, TestS
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(sessionParam);
 }
+#endif
 
 /*
  * @tc.name: TransClientSessionCallbackTest07
@@ -499,6 +501,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest07, TestS
     session->channelType = CHANNEL_TYPE_PROXY;
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
+#ifdef DSOFTBUS_FEATURE_TRANS_FILE
     ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_PROXY, TRANS_TEST_AUTH_DATA,
                               strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_FILE_FIRST_FRAME);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
@@ -514,6 +517,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest07, TestS
     ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_PROXY, TRANS_TEST_AUTH_DATA,
                               strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_FILE_ONLYONE_FRAME);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+#endif
 
     ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_PROXY, TRANS_TEST_AUTH_DATA,
                               strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_BYTES);
@@ -720,6 +724,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest13, TestS
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
 
+#ifdef DSOFTBUS_FEATURE_TRANS_FILE
     ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, TRANS_TEST_AUTH_DATA,
                               strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_FILE_ALLFILE_SENT);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -739,6 +744,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest13, TestS
     ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, TRANS_TEST_AUTH_DATA,
                               strlen(TRANS_TEST_AUTH_DATA), TRANS_SESSION_FILE_ACK_RESPONSE_SENT);
     EXPECT_EQ(ret, SOFTBUS_OK);
+#endif
 
     ret = TransOnDataReceived(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, TRANS_TEST_AUTH_DATA,
                               strlen(TRANS_TEST_AUTH_DATA), (SessionPktType)(TRANS_SESSION_FILE_ACK_RESPONSE_SENT + 1));

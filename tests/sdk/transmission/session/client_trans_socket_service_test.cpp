@@ -270,11 +270,36 @@ HWTEST_F(TransClientSocketServiceTest, DataType001, TestSize.Level1)
     info.pkgName = const_cast<char *>(g_pkgName.c_str());
 
     for (int32_t type = DATA_TYPE_MESSAGE; type < DATA_TYPE_BUTT; type++) {
+        if (type == DATA_TYPE_FILE) {
+            continue;
+        }
         info.dataType = static_cast<TransDataType>(type);
         int32_t socketId = Socket(info);
         EXPECT_EQ(socketId, SOFTBUS_TRANS_SESSION_ADDPKG_FAILED);
     }
 }
+
+#ifndef DSOFTBUS_FEATURE_TRANS_FILE
+/*
+ * @tc.name: SocketFileDataType001
+ * @tc.desc: test Socket with DATA_TYPE_FILE returns SOFTBUS_FUNC_NOT_SUPPORT
+ *           when trans_file feature is disabled
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, SocketFileDataType001, TestSize.Level1)
+{
+    SocketInfo info;
+    info.name = const_cast<char *>(g_socketName.c_str());
+    info.peerName = const_cast<char *>(g_socketPeerName.c_str());
+    info.peerNetworkId = const_cast<char *>(g_networkId.c_str());
+    info.pkgName = const_cast<char *>(g_pkgName.c_str());
+    info.dataType = DATA_TYPE_FILE;
+
+    int32_t socketId = Socket(info);
+    EXPECT_EQ(socketId, SOFTBUS_FUNC_NOT_SUPPORT);
+}
+#endif
 
 static void OnShutdown(int32_t socket, ShutdownReason reason)
 {

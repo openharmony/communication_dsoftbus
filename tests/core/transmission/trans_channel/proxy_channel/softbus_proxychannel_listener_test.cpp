@@ -200,6 +200,7 @@ HWTEST_F(SoftbusProxyChannelListenerTest, NotifyNormalChannelOpenedTest001, Test
     SoftBusFree(appInfo);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 /**
  * @tc.name: NotifyNormalChannelOpenedTest002
  * @tc.desc: test notify normal channel opened with normal type and get network id fails
@@ -217,6 +218,7 @@ HWTEST_F(SoftbusProxyChannelListenerTest, NotifyNormalChannelOpenedTest002, Test
     EXPECT_NE(SOFTBUS_OK, ret);
     SoftBusFree(appInfo);
 }
+#endif
 
 /**
  * @tc.name: NotifyNormalChannelOpenedTest003
@@ -487,6 +489,7 @@ HWTEST_F(SoftbusProxyChannelListenerTest, TransSendNetworkingMessageTest003, Tes
     SoftBusFree(appInfo);
 }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 /**
  * @tc.name: OnProxyChannelBindTest001
  * @tc.desc: test on proxy channel bind with normal type
@@ -553,6 +556,7 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelBindTest004, TestSize.Le
     ret = OnProxyChannelBind(TEST_NUMBER_ONE, &appInfo);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
 }
+#endif
 
 /**
  * @tc.name: FillExtraByProxyChannelErrorEndTest001

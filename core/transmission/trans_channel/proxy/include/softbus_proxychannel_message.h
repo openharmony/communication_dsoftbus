@@ -46,16 +46,19 @@ int32_t PackPlaintextMessage(ProxyMessageHead *msg, ProxyDataInfo *dataInfo);
 int32_t PackPlaintextExternalMessage(const ProxyExternalMessageHead *msg, ProxyDataInfo *dataInfo);
 
 int32_t GetBrMacFromConnInfo(uint32_t connId, char *peerBrMac, uint32_t len);
+int32_t TransParseMessageHeadType(char *data, int32_t len, ProxyMessage *msg);
+
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 int32_t TransPagingPackMessage(
     PagingProxyMessage *msg, ProxyDataInfo *dataInfo, ProxyChannelInfo *chan, bool needHash);
-int32_t TransParseMessageHeadType(char *data, int32_t len, ProxyMessage *msg);
 char *TransPagingPackHandshakeAckMsg(ProxyChannelInfo *chan);
 void TransPagingProcessHandshakeMsg(
     const ProxyMessage *msg, uint8_t *accountHash, uint8_t *udidHash, const char *authAccountHash);
 int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg);
-void TransWaitListenResult(const PagingListenCheckInfo *checkInfo, int32_t reason);
 char *TransPagingPackHandshakeErrMsg(int32_t errCode, int32_t channelId);
 char *TransProxyPagingPackChannelId(int16_t channelId);
+void TransWaitListenResult(const PagingListenCheckInfo *checkInfo, int32_t reason);
+#endif
 
 int32_t TransProxyParseD2DData(const char *data, int32_t len);
 

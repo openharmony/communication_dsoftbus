@@ -1844,8 +1844,8 @@ int32_t TransAsyncGetLaneInfoByExt(const SessionParam *param, uint32_t *laneHand
     allocListener.onLaneFreeSuccess = TransOnLaneFreeSuccess;
     allocListener.onLaneFreeFail = TransOnLaneFreeFail;
     allocListener.onLaneQosEvent = TransOnLaneQosEvent;
-    TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager()->lnnAllocLane != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR,
-        TRANS_SVC, "lnnAllocLane is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager()->lnnAllocTargetLane != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR,
+        TRANS_SVC, "lnnAllocTargetLane is null");
     ret = GetLaneManager()->lnnAllocTargetLane(*laneHandle, &allocInfo, &allocListener);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "trans request lane failed, ret=%{public}d", ret);

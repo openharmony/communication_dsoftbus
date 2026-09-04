@@ -26,6 +26,7 @@ ohos_fuzztest("SoftBusProxyChannelManagerMockFuzzTest") {
   fuzz_config_file = "$dsoftbus_root_path/tests/core/transmission/fuzztest/softbusproxychannelmanagermock_fuzzer"
 
   include_dirs = softbus_proxy_channel_manager_ut_include_dirs
+  defines += softbus_proxy_channel_manager_ut_defines
 
   cflags = [
     "-g",

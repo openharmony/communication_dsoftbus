@@ -176,7 +176,11 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest003, TestSize.Lev
     SocketAccessInfo accessInfo = { 0 };
     channel.businessType = BUSINESS_TYPE_FILE;
     int32_t ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort, &accessInfo);
+#ifdef DSOFTBUS_FEATURE_TRANS_UDP_FILE
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+#else
+    EXPECT_EQ(SOFTBUS_FUNC_NOT_SUPPORT, ret);
+#endif
 }
 
 /*

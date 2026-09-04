@@ -128,6 +128,11 @@ bool LnnIsCloudSyncEnd(void)
     return true;
 }
 
+int32_t __attribute__((weak)) LnnClearAllNode(void)
+{
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 bool IsHeartbeatEnable(void)
 {
     return false;

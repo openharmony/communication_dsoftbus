@@ -32,6 +32,7 @@ typedef struct {
     ConnectOption connInfo;
 } ProxyConnInfo;
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 typedef struct {
     ListNode node;
     uint32_t businessFlag;
@@ -40,6 +41,7 @@ typedef struct {
     bool isLoadFailed;
     int32_t retryTime;
 } ProxyPagingWaitInfo;
+#endif
 
 void TransProxyPostResetPeerMsgToLoop(const ProxyChannelInfo *chan);
 void TransProxyPostHandshakeMsgToLoop(int32_t channelId);
@@ -48,7 +50,9 @@ void TransProxyPostOpenClosedMsgToLoop(const ProxyChannelInfo *chan);
 void TransProxyPostOpenFailMsgToLoop(const ProxyChannelInfo *chan, int32_t errCode);
 void TransProxyPostKeepAliveMsgToLoop(const ProxyChannelInfo *chan);
 void TransProxyPostAuthNegoMsgToLooperDelay(uint32_t authRequestId, int32_t channelId, uint32_t delayTime);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 void TransProxyPagingHandshakeMsgToLoop(int32_t channelId, uint8_t *authKey, uint32_t keyLen);
+#endif
 int32_t TransProxyTransInit(void);
 int32_t TransProxyCloseConnChannel(uint32_t connectionId, bool isServer, bool isD2d);
 int32_t TransProxyCloseConnChannelReset(
@@ -64,8 +68,10 @@ int32_t CheckIsProxyAuthChannel(ConnectOption *connInfo);
 void TransProxyNegoSessionKeySucc(int32_t channelId);
 void TransProxyNegoSessionKeyFail(int32_t channelId, int32_t errCode);
 int32_t TransProxyGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt);
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 int32_t TransCheckPagingListenState(const PagingListenCheckInfo *checkInfo);
 int32_t TransPagingWaitListenStatus(const uint32_t businessFlag, PagingWaitListenStatus status);
+#endif
 int32_t TransAddConnItem(ProxyConnInfo *conn);
 
 #ifdef __cplusplus

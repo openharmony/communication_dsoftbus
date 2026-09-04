@@ -189,6 +189,7 @@ ohos_unittest("SoftbusTransProxyMessageTest") {
 ohos_unittest("SoftbusProxyChannelManagerTest") {
   module_out_path = module_output_path
   sources = softbus_proxy_channel_manager_ut_sources
+  defines += softbus_proxy_channel_manager_ut_defines
 
   include_dirs = softbus_proxy_channel_manager_ut_include_dirs
 
@@ -768,6 +769,7 @@ ohos_unittest("SoftbusProxyChannelControlPagingTest") {
     "mock/softbus_proxychannel_control_paging_test_mock.cpp",
     "softbus_proxychannel_control_paging_test.cpp",
   ]
+  defines += softbus_proxy_channel_manager_ut_defines
   include_dirs = [
     "$softbus_adapter_common/include",
     "$dsoftbus_core_path/adapter/transmission/include",
@@ -810,6 +812,7 @@ ohos_unittest("SoftbusProxyChannelManagerPagingTest") {
     "mock/softbus_proxychannel_manager_paging_test_mock.cpp",
     "softbus_proxychannel_manager_paging_test.cpp",
   ]
+  defines += softbus_proxy_channel_manager_ut_defines
   include_dirs = [
     "$softbus_adapter_common/include",
     "$dsoftbus_core_path/adapter/transmission/include",
@@ -862,6 +865,7 @@ ohos_unittest("SoftbusProxyChannelMessagePagingTest") {
     "mock/softbus_proxychannel_message_paging_test_mock.cpp",
     "softbus_proxychannel_message_paging_test.cpp",
   ]
+  defines += softbus_proxy_channel_manager_ut_defines
   include_dirs = [
     "$softbus_adapter_common/include",
     "$dsoftbus_core_path/adapter/transmission/include",
@@ -914,6 +918,7 @@ ohos_unittest("SoftbusProxyChannelTransceiverPagingTest") {
     "mock/softbus_proxychannel_transceiver_paging_test_mock.cpp",
     "softbus_proxychannel_transceiver_paging_test.cpp",
   ]
+  defines += softbus_proxy_channel_manager_ut_defines
   include_dirs = [
     "$softbus_adapter_common/include",
     "$dsoftbus_core_path/adapter/transmission/include",
@@ -1061,25 +1066,29 @@ ohos_unittest("SoftbusProxyProfileDeletedTest") {
 group("unittest") {
   testonly = true
   deps = [
-    ":SoftbusProxyChannelControlPagingTest",
     ":SoftbusProxyChannelListenerTest",
-    ":SoftbusProxyChannelManagerPagingTest",
     ":SoftbusProxyChannelManagerTest",
-    ":SoftbusProxyChannelMessagePagingTest",
-    ":SoftbusProxyChannelMessageTest",
     ":SoftbusProxyChannelMetaNodeMessageTest",
     ":SoftbusProxyChannelPipelineTest",
-    ":SoftbusProxyChannelTransceiverPagingTest",
     ":SoftbusProxyNetworkTest",
     ":SoftbusProxyProfileDeletedTest",
     ":SoftbusProxySessionTest",
     ":SoftbusProxyTransceiverTest",
     ":SoftbusTransProxyChannelManagerTest",
     ":SoftbusTransProxyManagerTest",
-    ":SoftbusTransProxyMessageTest",
     ":TransProxyChannelTest",
     ":TransProxyNetworkTest",
     ":TransProxySessionStaticTest",
     ":TransProxySessionTest",
   ]
+  if (dsoftbus_feature_trans_proxy_channel) {
+    deps += [
+      ":SoftbusProxyChannelControlPagingTest",
+      ":SoftbusProxyChannelManagerPagingTest",
+      ":SoftbusProxyChannelMessagePagingTest",
+      ":SoftbusProxyChannelMessageTest",
+      ":SoftbusProxyChannelTransceiverPagingTest",
+      ":SoftbusTransProxyMessageTest",
+    ]
+  }
 }

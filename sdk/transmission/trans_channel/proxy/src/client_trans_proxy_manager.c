@@ -540,6 +540,8 @@ static int32_t ClientTransProxyBytesNotifySession(int32_t channelId, const DataH
         case TRANS_SESSION_FILE_RESULT_FRAME:
         case TRANS_SESSION_FILE_ACK_REQUEST_SENT:
         case TRANS_SESSION_FILE_ACK_RESPONSE_SENT:
+            TRANS_LOGW(TRANS_SDK, "file frame not support, flags=%{public}d", flags);
+            return SOFTBUS_FUNC_NOT_SUPPORT;
         case TRANS_SESSION_ASYNC_MESSAGE:
             return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
         default:
@@ -558,6 +560,7 @@ static int32_t ClientTransProxyNotifySession(
         case TRANS_SESSION_ACK:
             return ClientTransProxyProcSendMsgAck(channelId, data, len, seq, 0);
         case TRANS_SESSION_BYTES:
+            return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
         case TRANS_SESSION_FILE_FIRST_FRAME:
         case TRANS_SESSION_FILE_ONGOINE_FRAME:
         case TRANS_SESSION_FILE_LAST_FRAME:
@@ -567,6 +570,12 @@ static int32_t ClientTransProxyNotifySession(
         case TRANS_SESSION_FILE_RESULT_FRAME:
         case TRANS_SESSION_FILE_ACK_REQUEST_SENT:
         case TRANS_SESSION_FILE_ACK_RESPONSE_SENT:
+#ifdef DSOFTBUS_FEATURE_TRANS_PROXY_FILE
+            return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
+#else
+            TRANS_LOGW(TRANS_SDK, "file frame not support, flags=%{public}d", flags);
+            return SOFTBUS_FUNC_NOT_SUPPORT;
+#endif
         case TRANS_SESSION_ASYNC_MESSAGE:
             return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
         default:
@@ -1001,6 +1010,7 @@ static int32_t ClientTransProxyNotifyD2D(
         case TRANS_SESSION_ACK:
             return ClientTransProxyProcD2DAck(channelId, data, len, dataSeq);
         case TRANS_SESSION_BYTES:
+            return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
         case TRANS_SESSION_FILE_FIRST_FRAME:
         case TRANS_SESSION_FILE_ONGOINE_FRAME:
         case TRANS_SESSION_FILE_LAST_FRAME:
@@ -1010,6 +1020,8 @@ static int32_t ClientTransProxyNotifyD2D(
         case TRANS_SESSION_FILE_RESULT_FRAME:
         case TRANS_SESSION_FILE_ACK_REQUEST_SENT:
         case TRANS_SESSION_FILE_ACK_RESPONSE_SENT:
+            TRANS_LOGW(TRANS_SDK, "file frame not support, flags=%{public}d", flags);
+            return SOFTBUS_FUNC_NOT_SUPPORT;
         case TRANS_SESSION_ASYNC_MESSAGE:
             return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
         default:

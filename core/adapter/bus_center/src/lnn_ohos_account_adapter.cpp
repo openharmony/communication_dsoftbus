@@ -120,13 +120,13 @@ int32_t GetOsAccountIdByUserId(int32_t userId, char **id, uint32_t *len)
         LNN_LOGD(LNN_STATE, "not login account");
         return SOFTBUS_MEM_ERR;
     }
-    *id = static_cast<char *>(SoftBusCalloc(*len));
+    *id = static_cast<char *>(SoftBusCalloc(*len + 1));
     if (*id == nullptr) {
         LNN_LOGE(LNN_STATE, "malloc fail");
         return SOFTBUS_MEM_ERR;
     }
-    if (memcpy_s(*id, *len, accountInfo.second.name_.c_str(), *len) != EOK) {
-        LNN_LOGE(LNN_STATE, "memcpy_s uid failed, len=%{public}d", *len);
+    if (strcpy_s(*id, *len + 1, accountInfo.second.name_.c_str()) != EOK) {
+        LNN_LOGE(LNN_STATE, "strcpy_s uid failed, len=%{public}d", *len);
         SoftBusFree(*id);
         *id = nullptr;
         return SOFTBUS_MEM_ERR;

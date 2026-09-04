@@ -33,7 +33,9 @@ public:
     SoftbusProxychannelControlPagingInterface() {};
     virtual ~SoftbusProxychannelControlPagingInterface() {};
     virtual int32_t TransProxyGetSendMsgChanInfo(int32_t channelId, ProxyChannelInfo *chanInfo) = 0;
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     virtual char *TransPagingPackHandShakeMsg(ProxyChannelInfo *info) = 0;
+#endif
     virtual int32_t TransPagingPackMessage(
         PagingProxyMessage *msg, ProxyDataInfo *dataInfo, ProxyChannelInfo *chan, bool needHash) = 0;
     virtual int32_t TransProxyTransSendMsg(
@@ -42,15 +44,19 @@ public:
         char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen) = 0;
     virtual int32_t AuthFindApplyKey(
         const RequestBusinessInfo *info, uint8_t *applyKey, char *accountHash, uint32_t accountHashLen) = 0;
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     virtual char *TransPagingPackHandshakeAckMsg(ProxyChannelInfo *chan) = 0;
+#endif
     virtual int32_t TransProxyPackMessage(
         ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo) = 0;
     virtual char *TransProxyPackHandshakeMsg(ProxyChannelInfo *info) = 0;
     virtual char *TransProxyPackHandshakeErrMsg(int32_t errCode) = 0;
     virtual char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan) = 0;
     virtual char *TransProxyPackIdentity(const char *identity) = 0;
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     virtual char *TransProxyPagingPackChannelId(int16_t channelId) = 0;
     virtual char *TransPagingPackHandshakeErrMsg(int32_t errCode, int32_t channelId) = 0;
+#endif
     virtual void AuthGetLatestIdByUuid(
         const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle) = 0;
     virtual int32_t TransProxySetAuthHandleByChanId(int32_t channelId, AuthHandle authHandle) = 0;
@@ -67,7 +73,9 @@ public:
     SoftbusProxychannelControlPagingInterfaceMock();
     ~SoftbusProxychannelControlPagingInterfaceMock() override;
     MOCK_METHOD2(TransProxyGetSendMsgChanInfo, int32_t(int32_t channelId, ProxyChannelInfo *chanInfo));
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     MOCK_METHOD1(TransPagingPackHandShakeMsg, char *(ProxyChannelInfo *info));
+#endif
     MOCK_METHOD4(TransPagingPackMessage, int32_t (
         PagingProxyMessage *msg, ProxyDataInfo *dataInfo, ProxyChannelInfo *chan, bool needHash));
     MOCK_METHOD5(TransProxyTransSendMsg, int32_t (
@@ -76,15 +84,19 @@ public:
         char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen));
     MOCK_METHOD4(AuthFindApplyKey,
         int32_t(const RequestBusinessInfo *info, uint8_t *applyKey, char *accountHash, uint32_t accountHashLen));
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     MOCK_METHOD1(TransPagingPackHandshakeAckMsg, char *(ProxyChannelInfo *chan));
+#endif
     MOCK_METHOD3(TransProxyPackMessage,
         int32_t (ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo));
     MOCK_METHOD1(TransProxyPackHandshakeMsg, char *(ProxyChannelInfo *info));
     MOCK_METHOD1(TransProxyPackHandshakeErrMsg, char *(int32_t errCode));
     MOCK_METHOD1(TransProxyPackHandshakeAckMsg, char *(ProxyChannelInfo *chan));
     MOCK_METHOD1(TransProxyPackIdentity, char *(const char *identity));
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     MOCK_METHOD1(TransProxyPagingPackChannelId, char *(int16_t channelId));
     MOCK_METHOD2(TransPagingPackHandshakeErrMsg, char *(int32_t errCode, int32_t channelId));
+#endif
     MOCK_METHOD4(AuthGetLatestIdByUuid,
         void (const char *uuid, AuthLinkType type, bool isMeta, AuthHandle *authHandle));
     MOCK_METHOD2(TransProxySetAuthHandleByChanId, int32_t (int32_t channelId, AuthHandle authHandle));
