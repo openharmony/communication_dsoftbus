@@ -791,6 +791,17 @@ void LnnNotifyUserSwitchEvent(SoftBusUserSwitchState state)
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
+void LnnNotifyUserSleepStateEvent(SoftBusUserSleepState state)
+{
+    if (state < SOFTBUS_USER_SLEEP || state >= SOFTBUS_USER_SLEEP_UNKNOWN) {
+        LNN_LOGE(LNN_EVENT, "bad userSleepState=%{public}d", state);
+        return;
+    }
+    LnnMonitorUserSleepChangedEvent event = {.basic.event = LNN_EVENT_USER_SLEEP_STATE_CHANGED,
+        .status = (uint8_t)state};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
 void LnnNotifyDifferentAccountChangeEvent(SoftBusDifferentAccountState state)
 {
     if (state < SOFTBUS_DIF_ACCOUNT_DEV_CHANGE || state >= SOFTBUS_DIF_ACCOUNT_UNKNOWN) {

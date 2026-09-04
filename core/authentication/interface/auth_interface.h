@@ -116,6 +116,7 @@ int32_t AuthRestoreAuthManager(const char *udidHash,
 int32_t AuthCheckMetaExist(const AuthConnInfo *connInfo, bool *isExist);
 bool IsNeedReOpenAuthConnection(const char *uuid);
 int32_t GetAuthManagerType(int64_t authId, bool *isMeta);
+int32_t AuthUpdateTcpKeepaliveByConnInfo(const char *uuid, bool isStartwifiKeepalive);
 
 #ifdef __cplusplus
 #if __cplusplus

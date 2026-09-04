@@ -483,3 +483,9 @@ bool IsNeedReOpenAuthConnection(const char *uuid)
     return false;
 }
 
+int32_t AuthUpdateTcpKeepaliveByConnInfo(const char *uuid, bool isStopKeepalive)
+{
+    (void)uuid;
+    (void)isStopKeepalive;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
