@@ -23,7 +23,6 @@
 #include "client_trans_socket_manager.h"
 #include "common_list.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_conn_interface.h"
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
@@ -53,12 +52,7 @@ static void CreateSocketResource(SocketResource *item, const char *sessionName, 
 
 void AddSocketResource(const char *sessionName, const ChannelInfo *channel)
 {
-    if (sessionName == NULL || channel == NULL || channel->isServer) {
-        TRANS_LOGE(TRANS_SDK, "invalid param");
-        return;
-    }
-    if (channel->connectType != CONNECT_BR && channel->connectType != CONNECT_BLE &&
-        channel->connectType != CONNECT_P2P && channel->connectType != CONNECT_HML) {
+    if (sessionName == NULL || channel == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param");
         return;
     }
