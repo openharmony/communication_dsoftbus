@@ -922,11 +922,6 @@ static void NotifyLinkSucc(uint32_t laneReqId)
         ret = SOFTBUS_LANE_ID_GENERATE_FAIL;
         goto FAIL;
     }
-    TransReqInfo transReqInfo;
-    (void)memset_s(&transReqInfo, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
-    if (GetTransReqInfoByLaneReqId(laneReqId, &transReqInfo) == SOFTBUS_OK) {
-        (void)strcpy_s(info.networkId, sizeof(info.networkId), transReqInfo.allocInfo.networkId);
-    }
     NotifyLaneAllocSuccess(laneReqId, laneId, &info);
     FreeLowPriorityLink(laneReqId, linkType);
     return;
