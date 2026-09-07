@@ -2012,7 +2012,9 @@ void TransProxyProcessKeepAlive(const ProxyMessage *msg)
         return;
     }
 
+#ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     TransProxyAckKeepalive(info);
+#endif
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
     (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0,
         sizeof(info->appInfo.sinkSessionKey));
