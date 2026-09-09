@@ -4181,20 +4181,26 @@ int32_t TransGetKeyTypeBySocketId(int32_t socket, int32_t *keyType)
 static bool IsSessionMatchedByServiceId(const SessionInfo *session, const int64_t *serviceIds, int32_t serviceIdCount)
 {
     if (session == NULL || serviceIds == NULL || serviceIdCount <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
         return false;
     }
     if (!CheckNameContainServiceId(session->info.peerSessionName)) {
+        TRANS_LOGE(TRANS_SDK, "sessionname not contain serviceId");
         return false;
     }
     int64_t peerServiceId = 0;
     if (!SplitToGetServiceId(session->info.peerSessionName, &peerServiceId)) {
+        TRANS_LOGE(TRANS_SDK, "split sessionname fail");
         return false;
     }
     for (int32_t i = 0; i < serviceIdCount; i++) {
         if (serviceIds[i] == peerServiceId) {
+            TRANS_LOGI(TRANS_SDK, "matched peerServiceId=%{public}" PRId64 " serviceIds[%{public}d]=%{public}" PRId64,
+                peerServiceId, i, serviceIds[i]);
             return true;
         }
     }
+    TRANS_LOGE(TRANS_SDK, "no matched peerServiceId=%{public}" PRId64, peerServiceId);
     return false;
 }
 
@@ -4202,6 +4208,7 @@ static void CollectMatchedSessionsForDeletion(ClientSessionServer *server, const
     int32_t serviceIdCount, ListNode *destroyList)
 {
     if (server == NULL || serviceIds == NULL || serviceIdCount <= 0 || destroyList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
         return;
     }
     SessionInfo *sessionNode = NULL;
