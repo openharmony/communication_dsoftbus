@@ -813,7 +813,7 @@ int32_t TransClientProxy::OnProfileDeleted(const int64_t *serviceIds, int32_t se
         SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED, TRANS_CTRL, "write InterfaceToken failed!");
     TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(serviceIdCount),
         SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write serviceIdCount failed");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteRawData(serviceIds, serviceIdCount),
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteRawData(serviceIds, serviceIdCount * sizeof(int64_t)),
         SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED, TRANS_CTRL, "write serviceIds failed");
 
     MessageParcel reply;

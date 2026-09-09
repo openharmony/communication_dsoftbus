@@ -460,9 +460,8 @@ void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, 
             continue;
         }
         LinkDownInfo itemInfo = info;
-        if (!CheckNameContainServiceId(pos->sessionName)) {
+        if (CheckNameContainServiceId(pos->sessionName)) {
             itemInfo.networkId = udid;
-            continue;
         } else {
             itemInfo.networkId = networkId;
         }

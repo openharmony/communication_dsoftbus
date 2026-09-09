@@ -1315,7 +1315,7 @@ int32_t SoftBusClientStub::OnProfileDeletedInner(MessageParcel &data, MessagePar
         return SOFTBUS_INVALID_PARAM;
     }
 
-    const int64_t *serviceIds = reinterpret_cast<const int64_t *>(data.ReadRawData(serviceIdCount));
+    const int64_t *serviceIds = reinterpret_cast<const int64_t *>(data.ReadRawData(serviceIdCount * sizeof(int64_t)));
     COMM_CHECK_AND_RETURN_RET_LOGE(
         serviceIds != nullptr, SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED, COMM_SDK, "read serviceIds failed");
 
