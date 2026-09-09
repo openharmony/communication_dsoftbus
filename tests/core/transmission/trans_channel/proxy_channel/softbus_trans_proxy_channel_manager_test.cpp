@@ -1061,6 +1061,6 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransDisableConnBrIdleCheckTest002
     ASSERT_TRUE(g_proxyChannelList != nullptr);
 
     int32_t ret = TransDisableConnBrIdleCheck(TEST_CHANNEL_ID + 9999);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND);
 }
 } // namespace OHOS
