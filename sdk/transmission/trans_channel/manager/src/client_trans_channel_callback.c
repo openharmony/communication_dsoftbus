@@ -189,9 +189,9 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
         TransSetUdpChannelSessionId(channel->channelId, channel->sessionId);
         (void)UpdateMultiPathSessionInfo(channel->sessionId, channel);
     }
-    if (ret == SOFTBUS_OK || !channel->isServer || channel->connectType == CONNECT_BR ||
+    if (ret == SOFTBUS_OK && !channel->isServer && (channel->connectType == CONNECT_BR ||
         channel->connectType == CONNECT_BLE || channel->connectType == CONNECT_P2P ||
-        channel->connectType == CONNECT_HML) {
+        channel->connectType == CONNECT_HML)) {
         AddSocketResource(sessionName, channel);
     }
     return ret;
