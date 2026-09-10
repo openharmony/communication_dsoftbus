@@ -365,7 +365,6 @@ static int32_t InternalInit(EpollDesc epollfd, uint32_t maxDeviceNum)
 static void ReportMainLoopStopInner(void *argument)
 {
     (void)argument;
-    DFINDER_LOGI(TAG, "receive message to stop main loop");
 }
 
 static void ReportMainLoopStop(void)
@@ -424,7 +423,7 @@ int32_t NSTACKX_ThreadInit(void)
     g_validTidFlag = NSTACKX_TRUE;
     g_nstackThreadInitState = NSTACKX_INIT_STATE_DONE;
     (void)PthreadMutexUnlock(&g_threadInitLock);
-    DFINDER_LOGI(TAG, "nstack init thread success");
+    DFINDER_LOGD(TAG, "nstack init thread success");
     return NSTACKX_EOK;
 }
 
@@ -433,7 +432,7 @@ void NSTACKX_ThreadDeinit(void)
     if (g_nstackThreadInitState == NSTACKX_INIT_STATE_START) {
         return;
     }
-    DFINDER_LOGI(TAG, "nstack begin deinit thread");
+    DFINDER_LOGD(TAG, "nstack begin deinit thread");
     if (PthreadMutexLock(&g_threadInitLock) != 0) {
         DFINDER_LOGE(TAG, "Failed to lock");
         return;
@@ -452,7 +451,7 @@ void NSTACKX_ThreadDeinit(void)
     }
     g_nstackThreadInitState = NSTACKX_INIT_STATE_START;
     (void)PthreadMutexUnlock(&g_threadInitLock);
-    DFINDER_LOGI(TAG, "nstack deinit thread success");
+    DFINDER_LOGD(TAG, "nstack deinit thread success");
 }
 
 #if !defined(DFINDER_USE_MINI_NSTACKX) && !defined(DFINDER_ENABLE_COAP_LOG)
@@ -504,12 +503,12 @@ static int32_t NstackxInitEx(const NSTACKX_Parameter *parameter, bool isNotifyPe
 
     g_epollfd = CreateEpollDesc();
     if (!IsEpollDescValid(g_epollfd)) {
-        DFINDER_LOGE(TAG, "epoll creat fail! errno: %d", errno);
+        DFINDER_LOGE(TAG, "epoll create fail! errno: %d", errno);
         g_nstackInitState = NSTACKX_INIT_STATE_START;
         return NSTACKX_EFAILED;
     }
 
-    DFINDER_LOGD(TAG, "nstack ctrl creat epollfd %d", REPRESENT_EPOLL_DESC(g_epollfd));
+    DFINDER_LOGD(TAG, "nstack ctrl create epollfd %d", REPRESENT_EPOLL_DESC(g_epollfd));
 #ifdef DFINDER_SAVE_DEVICE_LIST
     ret = InternalInit(g_epollfd, parameter != NULL ? parameter->maxDeviceNum : NSTACKX_DEFAULT_DEVICE_NUM);
 #else
@@ -727,7 +726,7 @@ static int32_t CheckDiscoverySettings(const NSTACKX_DiscoverySettings *discovery
 
 int32_t NSTACKX_StartDeviceDiscovery(const NSTACKX_DiscoverySettings *discoverySettings)
 {
-    DFINDER_LOGI(TAG, "begin to NSTACKX_StartDeviceDiscovery!");
+    DFINDER_LOGI(TAG, "start discovery");
     if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
         return NSTACKX_EFAILED;
@@ -825,7 +824,7 @@ int32_t NSTACKX_StartDeviceDiscoveryWithConfig(const DFinderDiscConfig *discConf
 {
     DFINDER_LOGI(TAG, "dfinder start disc with config");
     if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        DFINDER_LOGE(TAG, "nstackx ctrl is not initialed yet");
+        DFINDER_LOGE(TAG, "nstackx ctrl is not initiated yet");
         return NSTACKX_EFAILED;
     }
     if (CheckDiscConfig(discConfig) != NSTACKX_EOK) {
@@ -1088,7 +1087,7 @@ int32_t NSTACKX_RegisterDeviceAn(const NSTACKX_LocalDeviceInfo *localDeviceInfo,
     Coverity_Tainted_Set((void *)localDeviceInfo);
     Coverity_Tainted_Set((void *)&deviceHash);
 
-    DFINDER_LOGI(TAG, "begin to NSTACKX_RegisterDeviceAn!");
+    DFINDER_LOGD(TAG, "begin to register device an!");
     return RegisterDeviceWithDeviceHash(localDeviceInfo, NSTACKX_TRUE, deviceHash);
 }
 
@@ -1397,7 +1396,7 @@ static int32_t RegisterDeviceWithType(const NSTACKX_LocalDeviceInfoV2 *localDevi
 int32_t NSTACKX_RegisterDeviceV2(const NSTACKX_LocalDeviceInfoV2 *localDeviceInfo)
 {
     Coverity_Tainted_Set((void *)localDeviceInfo);
-    DFINDER_LOGI(TAG, "NSTACKX_RegisterDeviceV2 begin!");
+    DFINDER_LOGD(TAG, "register device v2 begin!");
 
     if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
@@ -1489,7 +1488,7 @@ int32_t NSTACKX_RegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabi
 
 int32_t NSTACKX_SetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[])
 {
-    DFINDER_LOGI(TAG, "Set Filter Capability");
+    DFINDER_LOGD(TAG, "Set Filter Capability");
     return NSTACKX_CapabilityHandle(capabilityBitmapNum, capabilityBitmap, SetFilterCapabilityInner);
 }
 
@@ -1632,7 +1631,7 @@ static void ServiceDataV2Free(void *arg)
 
 int32_t NSTACKX_RegisterServiceDataV2(const struct NSTACKX_ServiceData *param, uint32_t cnt)
 {
-    DFINDER_LOGI(TAG, "begin to call NSTACKX_RegisterServiceDataV2");
+    DFINDER_LOGD(TAG, "begin register data");
     if (!RegisterServiceDataParamCheck(param, cnt)) {
         return NSTACKX_EINVAL;
     }
@@ -1704,7 +1703,6 @@ int32_t NSTACKX_RegisterServiceData(const char *serviceData)
 
 static void RegisterBusinessDataInner(void *argument)
 {
-    DFINDER_LOGI(TAG, "Register Business Data Inner");
     char *businessData = argument;
     if (SetLocalDeviceBusinessData(businessData, NSTACKX_TRUE) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "RegisterBusinessData failed");
@@ -1714,8 +1712,6 @@ static void RegisterBusinessDataInner(void *argument)
 
 int32_t NSTACKX_RegisterBusinessData(const char *businessData)
 {
-    DFINDER_LOGI(TAG, "begin to call NSTACKX_RegisterBusinessData");
-
     char *businessDataTmp = NULL;
     if (businessData == NULL) {
         DFINDER_LOGE(TAG, "businessData is null");
@@ -1805,7 +1801,6 @@ int32_t NSTACKX_RegisterExtendServiceData(const char *extendServiceData)
     return NSTACKX_EOK;
 #else
     (void)extendServiceData;
-    DFINDER_LOGI(TAG, "NSTACKX_RegisterExtendServiceData not supported");
     return NSTACKX_EOK;
 #endif
 }
@@ -1820,7 +1815,6 @@ struct DirectMsgCtx {
 static void SendMsgDirectInner(void *arg)
 {
     struct DirectMsgCtx *msg = arg;
-    DFINDER_LOGD(TAG, "Enter WifiDirect send");
     msg->msg.err = CoapSendServiceMsg(&msg->msg, msg->ipStr, &msg->ip);
     SemPost(&msg->msg.wait);
 }
@@ -1867,7 +1861,6 @@ int32_t NSTACKX_SendMsgDirect(const char *moduleName, const char *deviceId, cons
 {
 #ifndef DFINDER_USE_MINI_NSTACKX
     int32_t ret = NSTACKX_EOK;
-    DFINDER_LOGD(TAG, "NSTACKX_SendMsgDirect");
     if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
         return NSTACKX_EFAILED;
@@ -2057,7 +2050,7 @@ static int32_t CheckResponseSettings(const NSTACKX_ResponseSettings *responseSet
 
 int32_t NSTACKX_SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings)
 {
-    DFINDER_LOGI(TAG, "begin to NSTACKX_SendDiscoveryRsp!");
+    DFINDER_LOGD(TAG, "begin to response!");
     if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
         return NSTACKX_EFAILED;
@@ -2223,7 +2216,6 @@ void NSTACKX_StartDeviceFindRestart(void)
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
         return;
     }
-    DFINDER_LOGI(TAG, "start device find for restart");
     if (PostEvent(&g_eventNodeChain, g_epollfd, DeviceDiscoverInnerRestart, NULL) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "Failed to start device discover!");
         return;
@@ -2285,7 +2277,7 @@ int NSTACKX_DFinderDump(const char **argv, uint32_t argc, void *softObj, DFinder
     (void)argc;
     (void)softObj;
     (void)dump;
-    DFINDER_LOGE(TAG, "unsupport dfinder dump");
+    DFINDER_LOGE(TAG, "unsupported dfinder dump");
     return NSTACKX_NOTSUPPORT;
 }
 #endif
@@ -2380,7 +2372,7 @@ static void NotificationInner(void *argument)
 
 int32_t NSTACKX_SendNotification(const NSTACKX_NotificationConfig *config)
 {
-    DFINDER_LOGI(TAG, "begin to call NSTACKX_SendNotification");
+    DFINDER_LOGD(TAG, "begin to call send notification");
 
     if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "dfinder not inited");
@@ -2431,7 +2423,7 @@ static void NotificationStop(void *argument)
 
 int32_t NSTACKX_StopSendNotification(uint8_t businessType)
 {
-    DFINDER_LOGI(TAG, "begin to call NSTACKX_StopSendNotification, business type: %hhu", businessType);
+    DFINDER_LOGD(TAG, "begin stop send notification, business type: %hhu", businessType);
 
     if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "dfinder not inited");
