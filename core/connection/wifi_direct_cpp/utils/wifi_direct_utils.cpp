@@ -722,6 +722,7 @@ int32_t WifiDirectUtils::GetDeviceType()
 
 int32_t WifiDirectUtils::GetMetaType(const char *networkId)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(networkId != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "networkId is null");
     int32_t metaType = 0;
     auto ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteNumInfo(networkId, NUM_KEY_META_TYPE, &metaType);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, metaType, CONN_WIFI_DIRECT, "get remote meta type fail");

@@ -406,6 +406,7 @@ void AuthNegotiateChannel::OnConnOpenFailed(uint32_t requestId, int32_t reason)
 
 void AuthNegotiateChannel::AddAuthConnection(const LnnEventBasicInfo *info)
 {
+    CONN_CHECK_AND_RETURN_LOGE(info != nullptr, CONN_WIFI_DIRECT, "info is null");
     CONN_LOGI(CONN_WIFI_DIRECT, "start refresh auth connection");
     LnnNotifyRawEnhanceP2pEvent *lnnNotifyRawEnhanceP2pEvent =
         reinterpret_cast<LnnNotifyRawEnhanceP2pEvent *>(const_cast<LnnEventBasicInfo *>(info));
