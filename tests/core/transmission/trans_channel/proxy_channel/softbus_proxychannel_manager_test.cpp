@@ -14,26 +14,18 @@
  */
 
 #include <securec.h>
-
 #include "gtest/gtest.h"
-#include "message_handler.h"
-#include "session.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_conn_manager.h"
-#include "softbus_error_code.h"
+
+#include "softbus_utils.h"
 #include "softbus_feature_config.h"
-#include "softbus_json_utils.h"
-#include "softbus_protocol_def.h"
+#include "softbus_adapter_mem.h"
+
+#include "message_handler.h"
 #include "softbus_proxychannel_common.h"
-#include "softbus_proxychannel_control.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_manager.c"
-#include "softbus_proxychannel_session.h"
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_proxychannel_transceiver.c"
-#include "softbus_transmission_interface.h"
-#include "softbus_utils.h"
-#include "trans_channel_callback.h"
 #include "trans_channel_manager.h"
 
 using namespace testing;
@@ -1957,20 +1949,6 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetLocalInfoTest001, TestSize
     info.type = CONNECT_RAW_BLE_DIRECT;
     ConstructProxyChannelInfo(chan, msg, newChanId, &info);
 
-    TransWifiOnLineProc(nullptr);
-
-    char network[TEST_NUMBER_TWENTY]  = { TEST_ARR_INIT };
-    ret = strcpy_s(network, TEST_NUMBER_TWENTY, TEST_CHANNEL_INDENTITY);
-    if (ret != EOK) {
-        TRANS_LOGE(TRANS_TEST, "copy failed");
-        return;
-    }
-    TransWifiOffLineProc(network);
-
-    char networkId = 5;
-    TransWifiOnLineProc(&networkId);
-    TransWifiOffLineProc(&networkId);
-
     LnnEventBasicInfo lnnInfo;
     TransNotifyOffLine(nullptr);
     TransNotifyOffLine(&lnnInfo);
@@ -2638,7 +2616,6 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyUpdateBlePriority001, TestSiz
     TransProxyUpdateBlePriority(channelId, connId, BLE_PRIORITY_MAX);
 
     TransProxyOpenProxyChannelFail(channelId, appInfo, SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED);
-    TransWifiOffLineProc(nullptr);
 
     LnnEventBasicInfo info;
     info.event = LNN_EVENT_TYPE_MAX;

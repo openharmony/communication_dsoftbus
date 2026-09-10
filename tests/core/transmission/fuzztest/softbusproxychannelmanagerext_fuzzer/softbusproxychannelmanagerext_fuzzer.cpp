@@ -430,7 +430,6 @@ void TransWifiStateChangeTest(FuzzedDataProvider &provider)
     lnnOnlineStateEventInfo.uuid = uuid;
     lnnOnlineStateEventInfo.networkId = networkId;
     lnnOnlineStateEventInfo.udid = udid;
-    (void)TransWifiStateChange(reinterpret_cast<LnnEventBasicInfo *>(&lnnOnlineStateEventInfo));
     (void)TransNotifyOffLine(reinterpret_cast<LnnEventBasicInfo *>(&lnnOnlineStateEventInfo));
     LnnSingleNetworkOffLineEvent lnnSingleNetworkOffLineEvent;
     lnnSingleNetworkOffLineEvent.basic = info;

@@ -17,11 +17,7 @@
 #include <securec.h>
 
 #include "bus_center_manager.h"
-#include "data_bus_native.h"
 #include "lnn_distributed_net_ledger.h"
-#include "softbus_common.h"
-#include "softbus_conn_interface.h"
-#include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_socket.h"
 #include "trans_log.h"
@@ -94,13 +90,6 @@ static void OnWifiDirectDeviceOffline(
     }
 
     TransOnLinkDown(nodeInfo.networkId, nodeInfo.uuid, nodeInfo.masterUdid, peerIp, COMBINE_TYPE(WIFI_P2P, connType));
-    TRANS_LOGI(TRANS_SVC, "Notify Degrade MigrateEvents start");
-    ret = NotifyNearByOnMigrateEvents(nodeInfo.networkId, WIFI_P2P, false);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "Notify Degrade MigrateEvents fail, ret=%{public}d", ret);
-        return;
-    }
-    TRANS_LOGI(TRANS_SVC, "Notify Degrade MigrateEvents success");
 }
 
 static void OnWifiDirectRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole newRole)
@@ -113,22 +102,8 @@ static void OnWifiDirectDeviceOnline(const char *peerMac, const char *peerIp, co
 {
     (void)peerMac;
     (void)peerIp;
+    (void)peerUuid;
     (void)isSource;
-    TRANS_CHECK_AND_RETURN_LOGE(peerUuid != NULL, TRANS_SVC, "peer uuid is null");
-
-    NodeInfo nodeInfo;
-    memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
-
-    int32_t ret = LnnGetRemoteNodeInfoById(peerUuid, CATEGORY_UUID, &nodeInfo);
-    TRANS_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, TRANS_SVC, "LnnGetRemoteNodeInfoById failed");
-
-    TRANS_LOGI(TRANS_SVC, "Notify Upgrade MigrateEvents start");
-    ret = NotifyNearByOnMigrateEvents(nodeInfo.networkId, WIFI_P2P, true);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "Notify Upgrade MigrateEvents fail, ret=%{public}d", ret);
-        return;
-    }
-    TRANS_LOGI(TRANS_SVC, "Notify Upgrade MigrateEvents success");
 }
 
 void ReqLinkListener(void)
