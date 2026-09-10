@@ -207,8 +207,7 @@ static int32_t WaitEpollReadyEvent(struct epoll_event fdEvent, int32_t fd, int32
     struct epoll_event events = {0};
     ret = SoftBusSocketEpollWait(epollFd, &events, 1, timeoutMs);
     SoftBusSocketClose(epollFd);
-    if (ret > 0 && (events.events & ~(EPOLLERR | EPOLLHUP)) == 0 &&
-        (events.events & (EPOLLERR | EPOLLHUP)) != 0) {
+    if (ret > 0 && (events.events & (EPOLLERR | EPOLLHUP)) != 0) {
         CONN_LOGE(CONN_COMMON, "wait event detect abnormal event, fd=%{public}d, events=0x%{public}x",
             fd, events.events);
         return SOFTBUS_CONN_EPOLL_ABNORMAL_EVENT;
