@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "data_bus_native.h"
 #include "softbus_rsa_encrypt.h"
 
 #include <hks_api.h>
@@ -256,29 +255,6 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaDecrypt003, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(decryptedData);
     SoftBusFree(encryptedData);
-}
-
-/*
- * @tc.name: DataBusNativeVirtual001
- * @tc.desc: Verify normal return of NotifyNearBy series functions with legal parameters
- * @tc.type: FUNC
- * @tc.require: 1
- */
-HWTEST_F(AdapterDsoftbusRsaCryptoTest, DataBusNativeVirtual001, TestSize.Level0)
-{
-    int32_t channelId = 0;
-    int32_t ret = NotifyNearByUpdateMigrateOption(channelId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    const char *peerDeviceId = nullptr;
-    int32_t routeType = 0;
-    bool isUpgrade = true;
-    ret = NotifyNearByOnMigrateEvents(peerDeviceId, routeType, isUpgrade);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    const char *busName = nullptr;
-    ret = NotifyNearByGetBrAgingTimeoutByBusName(busName);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 static int32_t ConstructKeyParamSet(struct HksParamSet **paramSet, const struct HksParam *params, uint32_t paramCount)

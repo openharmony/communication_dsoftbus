@@ -23,12 +23,9 @@
 #include "auth_manager.h"
 #include "auth_session_fsm.h"
 #include "bus_center_event.h"
-#include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
-#include "data_bus_native.h"
 #include "g_enhance_auth_func_pack.h"
-#include "g_enhance_lnn_func_pack.h"
 #include "g_enhance_trans_func_pack.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "lnn_distributed_net_ledger.h"
@@ -54,11 +51,10 @@
 #include "trans_channel_common.h"
 #include "trans_channel_limit.h"
 #include "trans_channel_manager.h"
-#include "trans_tcp_direct_p2p.h"
 #include "trans_event.h"
-#include "trans_inner.h"
 #include "trans_log.h"
 #include "trans_session_manager.h"
+#include "trans_tcp_direct_p2p.h"
 #include "trans_uk_manager.h"
 
 #define ID_OFFSET (1)
@@ -105,8 +101,7 @@ void ReleaseProxyChannelLock(void)
 
 static bool ChanIsEqual(ProxyChannelInfo *a, ProxyChannelInfo *b)
 {
-    if ((a->myId == b->myId) &&
-        (a->peerId == b->peerId) &&
+    if ((a->myId == b->myId) && (a->peerId == b->peerId) &&
         (strncmp(a->identity, b->identity, sizeof(a->identity)) == 0)) {
         return true;
     }
@@ -116,14 +111,12 @@ static bool ChanIsEqual(ProxyChannelInfo *a, ProxyChannelInfo *b)
 static bool ResetChanIsEqual(int8_t status, ProxyChannelInfo *a, ProxyChannelInfo *b)
 {
     if (status == PROXY_CHANNEL_STATUS_HANDSHAKEING) {
-        if ((a->myId == b->myId) &&
-            (strncmp(a->identity, b->identity, sizeof(a->identity)) == 0)) {
+        if ((a->myId == b->myId) && (strncmp(a->identity, b->identity, sizeof(a->identity)) == 0)) {
             return true;
         }
     }
 
-    if ((a->myId == b->myId) &&
-        (a->peerId == b->peerId) &&
+    if ((a->myId == b->myId) && (a->peerId == b->peerId) &&
         (strncmp(a->identity, b->identity, sizeof(a->identity)) == 0)) {
         return true;
     }
@@ -153,12 +146,12 @@ int32_t TransProxyGetAppInfoType(int16_t myId, const char *identity, AppType *ap
 }
 
 static const ConfigTypeMap g_configTypeMap[] = {
-    {CHANNEL_TYPE_AUTH, BUSINESS_TYPE_BYTE, SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH},
-    {CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH},
-    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_BYTE, SOFTBUS_INT_MAX_BYTES_NEW_LENGTH},
-    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH},
-    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_D2D_VOICE, SOFTBUS_INT_D2D_MAX_VOICE_LENGTH},
-    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_D2D_MESSAGE, SOFTBUS_INT_D2D_MAX_MESSAGE_LENGTH},
+    { CHANNEL_TYPE_AUTH,  BUSINESS_TYPE_BYTE,        SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH   },
+    { CHANNEL_TYPE_AUTH,  BUSINESS_TYPE_MESSAGE,     SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH },
+    { CHANNEL_TYPE_PROXY, BUSINESS_TYPE_BYTE,        SOFTBUS_INT_MAX_BYTES_NEW_LENGTH    },
+    { CHANNEL_TYPE_PROXY, BUSINESS_TYPE_MESSAGE,     SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH  },
+    { CHANNEL_TYPE_PROXY, BUSINESS_TYPE_D2D_VOICE,   SOFTBUS_INT_D2D_MAX_VOICE_LENGTH    },
+    { CHANNEL_TYPE_PROXY, BUSINESS_TYPE_D2D_MESSAGE, SOFTBUS_INT_D2D_MAX_MESSAGE_LENGTH  },
 };
 
 static int32_t FindConfigType(int32_t channelType, int32_t businessType)
@@ -201,10 +194,10 @@ int32_t TransPagingUpdateDataConfig(AppInfo *info)
         return SOFTBUS_OK;
     }
     if (!info->isSupportNewHead) {
-        ConfigType configType = info->businessType == BUSINESS_TYPE_D2D_VOICE ?
-            SOFTBUS_INT_PROXY_MAX_BYTES_LENGTH : SOFTBUS_INT_PROXY_MAX_MESSAGE_LENGTH;
-        if (SoftbusGetConfig(configType, (unsigned char *)&info->myData.dataConfig,
-            sizeof(info->myData.dataConfig)) != SOFTBUS_OK) {
+        ConfigType configType = info->businessType == BUSINESS_TYPE_D2D_VOICE ? SOFTBUS_INT_PROXY_MAX_BYTES_LENGTH :
+                                                                                SOFTBUS_INT_PROXY_MAX_MESSAGE_LENGTH;
+        if (SoftbusGetConfig(configType, (unsigned char *)&info->myData.dataConfig, sizeof(info->myData.dataConfig)) !=
+            SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "get config failed, configType=%{public}d", configType);
             return SOFTBUS_GET_CONFIG_VAL_ERR;
         }
@@ -236,8 +229,8 @@ int32_t TransPagingUpdatePagingChannelInfo(ProxyChannelInfo *info)
             item->timeout = 0;
             if (memcpy_s(item->appInfo.pagingSessionkey, SHORT_SESSION_KEY_LENGTH, info->appInfo.pagingSessionkey,
                 SHORT_SESSION_KEY_LENGTH) != EOK ||
-                memcpy_s(item->appInfo.pagingNonce, PAGING_NONCE_LEN,
-                    info->appInfo.pagingNonce, PAGING_NONCE_LEN) != EOK ||
+                memcpy_s(item->appInfo.pagingNonce, PAGING_NONCE_LEN, info->appInfo.pagingNonce, PAGING_NONCE_LEN) !=
+                EOK ||
                 memcpy_s(info->appInfo.peerData.shortAccountHash, D2D_SHORT_ACCOUNT_HASH_LEN,
                     item->appInfo.peerData.shortAccountHash, D2D_SHORT_ACCOUNT_HASH_LEN) != EOK ||
                 memcpy_s(info->appInfo.peerData.shortUdidHash, D2D_SHORT_UDID_HASH_LEN,
@@ -273,8 +266,8 @@ int32_t TransPagingUpdatePidAndData(int32_t channelId, int32_t pid, char *data, 
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE((g_proxyChannelList != NULL && data != NULL && len <= EXTRA_DATA_MAX_LEN),
         SOFTBUS_INVALID_PARAM, TRANS_CTRL, "g_proxyChannelList or item is null");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK,
-        SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
     ProxyChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == channelId) {
@@ -297,10 +290,10 @@ int32_t TransPagingUpdatePidAndData(int32_t channelId, int32_t pid, char *data, 
 #ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
 static int32_t TransUpdateAuthSeqByChannelId(int32_t channelId, int32_t reqId)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(g_proxyChannelList != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL,
-        "g_proxyChannelList or item is null");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK,
-        SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "g_proxyChannelList or item is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
     ProxyChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == channelId) {
@@ -356,14 +349,14 @@ void TransPagingBadKeyRetry(int32_t channelId)
     (void)memset_s(&businessInfo, sizeof(RequestBusinessInfo), 0, sizeof(RequestBusinessInfo));
     businessInfo.type = BUSINESS_TYPE_D2D;
     if (strcpy_s(businessInfo.peerAccountHash, sizeof(businessInfo.peerAccountHash),
-        chan.appInfo.myData.calleeAccountId) != EOK) {
+            chan.appInfo.myData.calleeAccountId) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "cpy account id failed");
         return;
     }
-    if (ConvertBytesToHexString(businessInfo.udidHash, D2D_UDID_HASH_STR_LEN,
-        chan.appInfo.peerData.shortUdidHash, D2D_SHORT_UDID_HASH_LEN) != SOFTBUS_OK ||
+    if (ConvertBytesToHexString(businessInfo.udidHash, D2D_UDID_HASH_STR_LEN, chan.appInfo.peerData.shortUdidHash,
+        D2D_SHORT_UDID_HASH_LEN) != SOFTBUS_OK ||
         ConvertBytesToHexString(businessInfo.accountHash, D2D_ACCOUNT_HASH_STR_LEN,
-        chan.appInfo.peerData.shortAccountHash, D2D_SHORT_ACCOUNT_HASH_LEN) != SOFTBUS_OK) {
+            chan.appInfo.peerData.shortAccountHash, D2D_SHORT_ACCOUNT_HASH_LEN) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "convert udidHash or account hex string failed");
         return;
     }
@@ -406,8 +399,8 @@ static int32_t TransProxyUpdateAckInfo(ProxyChannelInfo *info)
                 TRANS_LOGE(TRANS_SVC, "memcpy_s sink session key failed");
                 return SOFTBUS_MEM_ERR;
             }
-            if (memcpy_s(&(item->appInfo.peerData), sizeof(item->appInfo.peerData),
-                &(info->appInfo.peerData), sizeof(info->appInfo.peerData)) != EOK ||
+            if (memcpy_s(&(item->appInfo.peerData), sizeof(item->appInfo.peerData), &(info->appInfo.peerData),
+                sizeof(info->appInfo.peerData)) != EOK ||
                 memcpy_s(info, sizeof(ProxyChannelInfo), item, sizeof(ProxyChannelInfo)) != EOK) {
                 (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
                 TRANS_LOGE(TRANS_SVC, "memcpy_s failed");
@@ -549,14 +542,12 @@ void TransProxyDelChanByReqId(int32_t reqId, int32_t errCode)
     ProxyChannelInfo *item = NULL;
     ProxyChannelInfo *nextNode = NULL;
 
-    TRANS_CHECK_AND_RETURN_LOGE(
-        g_proxyChannelList != NULL, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_LOGE(g_proxyChannelList != NULL, TRANS_CTRL, "g_proxyChannelList is null");
     TRANS_CHECK_AND_RETURN_LOGE(
         SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, TRANS_CTRL, "lock mutex fail!");
 
     LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
-        if ((item->reqId == reqId) &&
-            (item->status == PROXY_CHANNEL_STATUS_PYH_CONNECTING)) {
+        if ((item->reqId == reqId) && (item->status == PROXY_CHANNEL_STATUS_PYH_CONNECTING)) {
             ReleaseProxyChannelId(item->channelId);
             ListDelete(&(item->node));
             g_proxyChannelList->cnt--;
@@ -567,7 +558,6 @@ void TransProxyDelChanByReqId(int32_t reqId, int32_t errCode)
         }
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-    return;
 }
 
 void TransProxyDelChanByChanId(int32_t chanlId)
@@ -575,8 +565,7 @@ void TransProxyDelChanByChanId(int32_t chanlId)
     ProxyChannelInfo *item = NULL;
     ProxyChannelInfo *nextNode = NULL;
 
-    TRANS_CHECK_AND_RETURN_LOGE(
-        g_proxyChannelList != NULL, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_LOGE(g_proxyChannelList != NULL, TRANS_CTRL, "g_proxyChannelList is null");
     TRANS_CHECK_AND_RETURN_LOGE(
         SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, TRANS_CTRL, "lock mutex fail!");
 
@@ -587,8 +576,8 @@ void TransProxyDelChanByChanId(int32_t chanlId)
             if (item->appInfo.fastTransData != NULL) {
                 SoftBusFree((void *)item->appInfo.fastTransData);
             }
-            (void)memset_s(item->appInfo.sessionKey, sizeof(item->appInfo.sessionKey), 0,
-                sizeof(item->appInfo.sessionKey));
+            (void)memset_s(
+                item->appInfo.sessionKey, sizeof(item->appInfo.sessionKey), 0, sizeof(item->appInfo.sessionKey));
             (void)memset_s(item->appInfo.sinkSessionKey, sizeof(item->appInfo.sinkSessionKey), 0,
                 sizeof(item->appInfo.sinkSessionKey));
             SoftBusFree(item);
@@ -598,14 +587,12 @@ void TransProxyDelChanByChanId(int32_t chanlId)
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     TRANS_LOGE(TRANS_CTRL, "del channelId by chanId! channelId=%{public}d", chanlId);
-    return;
 }
 
 void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId, int32_t errCode)
 {
     ProxyChannelInfo *item = NULL;
-    TRANS_CHECK_AND_RETURN_LOGE(
-        g_proxyChannelList != NULL, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_LOGE(g_proxyChannelList != NULL, TRANS_CTRL, "g_proxyChannelList is null");
     TRANS_CHECK_AND_RETURN_LOGE(
         SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, TRANS_CTRL, "lock mutex fail!");
 
@@ -731,8 +718,8 @@ static int32_t TransProxyDelByChannelId(int32_t channelId, ProxyChannelInfo *cha
 int32_t TransPagingResetChan(ProxyChannelInfo *chanInfo)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(chanInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "chanInfo is null");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(g_proxyChannelList != NULL,
-        SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
     ProxyChannelInfo *removeNode = NULL;
@@ -877,8 +864,7 @@ int32_t TransProxyGetSendMsgChanInfo(int32_t channelId, ProxyChannelInfo *chanIn
 
 int32_t TransProxyGetAuthId(int32_t channelId, AuthHandle *authHandle)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        authHandle != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "authHandle is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(authHandle != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "authHandle is null");
     ProxyChannelInfo *item = NULL;
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
@@ -921,8 +907,7 @@ int32_t TransProxyGetChannelCapaByChanId(int32_t channelId, uint32_t *channelCap
 
 int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, uint32_t sessionKeySize)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        sessionKey != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "sessionKey is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(sessionKey != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "sessionKey is null");
     ProxyChannelInfo *item = NULL;
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
@@ -933,8 +918,8 @@ int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, uin
             if (item->status == PROXY_CHANNEL_STATUS_COMPLETED) {
                 item->timeout = 0;
             }
-            if (memcpy_s(sessionKey, sessionKeySize, item->appInfo.sessionKey,
-                sizeof(item->appInfo.sessionKey)) != EOK) {
+            if (memcpy_s(sessionKey, sessionKeySize, item->appInfo.sessionKey, sizeof(item->appInfo.sessionKey)) !=
+                EOK) {
                 TRANS_LOGE(TRANS_CTRL, "memcpy_s fail!");
                 (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
                 return SOFTBUS_MEM_ERR;
@@ -1128,10 +1113,7 @@ static int32_t TransProxyHandshakeUnpackRightMsg(ProxyChannelInfo *info, const P
 void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
 {
     SoftBusHitraceChainBegin("TransProxyProcessHandshakeAckMsg");
-    ProxyChannelInfo info = {
-        .myId = msg->msgHead.myId,
-        .peerId = msg->msgHead.peerId
-    };
+    ProxyChannelInfo info = { .myId = msg->msgHead.myId, .peerId = msg->msgHead.peerId };
 
     if (TransProxyGetAppInfoById(info.myId, &(info.appInfo)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "failed to get peer data info");
@@ -1168,24 +1150,23 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
     (void)OnProxyChannelOpened(info.channelId, &(info.appInfo), PROXY_CHANNEL_CLIENT);
 EXIT:
     (void)memset_s(info.appInfo.sessionKey, sizeof(info.appInfo.sessionKey), 0, sizeof(info.appInfo.sessionKey));
-    (void)memset_s(info.appInfo.sinkSessionKey, sizeof(info.appInfo.sinkSessionKey), 0,
-        sizeof(info.appInfo.sinkSessionKey));
+    (void)memset_s(
+        info.appInfo.sinkSessionKey, sizeof(info.appInfo.sinkSessionKey), 0, sizeof(info.appInfo.sinkSessionKey));
     SoftBusHitraceChainEnd();
-    return;
 }
 
 static int32_t TransProxyGetLocalInfo(ProxyChannelInfo *chan)
 {
     bool noNeedGetPkg = (chan->appInfo.appType == APP_TYPE_INNER);
     if (!noNeedGetPkg) {
-        if (TransProxyGetPkgName(chan->appInfo.myData.sessionName,
-            chan->appInfo.myData.pkgName, sizeof(chan->appInfo.myData.pkgName)) != SOFTBUS_OK) {
+        if (TransProxyGetPkgName(chan->appInfo.myData.sessionName, chan->appInfo.myData.pkgName,
+            sizeof(chan->appInfo.myData.pkgName)) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "channelId=%{public}d proc handshake get pkg name fail", chan->channelId);
             return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
         }
 
-        if (TransProxyGetUidAndPidBySessionName(chan->appInfo.myData.sessionName,
-            &chan->appInfo.myData.uid, &chan->appInfo.myData.pid) != SOFTBUS_OK) {
+        if (TransProxyGetUidAndPidBySessionName(
+            chan->appInfo.myData.sessionName, &chan->appInfo.myData.uid, &chan->appInfo.myData.pid) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "channelId=%{public}d proc handshake get uid pid fail", chan->channelId);
             return SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED;
         }
@@ -1197,10 +1178,10 @@ static int32_t TransProxyGetLocalInfo(ProxyChannelInfo *chan)
     }
     int32_t ret = SOFTBUS_INVALID_PARAM;
     if (chan->appInfo.osType == OTHER_OS_TYPE && chan->appInfo.metaType == META_HA) {
-        ret = AuthMetaGetLocalMetaNodeIdByPeerMetaNodeIdPacked(chan->appInfo.peerData.deviceId,
-            chan->appInfo.myData.deviceId, sizeof(chan->appInfo.myData.deviceId));
-        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
-            TRANS_CTRL, "channelId=%{public}d meta node Handshake get local info fail", chan->channelId);
+        ret = AuthMetaGetLocalMetaNodeIdByPeerMetaNodeIdPacked(
+            chan->appInfo.peerData.deviceId, chan->appInfo.myData.deviceId, sizeof(chan->appInfo.myData.deviceId));
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
+            "channelId=%{public}d meta node Handshake get local info fail", chan->channelId);
     } else {
         ret = LnnGetLocalStrInfo(key, chan->appInfo.myData.deviceId, sizeof(chan->appInfo.myData.deviceId));
         TRANS_CHECK_AND_RETURN_RET_LOGE(
@@ -1328,7 +1309,7 @@ static void FillMetaNodeAppInfo(int64_t authId, AppInfo *appInfo)
         TRANS_LOGE(TRANS_CTRL, "appInfo is null");
         return;
     }
-    char peerNetWorkId[NETWORK_ID_BUF_LEN] = {0};
+    char peerNetWorkId[NETWORK_ID_BUF_LEN] = { 0 };
     (void)AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked(authId, peerNetWorkId, NETWORK_ID_BUF_LEN);
     GetOsTypeByNetworkId(peerNetWorkId, &appInfo->osType);
     LnnGetRemoteNumInfo(peerNetWorkId, NUM_KEY_META_TYPE, &appInfo->metaType);
@@ -1462,13 +1443,12 @@ static void TransProxyFastDataRecv(ProxyChannelInfo *chan)
     } else {
         receiveData.dataType = TRANS_SESSION_BYTES;
     }
-    if (NotifyClientMsgReceived(chan->appInfo.myData.pkgName, chan->appInfo.myData.pid,
-        chan->channelId, &receiveData) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "TransProxyFastDataRecv err");
+    if (NotifyClientMsgReceived(
+        chan->appInfo.myData.pkgName, chan->appInfo.myData.pid, chan->channelId, &receiveData) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "Notify client failed");
         chan->appInfo.fastTransDataSize = 0;
     }
     TRANS_LOGD(TRANS_CTRL, "ok");
-    return;
 }
 
 static void ReleaseChannelInfo(ProxyChannelInfo *chan)
@@ -1477,7 +1457,7 @@ static void ReleaseChannelInfo(ProxyChannelInfo *chan)
         return;
     }
     if (chan->appInfo.fastTransData != NULL) {
-        SoftBusFree((void*)chan->appInfo.fastTransData);
+        SoftBusFree((void *)chan->appInfo.fastTransData);
     }
     SoftBusFree(chan);
 }
@@ -1519,8 +1499,7 @@ static int32_t TransProxySendHandShakeMsgWhenInner(uint32_t connId, ProxyChannel
     chan->appInfo.myHandleId = 0;
     int32_t ret = TransProxyAckHandshake(connId, chan, SOFTBUS_OK);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(
-            TRANS_CTRL, "AckHandshake fail channelId=%{public}d, connId=%{public}u", chan->channelId, connId);
+        TRANS_LOGE(TRANS_CTRL, "AckHandshake fail channelId=%{public}d, connId=%{public}u", chan->channelId, connId);
         (void)OnProxyChannelClosed(chan->channelId, &(chan->appInfo));
         TransProxyDelChanByChanId(chan->channelId);
         return ret;
@@ -1614,7 +1593,8 @@ void TransProxyProcessHandshakeMsg(const ProxyMessage *msg)
     }
     int32_t ret = TransProxyFillChannelInfo(msg, chan);
     if ((ret == SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED || ret == SOFTBUS_TRANS_CHECK_ACL_FAILED ||
-        ret == SOFTBUS_PERMISSION_SERVER_DENIED) && (TransProxyAckHandshake(msg->connId, chan, ret) != SOFTBUS_OK)) {
+            ret == SOFTBUS_PERMISSION_SERVER_DENIED) &&
+        (TransProxyAckHandshake(msg->connId, chan, ret) != SOFTBUS_OK)) {
         TRANS_LOGW(TRANS_CTRL, "ErrHandshake fail, connId=%{public}u.", msg->connId);
     }
     char tmpSocketName[SESSION_NAME_SIZE_MAX] = { 0 };
@@ -1674,16 +1654,15 @@ static int32_t HandleProxyChanelOpened(ProxyChannelInfo *chan, int32_t channelId
 {
     int32_t ret = TransProxyAckHandshake(chan->connId, chan, SOFTBUS_OK);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(
-            TRANS_CTRL, "AckHandshake fail channelId=%{public}d, connId=%{public}u", channelId, chan->connId);
+        TRANS_LOGE(TRANS_CTRL, "AckHandshake fail channelId=%{public}d, connId=%{public}u", channelId, chan->connId);
         (void)OnProxyChannelClosed(channelId, &(chan->appInfo));
         TransProxyDelChanByChanId(channelId);
         return ret;
     }
     ret = OnProxyChannelBind(channelId, &(chan->appInfo));
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "OnProxyChannelBind fail channelId=%{public}d, connId=%{public}u", channelId,
-            chan->connId);
+        TRANS_LOGE(
+            TRANS_CTRL, "OnProxyChannelBind fail channelId=%{public}d, connId=%{public}u", channelId, chan->connId);
         TransProxyDelChanByChanId(channelId);
         return ret;
     }
@@ -1717,8 +1696,7 @@ static void HandleProxyGenUkResult(uint32_t requestId, int32_t ukId, int32_t rea
         TransProxyDelChanByChanId(ukRequestNode.channelId);
         (void)memset_s(
             chan.appInfo.sinkSessionKey, sizeof(chan.appInfo.sinkSessionKey), 0, sizeof(chan.appInfo.sinkSessionKey));
-        (void)memset_s(
-            chan.appInfo.sessionKey, sizeof(chan.appInfo.sessionKey), 0, sizeof(chan.appInfo.sessionKey));
+        (void)memset_s(chan.appInfo.sessionKey, sizeof(chan.appInfo.sessionKey), 0, sizeof(chan.appInfo.sessionKey));
         (void)TransUkRequestDeleteItem(requestId);
         return;
     }
@@ -1726,8 +1704,7 @@ static void HandleProxyGenUkResult(uint32_t requestId, int32_t ukId, int32_t rea
     (void)HandleProxyChanelOpened(&chan, ukRequestNode.channelId);
     (void)memset_s(
         chan.appInfo.sinkSessionKey, sizeof(chan.appInfo.sinkSessionKey), 0, sizeof(chan.appInfo.sinkSessionKey));
-    (void)memset_s(
-        chan.appInfo.sessionKey, sizeof(chan.appInfo.sessionKey), 0, sizeof(chan.appInfo.sessionKey));
+    (void)memset_s(chan.appInfo.sessionKey, sizeof(chan.appInfo.sessionKey), 0, sizeof(chan.appInfo.sessionKey));
     (void)TransUkRequestDeleteItem(requestId);
 }
 
@@ -1780,8 +1757,7 @@ static int32_t TransHandleProxyChannelOpened(int32_t channelId, ProxyChannelInfo
     return HandleProxyChanelOpened(chan, channelId);
 }
 
-static int32_t TransHandleD2DProxyChannelOpened(
-    int32_t channelId, int32_t openResult, ProxyChannelInfo *chan)
+static int32_t TransHandleD2DProxyChannelOpened(int32_t channelId, int32_t openResult, ProxyChannelInfo *chan)
 {
     if (LnnIsOsAccountConstraint()) {
         TRANS_LOGE(TRANS_CTRL, "block mode: channelId=%{public}d", channelId);
@@ -1802,8 +1778,8 @@ static int32_t TransHandleD2DProxyChannelOpened(
 #ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     ret = TransPagingAckHandshake(chan, openResult);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL,
-            "AckHandshake fail channelId=%{public}d, connId=%{public}u", chan->channelId, chan->connId);
+        TRANS_LOGE(
+            TRANS_CTRL, "AckHandshake fail channelId=%{public}d, connId=%{public}u", chan->channelId, chan->connId);
         (void)OnProxyChannelClosed(chan->channelId, &(chan->appInfo));
         TransProxyDelChanByChanId(chan->channelId);
         return ret;
@@ -1858,7 +1834,7 @@ static int32_t TransCheckProxyChannelOpenStatus(int32_t channelId, int32_t *curC
         g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
-    
+
     ProxyChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == channelId) {
@@ -1880,8 +1856,8 @@ void TransAsyncProxyChannelTask(int32_t channelId)
     int32_t curCount = 0;
     int32_t ret = TransCheckProxyChannelOpenStatus(channelId, &curCount);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL,
-            "check proxy channel open statue failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        TRANS_LOGE(
+            TRANS_CTRL, "check proxy channel open statue failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
         return;
     }
     if (curCount == CHANNEL_OPEN_SUCCESS) {
@@ -1964,8 +1940,8 @@ static int32_t TransProxyProcessReNegotiateMsg(const ProxyMessage *msg, const Pr
 static void TransProxyProcessResetMsgHelper(const ProxyChannelInfo *info, const ProxyMessage *msg)
 {
     if (info->status == PROXY_CHANNEL_STATUS_HANDSHAKEING) {
-        int32_t errCode = ((msg->msgHead.cipher & BAD_CIPHER) == BAD_CIPHER) ?
-            SOFTBUS_TRANS_BAD_KEY : SOFTBUS_TRANS_HANDSHAKE_ERROR;
+        int32_t errCode =
+            ((msg->msgHead.cipher & BAD_CIPHER) == BAD_CIPHER) ? SOFTBUS_TRANS_BAD_KEY : SOFTBUS_TRANS_HANDSHAKE_ERROR;
         TransProxyUnPackRestErrMsg(msg->data, &errCode, msg->dataLen);
         TRANS_LOGE(TRANS_CTRL, "TransProxyProcessResetMsg errCode=%{public}d", errCode);
         TransProxyOpenProxyChannelFail(info->channelId, &(info->appInfo), errCode);
@@ -2041,8 +2017,8 @@ void TransProxyProcessResetMsg(const ProxyMessage *msg)
     TransProxyProcessResetMsgHelper(info, msg);
 EXIT:
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
-    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0,
-        sizeof(info->appInfo.sinkSessionKey));
+    (void)memset_s(
+        info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0, sizeof(info->appInfo.sinkSessionKey));
     SoftBusFree(info);
     SoftBusHitraceChainEnd();
 }
@@ -2051,7 +2027,7 @@ void TransProxyProcessKeepAlive(const ProxyMessage *msg)
 {
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "ProxyProcessKeepAlive calloc failed.");
+        TRANS_LOGE(TRANS_CTRL, "calloc failed.");
         return;
     }
 
@@ -2076,8 +2052,8 @@ void TransProxyProcessKeepAlive(const ProxyMessage *msg)
     TransProxyAckKeepalive(info);
 #endif
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
-    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0,
-        sizeof(info->appInfo.sinkSessionKey));
+    (void)memset_s(
+        info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0, sizeof(info->appInfo.sinkSessionKey));
     SoftBusFree(info);
 }
 
@@ -2085,7 +2061,7 @@ void TransProxyProcessKeepAliveAck(const ProxyMessage *msg)
 {
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "ProxyProcessKeepAliveAck calloc failed.");
+        TRANS_LOGE(TRANS_CTRL, "calloc failed.");
         return;
     }
 
@@ -2105,8 +2081,8 @@ void TransProxyProcessKeepAliveAck(const ProxyMessage *msg)
         return;
     }
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
-    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0,
-        sizeof(info->appInfo.sinkSessionKey));
+    (void)memset_s(
+        info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0, sizeof(info->appInfo.sinkSessionKey));
     SoftBusFree(info);
 }
 
@@ -2114,7 +2090,7 @@ void TransProxyProcessDataRecv(const ProxyMessage *msg)
 {
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (info == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "ProxyProcessDataRecv calloc failed.");
+        TRANS_LOGE(TRANS_CTRL, "calloc failed.");
         return;
     }
 
@@ -2127,8 +2103,8 @@ void TransProxyProcessDataRecv(const ProxyMessage *msg)
 
     OnProxyChannelMsgReceived(info->channelId, &(info->appInfo), msg->data, msg->dataLen);
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
-    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0,
-        sizeof(info->appInfo.sinkSessionKey));
+    (void)memset_s(
+        info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0, sizeof(info->appInfo.sinkSessionKey));
     SoftBusFree(info);
 }
 
@@ -2203,8 +2179,8 @@ int32_t TransProxyCreatePagingChanInfo(ProxyChannelInfo *chan)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(chan != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "channel info is null");
     int32_t ret = TransProxyAddChanItem(chan);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
-        TRANS_CTRL, "trans proxy add channelId fail. channelId=%{public}d", chan->channelId);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_CTRL, "trans proxy add channelId fail. channelId=%{public}d", chan->channelId);
     return SOFTBUS_OK;
 }
 #endif
@@ -2302,8 +2278,7 @@ void TransProxyOpenProxyChannelFail(int32_t channelId, const AppInfo *appInfo, i
     SoftBusHitraceChainEnd();
 }
 
-int32_t TransProxyOpenProxyChannel(AppInfo *appInfo, const ConnectOption *connInfo,
-    int32_t *channelId)
+int32_t TransProxyOpenProxyChannel(AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)
 {
     if (appInfo == NULL || connInfo == NULL || channelId == NULL) {
         TRANS_LOGE(TRANS_CTRL, "open normal channel: invalid para");
@@ -2331,8 +2306,8 @@ int32_t TransProxyCloseProxyChannel(int32_t channelId)
         TransProxyUpdateBlePriority(channelId, info->connId, BLE_PRIORITY_BALANCED);
     }
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
-    (void)memset_s(info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0,
-        sizeof(info->appInfo.sinkSessionKey));
+    (void)memset_s(
+        info->appInfo.sinkSessionKey, sizeof(info->appInfo.sinkSessionKey), 0, sizeof(info->appInfo.sinkSessionKey));
     TransProxyPostResetPeerMsgToLoop(info);
     return SOFTBUS_OK;
 }
@@ -2362,10 +2337,10 @@ static void TransProxyTimerItemProc(const ListNode *proxyProcList)
         if (status == PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT) {
             connId = removeNode->connId;
             isServer = removeNode->isServer;
-            disChanInfo = (ProxyChannelInfo *)SoftBusMalloc(sizeof(ProxyChannelInfo));
+            disChanInfo = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
             if (disChanInfo == NULL) {
                 SoftBusFree(removeNode);
-                TRANS_LOGE(TRANS_SVC, "SoftBusMalloc failed");
+                TRANS_LOGE(TRANS_SVC, "SoftBusCalloc failed");
                 continue;
             }
             if (memcpy_s(disChanInfo, sizeof(ProxyChannelInfo), removeNode, sizeof(ProxyChannelInfo)) != EOK) {
@@ -2395,8 +2370,7 @@ void TransProxyTimerProc(void)
     ListNode proxyProcList;
     int32_t timeout = 0;
 
-    TRANS_CHECK_AND_RETURN_LOGE(
-        g_proxyChannelList != NULL, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_LOGE(g_proxyChannelList != NULL, TRANS_CTRL, "g_proxyChannelList is null");
     TRANS_CHECK_AND_RETURN_LOGE(
         SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, TRANS_CTRL, "lock mutex fail!");
     if (g_proxyChannelList->cnt <= 0) {
@@ -2412,7 +2386,8 @@ void TransProxyTimerProc(void)
             timeout = removeNode->isD2D ? D2D_CHANNEL_CONTROL_TIMEOUT : PROXY_CHANNEL_CONTROL_TIMEOUT;
             if (removeNode->timeout >= timeout) {
                 removeNode->status = (removeNode->status == PROXY_CHANNEL_STATUS_HANDSHAKEING) ?
-                    PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT : PROXY_CHANNEL_STATUS_CONNECTING_TIMEOUT;
+                    PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT :
+                    PROXY_CHANNEL_STATUS_CONNECTING_TIMEOUT;
                 TRANS_LOGE(TRANS_CTRL, "handshake is timeout. channelId=%{public}d", removeNode->myId);
                 ReleaseProxyChannelId(removeNode->channelId);
                 ListDelete(&(removeNode->node));
@@ -2435,57 +2410,12 @@ void TransProxyTimerProc(void)
     TransProxyTimerItemProc(&proxyProcList);
 }
 
-static void TransWifiOnLineProc(const char *peerNetworkId)
-{
-    TRANS_LOGI(TRANS_CTRL, "wifi is online");
-    if (peerNetworkId == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "invalid networkId");
-        return;
-    }
-    int32_t ret = NotifyNearByOnMigrateEvents(peerNetworkId, WIFI_STA, true);
-    if (ret == SOFTBUS_OK) {
-        TRANS_LOGI(TRANS_CTRL, "notify upgrade migrate success");
-        return;
-    }
-    TRANS_LOGE(TRANS_CTRL, "notify upgrade migrate fail");
-}
-
-static void TransWifiOffLineProc(const char *peerNetworkId)
-{
-    TRANS_LOGI(TRANS_CTRL, "wifi is offline");
-    if (peerNetworkId == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "invalid networkId");
-        return;
-    }
-    int32_t ret = NotifyNearByOnMigrateEvents(peerNetworkId, WIFI_STA, false);
-    if (ret == SOFTBUS_OK) {
-        TRANS_LOGI(TRANS_CTRL, "notify degrade migrate success");
-        return;
-    }
-    TRANS_LOGE(TRANS_CTRL, "notify degrade migrate fail");
-}
-
-void TransWifiStateChange(const LnnEventBasicInfo *info)
-{
-    TRANS_LOGI(TRANS_CTRL, "Start");
-    if ((info == NULL) || (info->event != LNN_EVENT_NODE_MIGRATE)) {
-        return;
-    }
-
-    LnnOnlineStateEventInfo *onlineStateInfo = (LnnOnlineStateEventInfo *)info;
-    if (onlineStateInfo->isOnline == true) {
-        TransWifiOnLineProc(onlineStateInfo->networkId);
-    } else {
-        TransWifiOffLineProc(onlineStateInfo->networkId);
-    }
-}
-
 static void TransNotifyNetworkOnline(const LnnEventBasicInfo *info)
 {
     if ((info == NULL) || (info->event != LNN_EVENT_NODE_NET_TYPE)) {
         return;
     }
-    LnnNodeNetTypeInfo *eventInfo = (LnnNodeNetTypeInfo*)info;
+    LnnNodeNetTypeInfo *eventInfo = (LnnNodeNetTypeInfo *)info;
     if (eventInfo->addrType == CONNECTION_ADDR_NCM) {
         TRANS_LOGI(TRANS_CTRL, "USB online, start realloc lnn");
         TransHandleReallocLnn();
@@ -2608,17 +2538,14 @@ int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
     }
 
     ret = LnnRegisterEventHandler(LNN_EVENT_SINGLE_NETWORK_OFFLINE, TransNotifySingleNetworkOffLine);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
-        TRANS_INIT, "register TransNotifySingleNetworkOffLine failed.");
-    
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_INIT, "register TransNotifySingleNetworkOffLine failed.");
+
     ret = LnnRegisterEventHandler(LNN_EVENT_NODE_NET_TYPE, TransNotifyNetworkOnline);
     TRANS_LOGE(TRANS_INIT, "register TransNotifyNetworkOnline failed.");
 
     ret = LnnRegisterEventHandler(LNN_EVENT_NODE_ONLINE_STATE_CHANGED, TransNotifyOffLine);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "register TransNotifyOffLine failed.");
-
-    ret = LnnRegisterEventHandler(LNN_EVENT_NODE_MIGRATE, TransWifiStateChange);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "TransWifiStateChange register failed.");
 
     ret = LnnRegisterEventHandler(LNN_EVENT_USER_SWITCHED, TransNotifyUserSwitch);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "register user switch event failed.");
@@ -2633,17 +2560,17 @@ int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName,
-    uint16_t pkgLen, uint16_t sessionLen)
+int32_t TransProxyGetNameByChanId(
+    int32_t chanId, char *pkgName, char *sessionName, uint16_t pkgLen, uint16_t sessionLen)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE((pkgName != NULL && sessionName != NULL), SOFTBUS_INVALID_PARAM, TRANS_CTRL,
-        "invalid param");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        (pkgName != NULL && sessionName != NULL), SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param");
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     TRANS_CHECK_AND_RETURN_RET_LOGE(chan != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "malloc err");
     int32_t ret = TransProxyGetChanByChanId(chanId, chan);
     (void)memset_s(chan->appInfo.sessionKey, sizeof(chan->appInfo.sessionKey), 0, sizeof(chan->appInfo.sessionKey));
-    (void)memset_s(chan->appInfo.sinkSessionKey, sizeof(chan->appInfo.sinkSessionKey), 0,
-        sizeof(chan->appInfo.sinkSessionKey));
+    (void)memset_s(
+        chan->appInfo.sinkSessionKey, sizeof(chan->appInfo.sinkSessionKey), 0, sizeof(chan->appInfo.sinkSessionKey));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get channel info by chanId failed. chanId=%{public}d", chanId);
         SoftBusFree(chan);
@@ -2666,8 +2593,7 @@ int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionNa
 
 static void TransProxyManagerDeinitInner(void)
 {
-    TRANS_CHECK_AND_RETURN_LOGE(
-        g_proxyChannelList != NULL, TRANS_INIT, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_LOGE(g_proxyChannelList != NULL, TRANS_INIT, "g_proxyChannelList is null");
     TRANS_CHECK_AND_RETURN_LOGE(
         SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, TRANS_INIT, "lock mutex fail!");
     ProxyChannelInfo *item = NULL;
@@ -2717,7 +2643,6 @@ static void TransProxyDestroyChannelList(const ListNode *destroyList)
             sizeof(destroyNode->appInfo.sinkSessionKey));
         SoftBusFree(destroyNode);
     }
-    return;
 }
 
 void TransProxyDeathCallback(const char *pkgName, int32_t pid)
@@ -2749,10 +2674,8 @@ void TransProxyDeathCallback(const char *pkgName, int32_t pid)
 void TransProxyCloseChannelByRequestId(uint32_t requestId)
 {
     TRANS_LOGI(TRANS_CTRL, "close channel by reqId=%{public}d", requestId);
-    TRANS_CHECK_AND_RETURN_LOGE(
-        g_proxyChannelList != NULL, TRANS_CTRL, "g_proxyChannelList is null");
-    TRANS_CHECK_AND_RETURN_LOGE(
-        requestId <= INT32_MAX, TRANS_CTRL, "requestId overflow.");
+    TRANS_CHECK_AND_RETURN_LOGE(g_proxyChannelList != NULL, TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_LOGE(requestId <= INT32_MAX, TRANS_CTRL, "requestId overflow.");
     ListNode destroyList;
     ListInit(&destroyList);
     ProxyChannelInfo *item = NULL;
@@ -2777,8 +2700,7 @@ void TransProxyCloseChannelByRequestId(uint32_t requestId)
 
 int32_t TransProxyGetAppInfoByChanId(int32_t chanId, AppInfo *appInfo)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL,
-        "invalid param");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param");
 
     ProxyChannelInfo *item = NULL;
     ProxyChannelInfo *nextNode = NULL;
@@ -2817,8 +2739,7 @@ int32_t TransProxyGetConnIdByChanId(int32_t channelId, int32_t *connId)
 
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == channelId) {
-            if (item->status == PROXY_CHANNEL_STATUS_COMPLETED ||
-                item->status == PROXY_CHANNEL_STATUS_KEEPLIVEING) {
+            if (item->status == PROXY_CHANNEL_STATUS_COMPLETED || item->status == PROXY_CHANNEL_STATUS_KEEPLIVEING) {
                 *connId = (int32_t)item->connId;
                 (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
                 return SOFTBUS_OK;
@@ -2869,11 +2790,11 @@ int32_t TransProxyGetProxyChannelInfoByChannelId(int32_t channelId, ProxyChannel
 
 int32_t TransProxyGetProxyChannelIdByAuthReq(uint32_t reqId, int32_t *channelId)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(g_proxyChannelList != NULL, SOFTBUS_NO_INIT,
-        TRANS_CTRL, "g_proxyChannelList is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
     TRANS_CHECK_AND_RETURN_RET_LOGE(channelId != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "channelId is null");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
-        TRANS_CTRL, "lock mutex fail!");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
     ProxyChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->authReqId == reqId) {
@@ -2983,8 +2904,7 @@ int32_t TransDealProxyCheckCollabResult(int32_t channelId, int32_t checkResult, 
     char dmsPkgName[PKG_NAME_SIZE_MAX] = { 0 };
     (void)TransGetPidAndPkgName(DMS_SESSIONNAME, DMS_UID, &dmsPid, dmsPkgName, PKG_NAME_SIZE_MAX);
     if (callingPid != 0 && dmsPid != callingPid) {
-        TRANS_LOGE(TRANS_CTRL,
-            "dmsPid does not match callingPid, dmsPid=%{public}d, callingPid=%{public}d", dmsPid, callingPid);
+        TRANS_LOGE(TRANS_CTRL, "dmsPid=%{public}d does not match callingPid=%{public}d", dmsPid, callingPid);
         SoftBusHitraceChainEnd();
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
@@ -3027,8 +2947,8 @@ ERR_EXIT:
 
 int32_t TransProxyD2dGetSleMac(int32_t channelId, int32_t pid, char *sleMac, uint32_t macLen)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(sleMac != NULL && macLen > 0 && macLen <= MAC_LEN,
-        SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        sleMac != NULL && macLen > 0 && macLen <= MAC_LEN, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param");
 
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
@@ -3056,8 +2976,7 @@ int32_t TransProxyD2dGetSleMac(int32_t channelId, int32_t pid, char *sleMac, uin
         TRANS_LOGE(TRANS_CTRL, "the conn type is not sle. type=%{public}u", connOpt.type);
         return SOFTBUS_TRANS_INVALID_CONNECT_TYPE;
     }
-    if (memcpy_s(sleMac, macLen, connOpt.sleOption.address,
-        sizeof(connOpt.sleOption.address)) != EOK) {
+    if (memcpy_s(sleMac, macLen, connOpt.sleOption.address, sizeof(connOpt.sleOption.address)) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -3075,8 +2994,7 @@ int32_t TransDisableConnBrIdleCheck(int32_t channelId)
     ConnectType connectType = CONNECT_TYPE_MAX;
     ProxyChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
-        if (item->channelId == channelId &&
-            (item->type == CONNECT_BR || item->type == CONNECT_BLE)) {
+        if (item->channelId == channelId && (item->type == CONNECT_BR || item->type == CONNECT_BLE)) {
             connId = item->connId;
             connectType = item->type;
             break;
@@ -3102,8 +3020,7 @@ int32_t TransDisableConnBrIdleCheck(int32_t channelId)
 
 void TransProxySetKeyTypeByChanId(int32_t channelId, int32_t keyType)
 {
-    TRANS_CHECK_AND_RETURN_LOGE((g_proxyChannelList != NULL), TRANS_CTRL,
-        "trans proxy get channel param nullptr!");
+    TRANS_CHECK_AND_RETURN_LOGE((g_proxyChannelList != NULL), TRANS_CTRL, "trans proxy get channel param nullptr!");
     TRANS_CHECK_AND_RETURN_LOGE(
         SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, TRANS_CTRL, "lock mutex fail!");
 
@@ -3119,5 +3036,4 @@ void TransProxySetKeyTypeByChanId(int32_t channelId, int32_t keyType)
     }
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     TRANS_LOGW(TRANS_CTRL, "proxy channel not found by channelId=%{public}d", channelId);
-    return;
 }
