@@ -33,6 +33,10 @@ void DiscCoapParseHwAccountHash(const cJSON *data, DeviceInfo *device);
 void DiscCoapParseNickname(const cJSON *data, char *nickName, int32_t length);
 int32_t DiscCoapParseKeyValueStr(const char *src, const char *key, char *outValue, uint32_t outLen);
 
+#ifdef DSOFTBUS_FEATURE_DISC_COAP_CUSTDATA
+void DiscCoapParseCustData(const cJSON *data, DeviceInfo *device);
+#endif
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

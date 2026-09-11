@@ -119,6 +119,10 @@ static void SetDiscCoapOption(DiscCoapOption *discCoapOption, DiscOption *option
         discCoapOption->mode = ACTIVE_PUBLISH;
         discCoapOption->freq = option->option.publishOption.freq;
         discCoapOption->capability = option->option.publishOption.capabilityBitmap[0];
+#ifdef DSOFTBUS_FEATURE_DISC_COAP_CUSTDATA
+        discCoapOption->capabilityData = option->option.publishOption.capabilityData;
+        discCoapOption->dataLen = option->option.publishOption.dataLen;
+#endif
     } else {
         discCoapOption->mode = ACTIVE_DISCOVERY;
         discCoapOption->freq = option->option.subscribeOption.freq;

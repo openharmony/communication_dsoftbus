@@ -19,6 +19,7 @@ declare_args() {
   dsoftbus_feature_disc_usb = true
   dsoftbus_feature_disc_nfc = true
   dsoftbus_feature_disc_virlink = true
+  dsoftbus_feature_disc_coap_custdata = false
 
   dsoftbus_feature_conn_tcp_proxy = true
   dsoftbus_feature_conn_tcp_comm = true

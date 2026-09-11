@@ -16,9 +16,12 @@
 #include "disc_coap_capability_public.h"
 
 #include "anonymizer.h"
+#include "cJSON.h"
 #include "disc_log.h"
 #include "disc_nstackx_adapter.h"
+#include "securec.h"
 #include "softbus_error_code.h"
+#include "softbus_utils.h"
 
 int32_t DiscCoapAssembleCapData(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData,
     uint32_t outLen)
@@ -118,3 +121,49 @@ int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceI
     }
     return SOFTBUS_OK;
 }
+
+#ifdef DSOFTBUS_FEATURE_DISC_COAP_CUSTDATA
+int32_t DiscCoapAssembleBdata(const unsigned char *capabilityData, uint32_t dataLen,
+    char *businessData, uint32_t businessDataLen)
+{
+    cJSON *json = cJSON_CreateObject();
+    DISC_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_MALLOC_ERR, DISC_COAP, "create json fail");
+
+    char *custDataStr = (char *)SoftBusCalloc(dataLen + 1);
+    if (custDataStr == NULL) {
+        cJSON_Delete(json);
+        DISC_LOGE(DISC_COAP, "malloc custDataStr fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (memcpy_s(custDataStr, dataLen + 1, capabilityData, dataLen) != EOK) {
+        SoftBusFree(custDataStr);
+        cJSON_Delete(json);
+        DISC_LOGE(DISC_COAP, "copy capabilityData fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    cJSON_AddStringToObject(json, "custData", custDataStr);
+    SoftBusFree(custDataStr);
+
+    char *jsonStr = cJSON_PrintUnformatted(json);
+    cJSON_Delete(json);
+    if (jsonStr == NULL) {
+        DISC_LOGE(DISC_COAP, "print json fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+
+    if (strlen(jsonStr) >= businessDataLen - 1) {
+        DISC_LOGE(DISC_COAP, "custData too long for businessData channel, dataLen=%{public}u", dataLen);
+        cJSON_free(jsonStr);
+        DISC_LOGE(DISC_COAP, "copy businessData fail");
+        return SOFTBUS_DISCOVER_COAP_ASSEMBLE_BDATA_FAIL;
+    }
+
+    if (strcpy_s(businessData, businessDataLen, jsonStr) != EOK) {
+        cJSON_free(jsonStr);
+        return SOFTBUS_STRCPY_ERR;
+    }
+
+    cJSON_free(jsonStr);
+    return SOFTBUS_OK;
+}
+#endif
