@@ -204,7 +204,8 @@ static int32_t TransProxyResetAndCloseConn(ProxyChannelInfo *chan)
         TRANS_LOGI(TRANS_CTRL, "reset dis device. isDisconnect=%{public}d, connId=%{public}u, deviceType=%{public}d",
             !chan->isServer, chan->connId, chan->deviceTypeIsWinpc);
         // only client side can disconnect connection
-        if (((chan->isD2D) || (!chan->isServer) || ret != SOFTBUS_OK) && (!chan->deviceTypeIsWinpc)) {
+        if (((chan->isD2D) || (!chan->isServer) || ret != SOFTBUS_OK ||
+            (strcmp(chan->appInfo.myData.sessionName, "IFusionCommAuthSession") == 0)) && (!chan->deviceTypeIsWinpc)) {
             (void)ConnDisconnectDevice(chan->connId);
         }
     }
