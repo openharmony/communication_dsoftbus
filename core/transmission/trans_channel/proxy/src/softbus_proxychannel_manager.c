@@ -1291,9 +1291,8 @@ static int32_t CheckAndGenerateSinkSessionKey(ProxyChannelInfo *chan)
         return SOFTBUS_OK;
     }
     (void)LnnGetNetworkIdByUuid(chan->appInfo.peerData.deviceId, chan->appInfo.peerNetWorkId, NETWORK_ID_BUF_LEN);
-    int32_t osType = 0;
-    GetOsTypeByNetworkId(chan->appInfo.peerNetWorkId, &osType);
-    if (osType != OH_OS_TYPE) {
+    GetOsTypeByNetworkId(chan->appInfo.peerNetWorkId, &chan->appInfo.osType);
+    if (chan->appInfo.osType != OH_OS_TYPE) {
         DisableCapabilityBit(&chan->appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET);
     }
     if (GetCapabilityBit(chan->appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
@@ -1310,10 +1309,15 @@ static void FillMetaNodeAppInfo(int64_t authId, AppInfo *appInfo)
         return;
     }
     char peerNetWorkId[NETWORK_ID_BUF_LEN] = { 0 };
-    (void)AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked(authId, peerNetWorkId, NETWORK_ID_BUF_LEN);
+    if (AuthMetaGetPeerMetaNodeIdByPeerAuthIdPacked(authId, peerNetWorkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+        return;
+    }
     GetOsTypeByNetworkId(peerNetWorkId, &appInfo->osType);
     LnnGetRemoteNumInfo(peerNetWorkId, NUM_KEY_META_TYPE, &appInfo->metaType);
     appInfo->isSupportConcurrentMetaNode = AuthMetaIsSupportConcurrentByMetaNodeIdPacked(peerNetWorkId);
+    if (appInfo->osType == OTHER_OS_TYPE) {
+        (void)strcpy_s(appInfo->peerNetWorkId, NETWORK_ID_BUF_LEN, peerNetWorkId);
+    }
 }
 
 static int32_t CheckProxyChannelPermission(const ProxyMessage *msg, ProxyChannelInfo *chan)
@@ -1331,13 +1335,7 @@ static int32_t CheckProxyChannelPermission(const ProxyMessage *msg, ProxyChannel
 
 #ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
     if (chan->appInfo.appType == APP_TYPE_NORMAL && chan->appInfo.callingTokenId != TOKENID_NOT_SET) {
-        if (chan->appInfo.osType != OH_OS_TYPE) {
-            (void)strcpy_s(chan->appInfo.peerNetWorkId, NETWORK_ID_BUF_LEN, chan->appInfo.peerData.deviceId);
-        } else {
-            (void)LnnGetNetworkIdByUuid(
-                chan->appInfo.peerData.deviceId, chan->appInfo.peerNetWorkId, NETWORK_ID_BUF_LEN);
-        }
-        if (chan->appInfo.osType != OH_OS_TYPE) {
+        if (chan->appInfo.osType != OH_OS_TYPE && chan->appInfo.osType != OTHER_OS_TYPE) {
             TRANS_LOGI(TRANS_CTRL, "not support acl check osType=%{public}d", chan->appInfo.osType);
         } else if (GetCapabilityBit(chan->appInfo.channelCapability, TRANS_CHANNEL_ACL_CHECK_OFFSET)) {
             int32_t ret = TransCheckServerAccessControl(&chan->appInfo);
