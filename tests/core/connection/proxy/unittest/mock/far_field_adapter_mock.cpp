@@ -61,13 +61,13 @@ int32_t FarFieldAdapterOpenP2P(const P2PDeviceInfo *device)
     return mocker->OpenP2P(device);
 }
 
-int32_t FarFieldAdapterCloseP2P(const P2PDeviceInfo *device)
+int32_t FarFieldAdapterCloseP2P(const P2PDeviceInfo *device, bool isNeedCloseSocket)
 {
     auto mocker = FarFieldAdapterMock::GetMock();
     if (mocker == nullptr) {
         return SOFTBUS_ERR;
     }
-    return mocker->CloseP2P(device);
+    return mocker->CloseP2P(device, isNeedCloseSocket);
 }
 
 P2PState FarFieldAdapterGetP2PState(const P2PDeviceInfo *device)

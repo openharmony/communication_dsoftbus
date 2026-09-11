@@ -642,6 +642,7 @@ const SoftBusCodeToStateMap G_CODE_MAP[] = {
     { SOFTBUS_CONN_BR_UNPAIRED,               CHANNEL_BR_NO_PAIRED              },
     { SOFTBUS_CONN_BLUETOOTH_OFF,             CHANNEL_WAIT_RESUME               },
     { SOFTBUS_PERMISSION_DENIED,              CHANNEL_EXCEPTION_SOFTWARE_FAILED },
+    { SOFTBUS_FAR_FIELD_DISCONNECT,           CHANNEL_WAIT_RESUME               },
 };
 
 static int32_t SoftbusErrConvertChannelState(int32_t err)

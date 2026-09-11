@@ -40,6 +40,7 @@ int32_t g_farFieldDisconnectReason = 0;
 uint32_t g_farFieldRecvDataLen = 0;
 bool g_farFieldReconnected = false;
 bool g_farFieldOpenSuccess = false;
+ProxyChannel *g_farFieldChannel = nullptr;
 
 void ResetFarFieldGlobals()
 {
@@ -49,12 +50,18 @@ void ResetFarFieldGlobals()
     g_farFieldRecvDataLen = 0;
     g_farFieldReconnected = false;
     g_farFieldOpenSuccess = false;
+    SoftBusFree(g_farFieldChannel);
+    g_farFieldChannel = nullptr;
 }
 
 void TestOnFarFieldOpenSuccess(uint32_t requestId, ProxyChannel *channel)
 {
     g_farFieldChannelId = channel->channelId;
     g_farFieldOpenSuccess = true;
+    SoftBusFree(g_farFieldChannel);
+    g_farFieldChannel = static_cast<ProxyChannel *>(SoftBusCalloc(sizeof(ProxyChannel)));
+    ASSERT_TRUE(g_farFieldChannel != nullptr);
+    (void)memcpy_s(g_farFieldChannel, sizeof(ProxyChannel), channel, sizeof(ProxyChannel));
 }
 
 void TestOnFarFieldOpenFail(uint32_t requestId, int32_t reason, const char *brMac)
@@ -70,12 +77,6 @@ void TestOnFarFieldDisconnected(ProxyChannel *channel, int32_t reason)
 void TestOnFarFieldDataReceived(ProxyChannel *channel, const uint8_t *data, uint32_t dataLen)
 {
     g_farFieldRecvDataLen = dataLen;
-}
-
-void TestOnFarFieldReconnected(char *addr, ProxyChannel *channel)
-{
-    g_farFieldReconnected = true;
-    g_farFieldChannelId = channel->channelId;
 }
 
 FarFieldProxyListener BuildTestListener()
@@ -109,6 +110,8 @@ P2PDeviceInfo BuildTestDevice()
 
 class FarFieldProxyManagerTest : public testing::Test {
 public:
+    FarFieldAdapterMock adapterMock_;
+
     static void SetUpTestCase()
     {
         LooperInit();
@@ -161,8 +164,6 @@ private:
         FarFieldProxyListener listener = BuildTestListener();
         RegisterFarFieldProxyListener(&listener);
     }
-
-    FarFieldAdapterMock adapterMock_;
 };
 
 /*
@@ -269,7 +270,7 @@ HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest006, TestSize.Level1)
     P2PDeviceInfo device = BuildTestDevice();
     FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_DISCONNECT, 0);
     SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
-    EXPECT_NE(g_farFieldOpenFailReason, 0);
+    EXPECT_FALSE(g_farFieldOpenSuccess);
     CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest006 out");
 }
 
@@ -364,9 +365,19 @@ HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest009, TestSize.Level1)
 HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest010, TestSize.Level1)
 {
     CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest010 in");
+    FarFieldProxyParam param = BuildTestParam();
+    int32_t ret = OpenFarFieldProxyChannel(&param);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+
+    P2PDeviceInfo device = BuildTestDevice();
+    FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    ASSERT_TRUE(g_farFieldOpenSuccess);
+    ASSERT_NE(g_farFieldChannel, nullptr);
+
     const uint8_t data[] = {0x01, 0x02, 0x03};
-    ProxyChannel channel = {.channelId = 99999};
-    int32_t ret = channel.send != nullptr ? channel.send(nullptr, data, sizeof(data)) : SOFTBUS_INVALID_PARAM;
+    ret = g_farFieldChannel->send(nullptr, data, sizeof(data));
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest010 out");
 }
@@ -385,12 +396,18 @@ HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest011, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
 
-    ProxyChannel channel = {.channelId = g_farFieldChannelId};
+    P2PDeviceInfo device = BuildTestDevice();
+    FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    ASSERT_TRUE(g_farFieldOpenSuccess);
+    ASSERT_NE(g_farFieldChannel, nullptr);
+
+    // transition to DISCONNECTED; send should report not connected
+    FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_DISCONNECT, 0);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
     const uint8_t data[] = {0x01, 0x02, 0x03};
-    int32_t sendRet = SOFTBUS_OK;
-    if (channel.send != nullptr) {
-        sendRet = channel.send(&channel, data, sizeof(data));
-    }
+    ret = g_farFieldChannel->send(g_farFieldChannel, data, sizeof(data));
+    EXPECT_EQ(ret, SOFTBUS_FAR_FIELD_NOT_CONNECTED);
     CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest011 out");
 }
 
@@ -412,13 +429,11 @@ HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest012, TestSize.Level1)
     FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
     SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
     EXPECT_TRUE(g_farFieldOpenSuccess);
+    ASSERT_NE(g_farFieldChannel, nullptr);
 
-    ProxyChannel channel = {.channelId = g_farFieldChannelId};
     const uint8_t data[] = {0x01, 0x02, 0x03, 0x04, 0x05};
-    if (channel.send != nullptr) {
-        ret = channel.send(&channel, data, sizeof(data));
-        EXPECT_EQ(ret, SOFTBUS_OK);
-    }
+    ret = g_farFieldChannel->send(g_farFieldChannel, data, sizeof(data));
+    EXPECT_EQ(ret, SOFTBUS_OK);
     CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest012 out");
 }
 
@@ -431,10 +446,22 @@ HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest012, TestSize.Level1)
 HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest013, TestSize.Level1)
 {
     CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest013 in");
-    ProxyChannel channel = {.channelId = 99999};
-    if (channel.close != nullptr) {
-        channel.close(nullptr, true);
-    }
+    FarFieldProxyParam param = BuildTestParam();
+    int32_t ret = OpenFarFieldProxyChannel(&param);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+
+    P2PDeviceInfo device = BuildTestDevice();
+    FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    ASSERT_TRUE(g_farFieldOpenSuccess);
+    ASSERT_NE(g_farFieldChannel, nullptr);
+
+    // null channel is rejected; the live connection must remain usable afterwards
+    g_farFieldChannel->close(nullptr, true);
+    const uint8_t data[] = {0x01, 0x02, 0x03};
+    ret = g_farFieldChannel->send(g_farFieldChannel, data, sizeof(data));
+    EXPECT_EQ(ret, SOFTBUS_OK);
     CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest013 out");
 }
 
@@ -456,12 +483,14 @@ HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest014, TestSize.Level1)
     FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
     SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
     EXPECT_TRUE(g_farFieldOpenSuccess);
+    ASSERT_NE(g_farFieldChannel, nullptr);
 
-    ProxyChannel channel = {.channelId = g_farFieldChannelId};
-    if (channel.close != nullptr) {
-        channel.close(&channel, true);
-    }
+    g_farFieldChannel->close(g_farFieldChannel, true);
     SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    // connection is torn down: subsequent send must fail to find it
+    const uint8_t data[] = {0x01, 0x02, 0x03};
+    ret = g_farFieldChannel->send(g_farFieldChannel, data, sizeof(data));
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest014 out");
 }
 
@@ -585,14 +614,26 @@ HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest020, TestSize.Level1)
 HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest021, TestSize.Level1)
 {
     CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest021 in");
+    FarFieldProxyParam param = BuildTestParam();
+    int32_t ret = OpenFarFieldProxyChannel(&param);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+
+    P2PDeviceInfo device = BuildTestDevice();
+    FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    ASSERT_TRUE(g_farFieldOpenSuccess);
+    ASSERT_NE(g_farFieldChannel, nullptr);
+
     OpenProxyChannelCallback callback = {
         .onOpenFail = TestOnFarFieldOpenFail,
         .onOpenSuccess = TestOnFarFieldOpenSuccess,
     };
-    ProxyChannel channel = {.channelId = 99999};
-    if (channel.refresh != nullptr) {
-        channel.refresh(nullptr, 1, &callback);
-    }
+    // null channel is rejected; the live connection must remain usable afterwards
+    g_farFieldChannel->refresh(nullptr, 1, &callback);
+    const uint8_t data[] = {0x01, 0x02, 0x03};
+    ret = g_farFieldChannel->send(g_farFieldChannel, data, sizeof(data));
+    EXPECT_EQ(ret, SOFTBUS_OK);
     CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest021 out");
 }
 
@@ -614,16 +655,14 @@ HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest022, TestSize.Level1)
     FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
     SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
     EXPECT_TRUE(g_farFieldOpenSuccess);
-    ResetFarFieldGlobals();
+    ASSERT_NE(g_farFieldChannel, nullptr);
+    g_farFieldOpenSuccess = false;
 
-    ProxyChannel channel = {.channelId = g_farFieldChannelId};
     OpenProxyChannelCallback callback = {
         .onOpenFail = TestOnFarFieldOpenFail,
         .onOpenSuccess = TestOnFarFieldOpenSuccess,
     };
-    if (channel.refresh != nullptr) {
-        channel.refresh(&channel, TEST_REQUEST_ID + 10, &callback);
-    }
+    g_farFieldChannel->refresh(g_farFieldChannel, TEST_REQUEST_ID + 10, &callback);
     SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
 
     FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
@@ -667,12 +706,10 @@ HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest024, TestSize.Level1)
     FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
     SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
     EXPECT_TRUE(g_farFieldOpenSuccess);
+    ASSERT_NE(g_farFieldChannel, nullptr);
 
-    ProxyChannel channel = {.channelId = g_farFieldChannelId};
-    if (channel.send != nullptr) {
-        ret = channel.send(&channel, nullptr, 5);
-        EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    }
+    ret = g_farFieldChannel->send(g_farFieldChannel, nullptr, 5);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest024 out");
 }
 
@@ -685,11 +722,307 @@ HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest024, TestSize.Level1)
 HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest025, TestSize.Level1)
 {
     CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest025 in");
-    ProxyChannel channel = {.channelId = 99999};
+    FarFieldProxyParam param = BuildTestParam();
+    int32_t ret = OpenFarFieldProxyChannel(&param);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+
+    P2PDeviceInfo device = BuildTestDevice();
+    FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    ASSERT_TRUE(g_farFieldOpenSuccess);
+    ASSERT_NE(g_farFieldChannel, nullptr);
+
+    // real send function pointer, but an unknown channelId: lookup must miss
+    ProxyChannel invalidChannel = *g_farFieldChannel;
+    invalidChannel.channelId = 99999;
     const uint8_t data[] = {0x01, 0x02, 0x03};
-    if (channel.send != nullptr) {
-        int32_t ret = channel.send(&channel, data, sizeof(data));
-        EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
-    }
+    ret = invalidChannel.send(&invalidChannel, data, sizeof(data));
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest025 out");
+}
+
+/*
+ * @tc.name: FarFieldProxyManagerTest026
+ * @tc.desc: test FarFieldProxySend with zero dataLen
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest026, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest026 in");
+    FarFieldProxyParam param = BuildTestParam();
+    int32_t ret = OpenFarFieldProxyChannel(&param);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+
+    P2PDeviceInfo device = BuildTestDevice();
+    FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    ASSERT_TRUE(g_farFieldOpenSuccess);
+    ASSERT_NE(g_farFieldChannel, nullptr);
+
+    const uint8_t data[] = {0x01, 0x02, 0x03};
+    ret = g_farFieldChannel->send(g_farFieldChannel, data, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest026 out");
+}
+
+/*
+ * @tc.name: FarFieldProxyManagerTest027
+ * @tc.desc: test FarFieldProxyClose with isClearReconnectEvent=false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest027, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest027 in");
+    FarFieldProxyParam param = BuildTestParam();
+    int32_t ret = OpenFarFieldProxyChannel(&param);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+
+    P2PDeviceInfo device = BuildTestDevice();
+    FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    ASSERT_TRUE(g_farFieldOpenSuccess);
+    ASSERT_NE(g_farFieldChannel, nullptr);
+
+    g_farFieldChannel->close(g_farFieldChannel, false);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    const uint8_t data[] = {0x01, 0x02, 0x03};
+    ret = g_farFieldChannel->send(g_farFieldChannel, data, sizeof(data));
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest027 out");
+}
+
+/*
+ * @tc.name: FarFieldProxyManagerTest028
+ * @tc.desc: test ConnectingOnEnter failure when FarFieldAdapterOpenP2P fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest028, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest028 in");
+    EXPECT_CALL(adapterMock_, OpenP2P).WillRepeatedly(Return(SOFTBUS_ERR));
+    FarFieldProxyParam param = BuildTestParam();
+    int32_t ret = OpenFarFieldProxyChannel(&param);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS * 2);
+    EXPECT_NE(g_farFieldOpenFailReason, 0);
+    EXPECT_FALSE(g_farFieldOpenSuccess);
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest028 out");
+}
+
+/*
+ * @tc.name: FarFieldProxyManagerTest029
+ * @tc.desc: test timeout during refreshing triggers disconnect and open fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest029, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest029 in");
+    FarFieldProxyParam param = BuildTestParam();
+    int32_t ret = OpenFarFieldProxyChannel(&param);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+
+    P2PDeviceInfo device = BuildTestDevice();
+    FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    EXPECT_TRUE(g_farFieldOpenSuccess);
+    ASSERT_NE(g_farFieldChannel, nullptr);
+
+    OpenProxyChannelCallback callback = {
+        .onOpenFail = TestOnFarFieldOpenFail,
+        .onOpenSuccess = TestOnFarFieldOpenSuccess,
+    };
+    g_farFieldChannel->refresh(g_farFieldChannel, TEST_REQUEST_ID + 20, &callback);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS * 2);
+    ResetFarFieldGlobals();
+
+    SoftBusSleepMs(10500);
+    EXPECT_EQ(g_farFieldOpenFailReason, SOFTBUS_FAR_FIELD_TIMEOUT);
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest029 out");
+}
+
+/*
+ * @tc.name: FarFieldProxyManagerTest030
+ * @tc.desc: test Disconnected to Connected transition covers DisconnectedOnExit
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest030, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest030 in");
+    FarFieldProxyParam param = BuildTestParam();
+    int32_t ret = OpenFarFieldProxyChannel(&param);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+
+    P2PDeviceInfo device = BuildTestDevice();
+    FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    EXPECT_TRUE(g_farFieldOpenSuccess);
+
+    ResetFarFieldGlobals();
+    FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_DISCONNECT, 0);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    EXPECT_NE(g_farFieldDisconnectReason, 0);
+
+    ResetFarFieldGlobals();
+    FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    EXPECT_TRUE(g_farFieldOpenSuccess);
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest030 out");
+}
+
+/*
+ * @tc.name: FarFieldProxyManagerTest031
+ * @tc.desc: test RefreshingOnEnter failure when FarFieldAdapterRefresh fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest031, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest031 in");
+    FarFieldProxyParam param = BuildTestParam();
+    int32_t ret = OpenFarFieldProxyChannel(&param);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+
+    P2PDeviceInfo device = BuildTestDevice();
+    FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    ASSERT_TRUE(g_farFieldOpenSuccess);
+    ASSERT_NE(g_farFieldChannel, nullptr);
+
+    EXPECT_CALL(adapterMock_, Refresh).WillRepeatedly(Return(SOFTBUS_ERR));
+    OpenProxyChannelCallback callback = {
+        .onOpenFail = TestOnFarFieldOpenFail,
+        .onOpenSuccess = TestOnFarFieldOpenSuccess,
+    };
+    g_farFieldChannel->refresh(g_farFieldChannel, TEST_REQUEST_ID + 30, &callback);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS * 2);
+
+    const uint8_t data[] = {0x01, 0x02, 0x03};
+    ret = g_farFieldChannel->send(g_farFieldChannel, data, sizeof(data));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest031 out");
+}
+
+/*
+ * @tc.name: FarFieldProxyManagerTest032
+ * @tc.desc: test OnRemoteEvent with valid REQ_CONNECT_P2P and REQ_DISCONNECT_P2P
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest032, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest032 in");
+    FarFieldProxyParam param = BuildTestParam();
+    int32_t ret = OpenFarFieldProxyChannel(&param);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+
+    P2PDeviceInfo device = BuildTestDevice();
+    FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    EXPECT_TRUE(g_farFieldOpenSuccess);
+    ResetFarFieldGlobals();
+
+    FarFieldAdapterMock::InjectRemoteEvent(&device, REQ_CONNECT_P2P);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    EXPECT_FALSE(g_farFieldOpenSuccess);
+    EXPECT_EQ(g_farFieldDisconnectReason, 0);
+
+    FarFieldAdapterMock::InjectRemoteEvent(&device, REQ_DISCONNECT_P2P);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    EXPECT_FALSE(g_farFieldOpenSuccess);
+    EXPECT_EQ(g_farFieldDisconnectReason, 0);
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest032 out");
+}
+
+/*
+ * @tc.name: FarFieldProxyManagerTest033
+ * @tc.desc: test AttemptReuseConnection in REFRESHING state
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest033, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest033 in");
+    FarFieldProxyParam param = BuildTestParam();
+    int32_t ret = OpenFarFieldProxyChannel(&param);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+
+    P2PDeviceInfo device = BuildTestDevice();
+    FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    ASSERT_TRUE(g_farFieldOpenSuccess);
+    ASSERT_NE(g_farFieldChannel, nullptr);
+
+    OpenProxyChannelCallback callback = {
+        .onOpenFail = TestOnFarFieldOpenFail,
+        .onOpenSuccess = TestOnFarFieldOpenSuccess,
+    };
+    g_farFieldChannel->refresh(g_farFieldChannel, TEST_REQUEST_ID + 40, &callback);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS * 2);
+    ResetFarFieldGlobals();
+
+    FarFieldProxyParam param2 = BuildTestParam(TEST_REQUEST_ID + 41);
+    ret = OpenFarFieldProxyChannel(&param2);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS * 2);
+
+    FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS * 2);
+    EXPECT_TRUE(g_farFieldOpenSuccess);
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest033 out");
+}
+
+/*
+ * @tc.name: FarFieldProxyManagerTest034
+ * @tc.desc: test ClearFarFieldProxy when connection is not in CONNECTED state
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest034, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest034 in");
+    FarFieldProxyParam param = BuildTestParam();
+    int32_t ret = OpenFarFieldProxyChannel(&param);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    EXPECT_FALSE(g_farFieldOpenSuccess);
+
+    ClearFarFieldProxy(TEST_BR_MAC);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest034 out");
+}
+
+/*
+ * @tc.name: FarFieldProxyManagerTest035
+ * @tc.desc: test OnRecvP2PMsg with unexpected state (CONNECTING)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest035, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest035 in");
+    FarFieldProxyParam param = BuildTestParam();
+    int32_t ret = OpenFarFieldProxyChannel(&param);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    EXPECT_FALSE(g_farFieldOpenSuccess);
+
+    P2PDeviceInfo device = BuildTestDevice();
+    uint8_t msg[] = {0x01, 0x02, 0x03, 0x04};
+    FarFieldAdapterMock::InjectRecvP2PMsg(&device, msg, sizeof(msg));
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    EXPECT_EQ(g_farFieldRecvDataLen, sizeof(msg));
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest035 out");
 }

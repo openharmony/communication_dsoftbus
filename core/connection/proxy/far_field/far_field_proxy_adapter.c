@@ -29,7 +29,7 @@ typedef int32_t (*FarFieldDeinitProxyFunc)(void);
 typedef bool (*FarFieldIsDeviceSupportFunc)(const P2PDeviceInfo *);
 typedef int32_t (*FarFieldRegisterCallbackFunc)(const FarFieldCallbackSt *);
 typedef int32_t (*FarFieldOpenP2PFunc)(const P2PDeviceInfo *);
-typedef int32_t (*FarFieldCloseP2PFunc)(const P2PDeviceInfo *);
+typedef int32_t (*FarFieldCloseP2PFunc)(const P2PDeviceInfo *, bool);
 typedef P2PState (*FarFieldGetP2PStateFunc)(const P2PDeviceInfo *);
 typedef int32_t (*FarFieldSendMsgFunc)(const P2PDeviceInfo *, const uint8_t *, uint32_t);
 typedef int32_t (*FarFieldRefreshFunc)(const P2PDeviceInfo *);
@@ -277,7 +277,7 @@ int32_t FarFieldAdapterOpenP2P(const P2PDeviceInfo *device)
     return ret;
 }
 
-int32_t FarFieldAdapterCloseP2P(const P2PDeviceInfo *device)
+int32_t FarFieldAdapterCloseP2P(const P2PDeviceInfo *device, bool isNeedCloseSocket)
 {
     if (device == NULL) {
         CONN_LOGE(CONN_PROXY, "Invalid params");
@@ -289,7 +289,7 @@ int32_t FarFieldAdapterCloseP2P(const P2PDeviceInfo *device)
         return FAR_FIELD_ADAPTER_NOT_INITIALIZED;
     }
 
-    ret = g_adapterContext.closeP2P(device);
+    ret = g_adapterContext.closeP2P(device, isNeedCloseSocket);
     DeferenceSoRefCnt();
     return ret;
 }

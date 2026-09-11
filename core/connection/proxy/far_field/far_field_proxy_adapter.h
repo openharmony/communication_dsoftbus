@@ -86,7 +86,7 @@ void FarFieldAdapterDeinit(void);
 bool FarFieldAdapterIsDeviceSupport(const P2PDeviceInfo *device);
 int32_t FarFieldAdapterRegisterCallback(const FarFieldCallbackSt *callback);
 int32_t FarFieldAdapterOpenP2P(const P2PDeviceInfo *device);
-int32_t FarFieldAdapterCloseP2P(const P2PDeviceInfo *device);
+int32_t FarFieldAdapterCloseP2P(const P2PDeviceInfo *device, bool isNeedCloseSocket);
 P2PState FarFieldAdapterGetP2PState(const P2PDeviceInfo *device);
 int32_t FarFieldAdapterSendMsg(const P2PDeviceInfo *device, const uint8_t *data, uint32_t len);
 int32_t FarFieldAdapterRefresh(const P2PDeviceInfo *device);
