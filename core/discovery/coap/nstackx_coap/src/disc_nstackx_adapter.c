@@ -68,6 +68,10 @@ static SoftBusMutex g_discCoapInnerCbLock = {0};
 static int32_t NstackxLocalDevInfoDump(int fd);
 static int32_t g_currentLinkUpNums = 0;
 static char g_serviceData[NSTACKX_MAX_SERVICE_DATA_LEN] = {0};
+#ifdef DSOFTBUS_FEATURE_DISC_COAP_CUSTDATA
+    static char g_cachedBData[NSTACKX_MAX_BUSINESS_DATA_LEN] = {0};
+    static uint32_t g_cachedBDataLen = 0;
+#endif
 
 typedef struct {
     char netWorkName[NSTACKX_MAX_INTERFACE_NAME_LEN];
@@ -80,12 +84,35 @@ static DiscLinkInfo g_linkInfo[MAX_IF + 1] = {
 };
 
 #if defined(DSOFTBUS_FEATURE_DISC_LNN_COAP) || defined(DSOFTBUS_FEATURE_DISC_SHARE_COAP)
+static void FillRspBusinessData(NSTACKX_ResponseSettings *settings)
+{
+#ifdef DSOFTBUS_FEATURE_DISC_COAP_CUSTDATA
+    if (g_cachedBDataLen > 0) {
+        settings->businessData = (char *)SoftBusCalloc(g_cachedBDataLen);
+        if (settings->businessData != NULL &&
+            strcpy_s(settings->businessData, g_cachedBDataLen, g_cachedBData) == EOK) {
+            settings->length = g_cachedBDataLen;
+        } else {
+            SoftBusFree(settings->businessData);
+            settings->businessData = NULL;
+            settings->length = 0;
+            DISC_LOGE(DISC_COAP, "fill rsp businessData fail, fallback to empty");
+        }
+    } else {
+        settings->businessData = NULL;
+        settings->length = 0;
+    }
+#else
+    settings->businessData = NULL;
+    settings->length = 0;
+#endif
+}
+
 static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings,
     const DeviceInfo *deviceInfo, uint8_t bType, bool isRemoveShareCap)
 {
-    settings->businessData = NULL;
-    settings->length = 0;
     settings->businessType = bType;
+    FillRspBusinessData(settings);
 
     char localNetifName[NSTACKX_MAX_INTERFACE_NAME_LEN] = {0};
     if (g_linkInfo[USB_IF].status == LINK_STATUS_UP && strlen(deviceInfo->addr[0].info.ip.ip) > IPV4_MAX_LEN) {
@@ -116,6 +143,9 @@ static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings,
         SOFTBUS_STRCPY_ERR, DISC_COAP, "copy capBitMap fail");
     return SOFTBUS_OK;
 EXIT:
+    SoftBusFree(settings->businessData);
+    settings->businessData = NULL;
+    settings->length = 0;
     return SOFTBUS_STRCPY_ERR;
 }
 #endif /* DSOFTBUS_FEATURE_DISC_LNN_COAP || DSOFTBUS_FEATURE_DISC_SHARE_COAP */
@@ -130,6 +160,7 @@ int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType, bool isRemo
     int32_t ret = FillRspSettings(settings, deviceInfo, bType, isRemoveShareCap);
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "fill nstackx response settings fail");
+        SoftBusFree(settings->businessData);
         SoftBusFree(settings);
         return ret;
     }
@@ -139,6 +170,7 @@ int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType, bool isRemo
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_COAP, "disc send response fail, ret=%{public}d", ret);
     }
+    SoftBusFree(settings->businessData);
     SoftBusFree(settings);
     return ret;
 #else
@@ -155,6 +187,9 @@ static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, Device
     DiscCoapParseWifiIpAddr(reserveInfo, device);
     DiscCoapParseHwAccountHash(reserveInfo, device);
     DiscCoapParseNickname(reserveInfo, nickName, DISC_MAX_NICKNAME_LEN);
+#ifdef DSOFTBUS_FEATURE_DISC_COAP_CUSTDATA
+    DiscCoapParseCustData(reserveInfo, device);
+#endif
     if (DiscCoapParseServiceData(reserveInfo, device) != SOFTBUS_OK) {
         DISC_LOGD(DISC_COAP, "parse service data fail");
     }
@@ -427,6 +462,15 @@ int32_t DiscCoapRegisterBusinessData(const unsigned char *capabilityData, uint32
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP, "assemble bdata fail, ret=%{public}d", ret);
     ret = NSTACKX_RegisterBusinessData(businessData);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP, "register bdata fail, ret=%{public}d", ret);
+#ifdef DSOFTBUS_FEATURE_DISC_COAP_CUSTDATA
+    if (strcpy_s(g_cachedBData, sizeof(g_cachedBData), businessData) == EOK) {
+        g_cachedBDataLen = strlen(businessData) + 1;
+        DISC_LOGI(DISC_COAP, "cache bData successful");
+    } else {
+        g_cachedBDataLen = 0;
+        DISC_LOGE(DISC_COAP, "cache bData fail");
+    }
+#endif
     return SOFTBUS_OK;
 }
 
@@ -489,6 +533,29 @@ static int32_t ConvertDiscoverySettings(NSTACKX_DiscoverySettings *discSet, cons
     discSet->advertiseDuration = (discFreq >> DISC_FREQ_DURATION_BIT) * DISC_USECOND;
     ret = DiscFillBtypePacked(option->capability, option->allCap, discSet);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP, "unsupport capability");
+#ifdef DSOFTBUS_FEATURE_DISC_COAP_CUSTDATA
+    if (option->mode == ACTIVE_PUBLISH && option->capabilityData != NULL && option->dataLen > 0) {
+        char bData[NSTACKX_MAX_BUSINESS_DATA_LEN] = { 0 };
+        int32_t bRet = DiscCoapAssembleBdataPacked(option->capabilityData, option->dataLen, bData, sizeof(bData));
+        if (bRet != SOFTBUS_OK) {
+            DISC_LOGE(DISC_COAP, "assemble bdata for broadcast fail, ret=%{public}d", bRet);
+            return bRet;
+        }
+        size_t bDataLen = strlen(bData);
+        if (bDataLen > 0) {
+            discSet->businessData = (char *)SoftBusCalloc(bDataLen + 1);
+            DISC_CHECK_AND_RETURN_RET_LOGE(discSet->businessData != NULL, SOFTBUS_MALLOC_ERR, DISC_COAP,
+                "malloc businessData fail");
+            if (strcpy_s(discSet->businessData, bDataLen + 1, bData) != EOK) {
+                SoftBusFree(discSet->businessData);
+                discSet->businessData = NULL;
+                DISC_LOGE(DISC_COAP, "copy businessData fail");
+                return SOFTBUS_STRCPY_ERR;
+            }
+            discSet->length = bDataLen + 1;
+        }
+    }
+#endif
     return SOFTBUS_OK;
 }
 

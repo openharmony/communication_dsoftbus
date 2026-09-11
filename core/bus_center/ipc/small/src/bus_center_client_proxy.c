@@ -323,10 +323,12 @@ int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void 
         return SOFTBUS_INVALID_PARAM;
     }
     IpcIo io;
-    uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN_EX];
-    IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN_EX, 0);
-    WriteUint32(&io, deviceLen);
-    WriteBuffer(&io, device, deviceLen);
+    uint8_t tmpData[sizeof(DeviceInfo) + sizeof(uint32_t)];
+    IpcIoInit(&io, tmpData, sizeof(tmpData), 0);
+    if (!WriteUint32(&io, deviceLen) || !WriteBuffer(&io, device, deviceLen)) {
+        LNN_LOGE(LNN_EVENT, "write device info failed, deviceLen=%{public}u", deviceLen);
+        return SOFTBUS_NETWORK_PACK_DATA_FAILED;
+    }
     SvcIdentity svc = {0};
     if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "get svc failed");

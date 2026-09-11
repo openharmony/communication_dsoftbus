@@ -130,6 +130,10 @@ if (dsoftbus_feature_disc_coap && dsoftbus_feature_inner_disc_coap) {
   defines += [ "DSOFTBUS_FEATURE_DISC_COAP" ]
 }
 
+if (dsoftbus_feature_disc_coap_custdata && dsoftbus_feature_inner_disc_coap) {
+  defines += [ "DSOFTBUS_FEATURE_DISC_COAP_CUSTDATA"]
+}
+
 if (dsoftbus_feature_disc_lnn_coap && dsoftbus_feature_inner_disc_coap) {
   defines += [ "DSOFTBUS_FEATURE_DISC_LNN_COAP" ]
 }
