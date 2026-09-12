@@ -361,8 +361,19 @@ int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *bi
             SoftBusFree(tmpMac);
             return SOFTBUS_ERR;
         }
-        binMac[i] = strtoul(token, &endptr, BT_ADDR_BASE);
+        unsigned long val = strtoul(token, &endptr, BT_ADDR_BASE);
+        if (endptr == token || *endptr != '\0'  || val > UINT8_MAX) {
+            COMM_LOGE(COMM_UTILS, "invalid mac addr token: %{public}s", token);
+            SoftBusFree(tmpMac);
+            return SOFTBUS_INVALID_PARAM;
+        }
+        binMac[i] = (uint8_t)val;
         token = strtok_r(NULL, BT_ADDR_DELIMITER, &nextTokenPtr);
+    }
+    if (token != NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid mac addr token: %{public}s", token);
+        SoftBusFree(tmpMac);
+        return SOFTBUS_INVALID_PARAM;
     }
     SoftBusFree(tmpMac);
     return SOFTBUS_OK;
