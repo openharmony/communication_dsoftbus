@@ -315,7 +315,7 @@ HWTEST_F(TransClientMsgServiceTest, TransClientMsgServiceTest03, TestSize.Level1
         g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     ret = SendMessage(sessionId, TRANS_TEST_AUTH_DATA, TRANS_TEST_BEYOND_MAX_MSG_LEN);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
+    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 
     sessionId = AddSessionServerAndSession(
@@ -432,6 +432,59 @@ HWTEST_F(TransClientMsgServiceTest, CheckSendLenForBoosterTest01, TestSize.Level
 
     ret = CheckSendLenForBooster(TRANS_TEST_INVALID_SEND_LEN);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: CheckMessageBusinessTypeAndOsTypeTest01
+ * @tc.desc: CheckMessageBusinessTypeAndOsType with different parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientMsgServiceTest, CheckMessageBusinessTypeAndOsTypeTest01, TestSize.Level1)
+{
+    int32_t sessionId = AddSessionServerAndSession(
+        g_sessionName, CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, false, ENABLE_STATUS_SUCCESS);
+    ASSERT_GT(sessionId, 0);
+
+    int32_t ret = CheckMessageBusinessTypeAndOsType(
+        sessionId, TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_AUTH, TRANS_TEST_SEND_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DeleteSessionServerAndSession(g_sessionName, sessionId);
+
+    sessionId = AddSessionServerAndSession(
+        g_sessionName, CHANNEL_TYPE_PROXY, BUSINESS_TYPE_MESSAGE, false, ENABLE_STATUS_SUCCESS);
+    ASSERT_GT(sessionId, 0);
+    ret = CheckMessageBusinessTypeAndOsType(sessionId, TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_PROXY, TRANS_TEST_SEND_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DeleteSessionServerAndSession(g_sessionName, sessionId);
+
+    sessionId = AddSessionServerAndSession(
+        g_sessionName, CHANNEL_TYPE_PROXY, BUSINESS_TYPE_NOT_CARE, false, ENABLE_STATUS_SUCCESS);
+    ASSERT_GT(sessionId, 0);
+    ret = CheckMessageBusinessTypeAndOsType(sessionId, TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_PROXY, TRANS_TEST_SEND_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DeleteSessionServerAndSession(g_sessionName, sessionId);
+
+    sessionId = AddSessionServerAndSession(
+        g_sessionName, CHANNEL_TYPE_PROXY, BUSINESS_TYPE_BYTE, false, ENABLE_STATUS_SUCCESS);
+    ASSERT_GT(sessionId, 0);
+    ret = CheckMessageBusinessTypeAndOsType(sessionId, TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_PROXY, TRANS_TEST_SEND_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DeleteSessionServerAndSession(g_sessionName, sessionId);
+
+    sessionId = AddSessionServerAndSession(
+        g_sessionName, CHANNEL_TYPE_PROXY, BUSINESS_TYPE_D2D_MESSAGE, false, ENABLE_STATUS_SUCCESS);
+    ASSERT_GT(sessionId, 0);
+    ret = CheckMessageBusinessTypeAndOsType(sessionId, TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_PROXY, TRANS_TEST_SEND_LEN);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH);
+    DeleteSessionServerAndSession(g_sessionName, sessionId);
+
+    sessionId = AddSessionServerAndSession(
+        g_sessionName, CHANNEL_TYPE_UDP, BUSINESS_TYPE_MESSAGE, false, ENABLE_STATUS_SUCCESS);
+    ASSERT_GT(sessionId, 0);
+    ret = CheckMessageBusinessTypeAndOsType(sessionId, TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_UDP, TRANS_TEST_SEND_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 
 /**
@@ -553,7 +606,7 @@ HWTEST_F(TransClientMsgServiceTest, SendMessageAsyncTest01, TestSize.Level1)
     len = TRANS_TEST_BEYOND_MAX_MSG_LEN;
     ret = SendMessageAsync(sessionId, dataSeq, data, len);
 #ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
 #else
     EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
 #endif
