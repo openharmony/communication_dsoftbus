@@ -169,3 +169,24 @@ void DiscCoapParseNickname(const cJSON *data, char *nickName, int32_t length)
     }
     cJSON_Delete(bDataInfo);
 }
+
+#ifdef DSOFTBUS_FEATURE_DISC_COAP_CUSTDATA
+#define JSON_KEY_CUST_DATA "custData"
+
+void DiscCoapParseCustData(const cJSON *data, DeviceInfo *device)
+{
+    DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_COAP, "json data is NULL");
+    DISC_CHECK_AND_RETURN_LOGE(device != NULL, DISC_COAP, "device info is NULL");
+    char bData[MAX_BDATA_LEN] = {0};
+    if (!GetJsonObjectStringItem(data, JSON_KEY_BDATA, bData, MAX_BDATA_LEN)) {
+        DISC_LOGD(DISC_COAP, "parse bData fail, skip custData");
+        return;
+    }
+    cJSON *bDataInfo = cJSON_Parse(bData);
+    DISC_CHECK_AND_RETURN_LOGE(bDataInfo != NULL, DISC_COAP, "parse bData json fail");
+    if (!GetJsonObjectStringItem(bDataInfo, JSON_KEY_CUST_DATA, device->custData, DISC_MAX_CUST_DATA_LEN)) {
+        DISC_LOGD(DISC_COAP, "no custData in bData, skip");
+    }
+    cJSON_Delete(bDataInfo);
+}
+#endif
