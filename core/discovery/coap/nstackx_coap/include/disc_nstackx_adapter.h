@@ -43,6 +43,10 @@ typedef struct {
     DiscCoapMode mode;
     uint32_t capability;
     uint32_t allCap;
+#ifdef DSOFTBUS_FEATURE_DISC_COAP_CUSTDATA
+    const unsigned char *capabilityData;
+    uint32_t dataLen;
+#endif
 } DiscCoapOption;
 
 int32_t DiscNstackxInit(void);
