@@ -320,7 +320,7 @@ static void DfxCallInterfaceByMedium(
 static int32_t CallInterfaceByMedium(const DiscInfo *info, const char *packageName, const InterfaceFuncType type)
 {
     int32_t ret = SOFTBUS_OK;
-    DISC_LOGI(DISC_CONTROL, "disc deal event, medium=%{public}d, mode=%{public}d, type=%{public}d", info->medium,
+    DISC_LOGD(DISC_CONTROL, "disc deal event, medium=%{public}d, mode=%{public}d, type=%{public}d", info->medium,
         info->mode, type);
     switch (info->medium) {
         case COAP:
