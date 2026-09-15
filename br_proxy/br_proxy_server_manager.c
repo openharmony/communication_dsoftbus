@@ -872,7 +872,7 @@ static bool IsPidExist(ProxyBaseInfo *baseInfo, uint32_t requestId, pid_t pid)
     Anonymize(baseInfo->uuid, &uuidTmp);
     TRANS_LOGI(TRANS_SVC,
         "[br_proxy] brproxy open! brMac=%{public}s, uuid=%{public}s, requestId=%{public}u, pid=%{public}d",
-        BrMacTmp, uuidTmp, requestId, pid);
+        AnonymizeWrapper(BrMacTmp), AnonymizeWrapper(uuidTmp), requestId, pid);
     AnonymizeFree(BrMacTmp);
     AnonymizeFree(uuidTmp);
     (void)SoftBusMutexUnlock(&(g_serverList->lock));
@@ -1305,7 +1305,8 @@ static int32_t RefreshChannel(ProxyChannelParam *param, bool *isRefresh, uint32_
     BrProxyInfo *nodeNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(nodeInfo, nodeNext, &(g_proxyList->list), BrProxyInfo, node) {
         if (strcmp(nodeInfo->proxyInfo.brMac, param->brMac) != 0 ||
-            strcmp(nodeInfo->proxyInfo.uuid, param->uuid) != 0) {
+            strcmp(nodeInfo->proxyInfo.uuid, param->uuid) != 0 ||
+            nodeInfo->requestId != requestId) {
             continue;
         }
         if (nodeInfo->isConnected && nodeInfo->channel.refresh != NULL) {
@@ -1322,7 +1323,6 @@ static int32_t RefreshChannel(ProxyChannelParam *param, bool *isRefresh, uint32_
 static int32_t InitProxyChannelParams(const char *brMac, const char *uuid,
     uint32_t requestId, int32_t appIndex, ProxyChannelParam *param)
 {
-    (void)memset_s(param, sizeof(ProxyChannelParam), 0, sizeof(ProxyChannelParam));
     param->requestId = requestId;
     param->appIndex = appIndex;
     TransBrProxyStorageInfo info;
@@ -1335,7 +1335,7 @@ static int32_t InitProxyChannelParams(const char *brMac, const char *uuid,
     if (strcpy_s(param->brMac, sizeof(param->brMac), brMac) != EOK ||
         strcpy_s(param->uuid, sizeof(param->uuid), uuid) != EOK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] copy brMac or uuid failed");
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     param->timeoutMs = BR_PROXY_MAX_WAIT_TIME_MS;
     return SOFTBUS_OK;
@@ -1359,14 +1359,20 @@ static int32_t AddChannelAndRefresh(ProxyChannelParam *param, uint32_t oldReques
     }
     if (!isRefresh) {
         ProxyChannelManager *proxyMgr = GetProxyChannelManager();
+        if (proxyMgr == NULL) {
+            ret = SOFTBUS_INVALID_PARAM;
+            goto FAIL;
+        }
         ret = proxyMgr->openProxyChannel(param, &g_channelOpen);
         if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SVC, "[br_proxy] openProxyChannel failed, ret=%{public}d", ret);
-            (void)UpdateBrProxyRequestId(param->brMac, param->uuid, param->appIndex, oldRequestId, &oldRequestId);
-            (void)ServerDeleteChannelFromList(channelId);
-            return ret;
+            goto FAIL;
         }
     }
+    return ret;
+FAIL:
+    TRANS_LOGE(TRANS_SVC, "[br_proxy] openProxyChannel failed, ret=%{public}d", ret);
+    (void)UpdateBrProxyRequestId(param->brMac, param->uuid, param->appIndex, oldRequestId, &oldRequestId);
+    (void)ServerDeleteChannelFromList(channelId);
     return ret;
 }
 
@@ -1378,6 +1384,7 @@ static int32_t ConnectPeerDevice(const char *brMac, const char *uuid, uint32_t *
     }
     *requestId = proxyMgr->generateRequestId();
     ProxyChannelParam param;
+    (void)memset_s(&param, sizeof(ProxyChannelParam), 0, sizeof(ProxyChannelParam));
     int32_t ret = InitProxyChannelParams(brMac, uuid, *requestId, appIndex, &param);
     if (ret != SOFTBUS_OK) {
         return ret;

@@ -14,6 +14,8 @@
  */
 
 #include "far_field_proxy_adapter.h"
+
+#include "conn_event.h"
 #include "conn_log.h"
 #include "softbus_error_code.h"
 #include "softbus_init_common.h"
@@ -61,6 +63,36 @@ static FarFieldCallbackSt *g_farFieldCallback = NULL;
 
 static SoftBusMutex g_adapterMutex;
 
+typedef int32_t (*DfxEventCallbackFunc)(const DfxEventExtra *event);
+typedef void (*RegisterDfxEventCallbackFunc)(DfxEventCallbackFunc callback);
+
+static int32_t DfxEventCallback(const DfxEventExtra *event)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGE(event != NULL, SOFTBUS_INVALID_PARAM, CONN_PROXY, "event is null");
+    ConnEventExtra extra = {
+        .callerPkg = event->hostPkg,
+        .result = event->stageRes,
+        .errcode = event->errorCode,
+        .connectReason = event->connectReason,
+        .costTime = event->costTime,
+        .sendCnt = event->sendMsgCnt,
+        .receiveCnt = event->receiveMsgCnt,
+    };
+    ConnEventInner(event->bizScene, event->bizStage, event->func, event->line, &extra);
+    return SOFTBUS_OK;
+}
+
+static void RegisterDfxEventCallback(void)
+{
+    RegisterDfxEventCallbackFunc registerDfxEventCallback = (RegisterDfxEventCallbackFunc)dlsym(
+        g_adapterContext.soHandle, "RegisterDfxEventCallback");
+    if (registerDfxEventCallback == NULL) {
+        CONN_LOGE(CONN_PROXY, "Failed to load RegisterDfxEventCallback symbol");
+        return;
+    }
+    registerDfxEventCallback(DfxEventCallback);
+}
+
 static int32_t LoadFarFieldSymbols(void)
 {
     g_adapterContext.initProxy = (FarFieldInitProxyFunc)dlsym(g_adapterContext.soHandle, "FarFieldInitProxy");
@@ -101,6 +133,7 @@ static int32_t LoadFarFieldSymbols(void)
     CONN_CHECK_AND_RETURN_RET_LOGE(g_adapterContext.refresh != NULL, FAR_FIELD_ADAPTER_SYMBOL_NOT_FOUND, CONN_PROXY,
         "Failed to load FarFieldRefresh symbol");
 
+    RegisterDfxEventCallback();
     CONN_LOGI(CONN_PROXY, "All symbols loaded successfully");
     return SOFTBUS_OK;
 }
