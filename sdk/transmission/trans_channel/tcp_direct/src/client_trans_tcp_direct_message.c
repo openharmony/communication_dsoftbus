@@ -620,7 +620,7 @@ static int32_t TransTdcProcessData(int32_t channelId)
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_SDK, "lock failed ");
     uint32_t plainLen = 1;
     DataBuf *node = TransGetDataBufNodeById(channelId);
-    if (node == NULL) {
+    if (node == NULL || node->data == NULL) {
         TRANS_LOGE(TRANS_SDK, "node is null. channelId=%{public}d ", channelId);
         (void)SoftBusMutexUnlock(&g_tcpDataList->lock);
         return SOFTBUS_TRANS_NODE_NOT_FOUND;
