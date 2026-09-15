@@ -91,9 +91,9 @@ static int32_t ChangeConfiguration(
     CONN_CHECK_AND_RETURN_RET_LOGE(self, SOFTBUS_INVALID_PARAM, CONN_COMMON, "invalid parameter, controller is null");
     if (active) {
         CONN_CHECK_AND_RETURN_RET_LOGE(windowInMillis >= MIN_WINDOW_IN_MILLIS && windowInMillis <= MAX_WINDOW_IN_MILLIS,
-            SOFTBUS_INVALID_PARAM, CONN_COMMON, "invalid parameter, window=%u", windowInMillis);
+            SOFTBUS_INVALID_PARAM, CONN_COMMON, "invalid parameter, window=%{public}u", windowInMillis);
         CONN_CHECK_AND_RETURN_RET_LOGE(quotaInBytes >= MIN_QUOTA_IN_BYTES && quotaInBytes <= MAX_QUOTA_IN_BYTES,
-            SOFTBUS_INVALID_PARAM, CONN_COMMON, "invalid parameter, quota=%u", quotaInBytes);
+            SOFTBUS_INVALID_PARAM, CONN_COMMON, "invalid parameter, quota=%{public}u", quotaInBytes);
     }
 
     int32_t ret = SoftBusMutexLock(&self->lock);
@@ -141,6 +141,7 @@ void ConnSlideWindowControllerDestructor(struct ConnSlideWindowController *self)
     int32_t ret = SoftBusMutexLock(&self->lock);
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_COMMON, "lock fail");
     CleanupHistoriesUnsafe(self);
+    (void)SoftBusMutexUnlock(&self->lock);
     SoftBusMutexDestroy(&self->lock);
 }
 

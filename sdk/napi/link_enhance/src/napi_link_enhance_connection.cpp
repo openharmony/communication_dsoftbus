@@ -158,15 +158,16 @@ napi_value NapiLinkEnhanceConnection::Constructor(napi_env env, napi_callback_in
     NapiLinkEnhanceConnection *connection = nullptr;
     if (argc == ARGS_SIZE_THREE) {
         uint32_t handle;
-        ParseUInt32(env, handle, argv[PARAM2]);
+        if (!ParseUInt32(env, handle, argv[PARAM2])) {
+            COMM_LOGE(COMM_SDK, "ParseUInt32 fail");
+            return NapiGetUndefinedRet(env);
+        }
         connection = new NapiLinkEnhanceConnection(deviceId, name, handle);
     } else {
         connection = new NapiLinkEnhanceConnection(deviceId, name);
     }
     CONN_CHECK_AND_RETURN_RET_LOGE(connection != nullptr, thisVar, COMM_SDK, "new link enhance connection fail");
-    auto status = napi_wrap(
-        env, thisVar, connection,
-        [](napi_env env, void *data, void *hint) {
+    auto status = napi_wrap(env, thisVar, connection, [](napi_env env, void *data, void *hint) {
             NapiLinkEnhanceConnection *connection = static_cast<NapiLinkEnhanceConnection *>(data);
             if (connection) {
                 ReleaseConnectionResource(env, connection);
