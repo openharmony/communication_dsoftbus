@@ -40,6 +40,7 @@ typedef enum {
     EVENT_SCENE_PAGING_PASSIVE_BROADCAST_RESPONSE = 13,
     EVENT_SCENE_BR_PROXY = 14,
     EVENT_SCENE_GENERAL_CONNECT = 15,
+    EVENT_SCENE_FAR_FIELD = 16,
 } ConnEventScene;
 
 typedef enum {
@@ -78,11 +79,28 @@ typedef enum {
     EVENT_STAGE_BR_PROXY_STATE = 2110,
     EVENT_STAGE_BR_PROXY_RECONNECT = 2111,
     EVENT_STAGE_BR_PROXY_SEND = 2112,
+
+    EVENT_STAGE_FAR_FIELD_START = 2200, // far field stage start[2201,2298]
+    EVENT_STAGE_FAR_FIELD_END = 2299, // far field stage end[2201,2298]
 } ConnEventConnectStage;
 
 typedef enum {
     EVENT_STAGE_TCP_COMMON_ONE = 1,
 } ConnEventTcpCommonStage;
+
+typedef struct {
+    char *func;
+    int32_t line;
+    int32_t bizScene;
+    int32_t bizStage;
+    int32_t stageRes;
+    int32_t errorCode;
+    char *hostPkg;
+    int32_t connectReason;
+    int32_t costTime;
+    int32_t sendMsgCnt;
+    int32_t receiveMsgCnt;
+} DfxEventExtra;
 
 typedef struct {
     int32_t result;             // STAGE_RES
@@ -157,6 +175,9 @@ typedef struct {
     int32_t brProxyIsClear;       // BR_PROXY_IS_CLEAR
     int32_t brProxyIsRetry;       // BR_PROXY_IS_RETRY
     int32_t brProxyIsAcl;         // BR_PROXY_IS_ACL
+    int32_t connectReason;        // CONNECT_REASON
+    int32_t sendCnt;              // SEND_CNT
+    int32_t receiveCnt;           // RECEIVE_CNT
 } ConnEventExtra;
 
 typedef enum {
