@@ -43,6 +43,7 @@
 #define AUTH_P2P_KEEP_ALIVE_COUNT 5
 #define SOCKET_EAGAIN_RETRY_MAX 30
 #define SOCKET_EAGAIN_RETRY_DELAY_MS 10
+#define SOCKET_RECV_MAX_RETRY 600
 
 #define TCP_CONNECT_INFO "tcpConnectInfo"
 
@@ -298,7 +299,15 @@ static char *RecvData(const ConnPktHead *head, int32_t fd, uint32_t len)
         goto EXIT;
     }
     uint32_t retryCnt = 0;
+    uint32_t recvCnt = 0;
     while (recvLen < len) {
+        if (recvCnt > SOCKET_RECV_MAX_RETRY) {
+            CONN_LOGE(CONN_COMMON,
+                "recvData: exceed max recv count, recvCnt=%{public}u, recvLen=%{public}u, len=%{public}u", recvCnt,
+                recvLen, len);
+            goto EXIT;
+        }
+        recvCnt++;
         ssize_t n = ConnRecvSocketData(fd, data + headSize + recvLen, len - recvLen, g_tcpTimeOut);
         if (n < 0) {
             CONN_LOGE(CONN_COMMON, "receiveData: error occurred! recvLen=%{public}d, len=%{public}d", recvLen, len);
