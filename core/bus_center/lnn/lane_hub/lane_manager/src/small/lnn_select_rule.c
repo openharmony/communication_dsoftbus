@@ -17,20 +17,27 @@
 
 #include <securec.h>
 
-#include "lnn_log.h"
-
 #include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_lane_communication_capability.h"
 #include "lnn_lane_link.h"
+#include "lnn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_wifi_api_adapter.h"
 
 #define LOW_BW                  (384 * 1024)
 #define MID_BW                  (30 * 1024 * 1024)
 #define HIGH_BW                 (160 * 1024 * 1024)
+
+typedef enum {
+    LANE_DATA_MSG = 0,
+    LANE_DATA_BYTES,
+    LANE_DATA_FILE,
+    LANE_DATA_STREAM,
+    LANE_DATA_BUTT,
+} LaneDataType;
 
 static int32_t DefaultFeatureCheck(const char *networkId)
 {
@@ -72,9 +79,25 @@ static uint32_t g_retryLaneList[BW_TYPE_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
     [LOW_BAND_WIDTH] = {LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
 };
 
+static uint32_t g_defaultLinkList[LANE_DATA_BUTT][LANE_LINK_TYPE_BUTT + 1] = {
+    [LANE_DATA_MSG] = {LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
+    [LANE_DATA_BYTES] = {LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
+    [LANE_DATA_FILE] = {LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
+    [LANE_DATA_STREAM] = {LANE_WLAN_5G, LANE_WLAN_2P4G, LANE_LINK_TYPE_BUTT},
+};
+
+
 static bool IsLinkTypeValid(LaneLinkType type)
 {
     if ((type < 0) || (type >= LANE_LINK_TYPE_BUTT)) {
+        return false;
+    }
+    return true;
+}
+
+static bool IsTransTypeValid(LaneTransType type)
+{
+    if ((type < 0) || (type >= LANE_T_BUTT)) {
         return false;
     }
     return true;
@@ -212,6 +235,59 @@ static int32_t GetErrCodeOfRequest(const char *networkId, const LaneSelectParam 
     }
     int32_t bandWidthType = GetBwType(request->qosRequire.minBW);
     return LaneCheckLinkValid(networkId, g_firstPriorityLane[bandWidthType][0], request->transType);
+}
+
+static void GetDefaultLinkByDataType(LaneDataType dataType, LaneLinkType *linkList, uint32_t *listNum)
+{
+    for (uint32_t i = 0; i < (LANE_LINK_TYPE_BUTT + 1); i++) {
+        if (g_defaultLinkList[dataType][i] == LANE_LINK_TYPE_BUTT) {
+            break;
+        }
+        linkList[(*listNum)++] = g_defaultLinkList[dataType][i];
+    }
+}
+
+int32_t DecideDefaultLink(const char *networkId, LaneTransType transType, LaneLinkType *resList, uint32_t *resNum)
+{
+    if (networkId == NULL || !IsTransTypeValid(transType) || resList == NULL || resNum == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param, transType=%{public}d", transType);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LaneLinkType defaultLink[LANE_LINK_TYPE_BUTT];
+    (void)memset_s(defaultLink, sizeof(defaultLink), -1, sizeof(defaultLink));
+    uint32_t index = 0;
+    switch (transType) {
+        case LANE_T_MSG:
+            GetDefaultLinkByDataType(LANE_DATA_MSG, defaultLink, &index);
+            break;
+        case LANE_T_BYTE:
+            GetDefaultLinkByDataType(LANE_DATA_BYTES, defaultLink, &index);
+            break;
+        case LANE_T_FILE:
+            GetDefaultLinkByDataType(LANE_DATA_FILE, defaultLink, &index);
+            break;
+        case LANE_T_RAW_STREAM:
+        /* fall-through */
+        case LANE_T_COMMON_VIDEO:
+        case LANE_T_COMMON_VOICE:
+            GetDefaultLinkByDataType(LANE_DATA_STREAM, defaultLink, &index);
+            break;
+        default:
+            LNN_LOGE(LNN_LANE, "lane type is not supported. type=%{public}d", transType);
+            return SOFTBUS_INVALID_PARAM;
+    }
+    *resNum = 0;
+    for (uint32_t i = 0; i < index; i++) {
+        if (LaneCheckLinkValid(networkId, defaultLink[i], LANE_T_BUTT) != SOFTBUS_OK) {
+            continue;
+        }
+        resList[(*resNum)++] = defaultLink[i];
+    }
+    if (*resNum == 0) {
+        LNN_LOGE(LNN_LANE, "there is none default linkResource can be used");
+        return GetErrCodeOfLink(networkId, defaultLink[0]);
+    }
+    return SOFTBUS_OK;
 }
 
 static void DecideLinksWithQosRequire(const LaneSelectParam *request, LaneLinkType *linkList, uint32_t *linksNum)
