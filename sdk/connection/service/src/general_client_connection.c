@@ -38,6 +38,17 @@ static bool IsValidListener(IGeneralListener *listener)
     return true;
 }
 
+static IGeneralListener *GetConnectionListener(void)
+{
+    if (SoftBusMutexLock(&g_connectionListenerLock) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_INIT, "lock fail");
+        return NULL;
+    }
+    IGeneralListener *listener = g_connectionListener;
+    (void)SoftBusMutexUnlock(&g_connectionListenerLock);
+    return listener;
+}
+
 int32_t GeneralRegisterListener(IGeneralListener *listener)
 {
     if (!IsValidListener(listener)) {
@@ -227,17 +238,12 @@ int32_t ConnectionStateChange(uint32_t handle, int32_t state, int32_t reason)
 {
     CONN_LOGI(CONN_COMMON, "sdk connection state change, handle=%{public}u, state=%{public}d, reason=%{public}d",
         handle, state, reason);
-    if (SoftBusMutexLock(&g_connectionListenerLock) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "lock fail");
-        return SOFTBUS_LOCK_ERR;
-    }
-    if (g_connectionListener == NULL || g_connectionListener->OnConnectionStateChange == NULL) {
-        (void)SoftBusMutexUnlock(&g_connectionListenerLock);
+    IGeneralListener *listener = GetConnectionListener();
+    if (listener == NULL || listener->OnConnectionStateChange == NULL) {
         CONN_LOGE(CONN_COMMON, "notify connection state change fail, listener is null.");
         return SOFTBUS_NO_INIT;
     }
-    int32_t ret = g_connectionListener->OnConnectionStateChange(handle, state, reason);
-    (void)SoftBusMutexUnlock(&g_connectionListenerLock);
+    int32_t ret = listener->OnConnectionStateChange(handle, state, reason);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "notify connection state change fail, ret=%{public}d", ret);
         return ret;
@@ -249,17 +255,12 @@ int32_t ConnectionStateChange(uint32_t handle, int32_t state, int32_t reason)
 int32_t AcceptConnect(const char *name, uint32_t handle)
 {
     CONN_LOGI(CONN_COMMON, "sdk accept connect, handle=%{public}u", handle);
-    if (SoftBusMutexLock(&g_connectionListenerLock) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "lock fail");
-        return SOFTBUS_LOCK_ERR;
-    }
-    if (g_connectionListener == NULL || g_connectionListener->OnAcceptConnect == NULL) {
-        (void)SoftBusMutexUnlock(&g_connectionListenerLock);
+    IGeneralListener *listener = GetConnectionListener();
+    if (listener == NULL || listener->OnAcceptConnect == NULL) {
         CONN_LOGE(CONN_COMMON, "notify accept connect fail, listener is null");
         return SOFTBUS_NO_INIT;
     }
-    int32_t ret = g_connectionListener->OnAcceptConnect(name, handle);
-    (void)SoftBusMutexUnlock(&g_connectionListenerLock);
+    int32_t ret = listener->OnAcceptConnect(name, handle);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "accept connect fail, ret=%{public}d", ret);
         return ret;
@@ -272,58 +273,43 @@ void DataReceived(uint32_t handle, const uint8_t *data, uint32_t len)
 {
     CONN_CHECK_AND_RETURN_LOGE(len > 0 && len <= GENERAL_SEND_DATA_MAX_LEN, CONN_COMMON, "len=%{public}u", len);
     CONN_LOGI(CONN_COMMON, "sdk data received, handle=%{public}u, len=%{public}u", handle, len);
-    if (SoftBusMutexLock(&g_connectionListenerLock) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "lock fail");
-        return;
-    }
-    if (g_connectionListener == NULL || g_connectionListener->OnDataReceived == NULL) {
-        (void)SoftBusMutexUnlock(&g_connectionListenerLock);
+    IGeneralListener *listener = GetConnectionListener();
+    if (listener == NULL || listener->OnDataReceived == NULL) {
         CONN_LOGE(CONN_COMMON, "notify data received fail, listener is null.");
         return;
     }
-    g_connectionListener->OnDataReceived(handle, data, len);
-    (void)SoftBusMutexUnlock(&g_connectionListenerLock);
+    listener->OnDataReceived(handle, data, len);
     CONN_LOGI(CONN_COMMON, "notify data received succ");
 }
 
 void ConnectionDeathNotify(void)
 {
     CONN_LOGI(CONN_COMMON, "connection death notify");
-    if (SoftBusMutexLock(&g_connectionListenerLock) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "lock fail");
+    IGeneralListener *listener = GetConnectionListener();
+    if (listener == NULL) {
+        CONN_LOGE(CONN_COMMON, "connection death notify fail, listener is null");
         return;
     }
-    if (g_connectionListener == NULL) {
-        CONN_LOGI(CONN_COMMON, "listener has not registered, no need to notify.");
-        (void)SoftBusMutexUnlock(&g_connectionListenerLock);
-        return;
+    if (listener->OnConnectionStateChange != NULL) {
+        (void)listener->OnConnectionStateChange(0, CONNECTION_STATE_DISCONNECTED, SOFTBUS_CONN_FAIL);
     }
-    if (g_connectionListener->OnConnectionStateChange != NULL) {
-        (void)g_connectionListener->OnConnectionStateChange(0, CONNECTION_STATE_DISCONNECTED, SOFTBUS_CONN_FAIL);
+    if (listener->OnServiceDied != NULL) {
+        listener->OnServiceDied();
     }
-    if (g_connectionListener->OnServiceDied != NULL) {
-        g_connectionListener->OnServiceDied();
-    }
-    (void)SoftBusMutexUnlock(&g_connectionListenerLock);
     CONN_LOGI(CONN_COMMON, "connection death notify succ");
 }
 
 int32_t ServerStopped(const char *name)
 {
     CONN_LOGI(CONN_COMMON, "connect server stopped");
-    if (SoftBusMutexLock(&g_connectionListenerLock) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "lock fail");
-        return SOFTBUS_LOCK_ERR;
-    }
-    if (g_connectionListener == NULL) {
-        (void)SoftBusMutexUnlock(&g_connectionListenerLock);
+    IGeneralListener *listener = GetConnectionListener();
+    if (listener == NULL || listener->OnServiceStopped == NULL) {
         CONN_LOGE(CONN_COMMON, "notify server stopped fail, listener is null");
         return SOFTBUS_NO_INIT;
     }
-    if (name != NULL && g_connectionListener->OnServiceStopped != NULL) {
-        g_connectionListener->OnServiceStopped(name);
+    if (name != NULL) {
+        listener->OnServiceStopped(name);
     }
-    (void)SoftBusMutexUnlock(&g_connectionListenerLock);
     CONN_LOGI(CONN_COMMON, "connect server stopped succ");
     return SOFTBUS_OK;
 }

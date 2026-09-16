@@ -242,5 +242,35 @@ HWTEST_F(ClientConnectionTest, ConnectionDeathNotifyTest, TestSize.Level0)
     ret = GeneralUnregisterListener();
     ASSERT_EQ(ret, SOFTBUS_OK);
 }
+
+/*
+ * @tc.name: ServerStoppedTest
+ * @tc.desc: server stopped test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientConnectionTest, ServerStoppedTest, TestSize.Level0)
+{
+    int32_t ret = ServerStopped("test");
+    ASSERT_EQ(ret, SOFTBUS_NO_INIT);
+    IGeneralListener listener = {
+        .OnAcceptConnect = OnAcceptConnect,
+        .OnConnectionStateChange = OnConnectionStateChange,
+        .OnDataReceived = OnDataRecevied,
+        .OnServiceDied = OnServiceDied,
+        .OnServiceStopped = OnServiceStopped,
+    };
+    ret = GeneralRegisterListener(&listener);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = ServerStopped("test");
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = ServerStopped(nullptr);
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    listener.OnServiceStopped = nullptr;
+    ret = ServerStopped("test");
+    ASSERT_EQ(ret, SOFTBUS_NO_INIT);
+    ret = GeneralUnregisterListener();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+}
 } // namespace
 } // namespace OHOS

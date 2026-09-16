@@ -566,20 +566,23 @@ static int32_t OnAcceptConnectAdapter(const char *name, uint32_t handle)
         std::lock_guard<std::mutex> guard(connectionLock_);
         connectionList_.push_back(connection);
     }
+    std::shared_ptr<::taihe::callback<void(
+        ::ohos::distributedsched::linkEnhance::weak::Connection connection)>> acceptCallback = nullptr;
     {
         std::lock_guard<std::mutex> guard(serverLock_);
         for (auto it : serverList_) {
             auto serverImpl = reinterpret_cast<ServerImpl *>(it->GetServerImpl());
             if (serverImpl != nullptr && serverImpl->name_ == name) {
-                if (serverImpl->GetAcceptedCallback() == nullptr) {
-                    COMM_LOGE(COMM_SDK, "server status err, name=%{public}s", name);
-                    return LINK_ENHANCE_PARAMETER_INVALID;
-                }
-                (*serverImpl->GetAcceptedCallback())(connection);
+                acceptCallback = serverImpl->GetAcceptedCallback();
                 break;
             }
         }
     }
+    if (acceptCallback == nullptr) {
+        COMM_LOGE(COMM_SDK, "server status err, name=%{public}s", name);
+        return LINK_ENHANCE_PARAMETER_INVALID;
+    }
+    (*acceptCallback)(connection);
     return SOFTBUS_OK;
 }
 
@@ -631,27 +634,34 @@ static int32_t OnConnectionStateChangeAdapter(uint32_t handle, int32_t status, i
 {
     COMM_LOGI(COMM_SDK, "conn state change, handle=%{public}u", handle);
     int32_t ret = LINK_ENHANCE_PARAMETER_INVALID;
-    std::lock_guard<std::mutex> guard(connectionLock_);
-    for (auto iter = connectionList_.begin(); iter != connectionList_.end();) {
-        COMM_LOGI(COMM_SDK, "find connection");
-        auto connection = *iter;
-        auto connImpl = reinterpret_cast<ConnectionImpl *>(connection->GetConnectionImpl());
-        if (handle == 0) {
-            // indicates that server is died and clear all connections
-            ret = NotifyConnectionStateChange(connImpl, status, reason);
-            iter = connectionList_.erase(iter);
-            continue;
-        }
-        if (connImpl->handle_ == handle) {
-            ret = NotifyConnectionStateChange(connImpl, status, reason);
-            if (status == CONNECTION_STATE_DISCONNECTED) {
-                COMM_LOGI(COMM_SDK, "disconnect server connection");
+    std::vector<::ohos::distributedsched::linkEnhance::Connection> toNotify;
+    {
+        std::lock_guard<std::mutex> guard(connectionLock_);
+        for (auto iter = connectionList_.begin(); iter != connectionList_.end();) {
+            COMM_LOGI(COMM_SDK, "find connection");
+            auto connection = *iter;
+            auto connImpl = reinterpret_cast<ConnectionImpl *>(connection->GetConnectionImpl());
+            if (handle == 0) {
+                // indicates that server is died and clear all connections
+                toNotify.push_back(connection);
                 iter = connectionList_.erase(iter);
+                continue;
             }
-            return ret;
-        } else {
-            iter++;
+            if (connImpl->handle_ == handle) {
+                toNotify.push_back(connection);
+                if (status == CONNECTION_STATE_DISCONNECTED) {
+                    COMM_LOGI(COMM_SDK, "disconnect server connection");
+                    iter = connectionList_.erase(iter);
+                }
+                break;
+            } else {
+                iter++;
+            }
         }
+    }
+    for (auto &connection : toNotify) {
+        auto connImpl = reinterpret_cast<ConnectionImpl *>(connection->GetConnectionImpl());
+        ret = NotifyConnectionStateChange(connImpl, status, reason);
     }
     return ret;
 }
@@ -672,34 +682,43 @@ static void OnDataReceivedAdapter(uint32_t handle, const uint8_t *data, uint32_t
 {
     COMM_CHECK_AND_RETURN_LOGE(data != nullptr, COMM_SDK, "data is null");
     COMM_LOGI(COMM_SDK, "on data receive, handle=%{public}u", handle);
-    std::lock_guard<std::mutex> guard(connectionLock_);
-    for (auto it : connectionList_) {
-        auto conn = reinterpret_cast<ConnectionImpl *>(it->GetConnectionImpl());
-        if (conn != nullptr && conn->handle_ == handle) {
-            COMM_LOGI(COMM_SDK, "find the connection");
-            if (conn->GetDataReceiveCallback() == nullptr) {
-                COMM_LOGE(COMM_SDK, "not register data recv listener");
-                return;
+    std::shared_ptr<::taihe::callback<void(::taihe::array_view<uint8_t> arrayBuffer)>> callback = nullptr;
+    {
+        std::lock_guard<std::mutex> guard(connectionLock_);
+        for (auto it : connectionList_) {
+            auto conn = reinterpret_cast<ConnectionImpl *>(it->GetConnectionImpl());
+            if (conn != nullptr && conn->handle_ == handle) {
+                COMM_LOGI(COMM_SDK, "find the connection");
+                callback = conn->GetDataReceiveCallback();
+                break;
             }
-            NotifyDataReceived(conn->GetDataReceiveCallback(), data, len);
-            return;
         }
     }
+    if (callback == nullptr) {
+        COMM_LOGE(COMM_SDK, "not register data recv listener");
+        return;
+    }
+    NotifyDataReceived(callback, data, len);
 }
 
 static void OnServiceDiedAdapter(void)
 {
     COMM_LOGI(COMM_SDK, "server died");
-    std::lock_guard<std::mutex> guard(serverLock_);
-    for (auto it = serverList_.begin(); it != serverList_.end();) {
-        auto server = *it;
-        auto serverImpl = reinterpret_cast<ServerImpl *>(server->GetServerImpl());
-        if (serverImpl->GetStopCallback() == nullptr) {
+    std::vector<std::shared_ptr<::taihe::callback<void(int32_t result)>>> callbacks;
+    {
+        std::lock_guard<std::mutex> guard(serverLock_);
+        for (auto it = serverList_.begin(); it != serverList_.end();) {
+            auto server = *it;
+            auto serverImpl = reinterpret_cast<ServerImpl *>(server->GetServerImpl());
+            auto callback = serverImpl->GetStopCallback();
+            if (callback != nullptr) {
+                callbacks.push_back(callback);
+            }
             it = serverList_.erase(it);
-            continue;
         }
-        (*serverImpl->GetStopCallback())((int32_t)LINK_ENHANCE_SERVER_DIED);
-        it = serverList_.erase(it);
+    }
+    for (auto &callback : callbacks) {
+        (*callback)((int32_t)LINK_ENHANCE_SERVER_DIED);
     }
 }
 
@@ -707,21 +726,23 @@ static void OnServiceStoppedAdapter(const char *name)
 {
     COMM_CHECK_AND_RETURN_LOGE(name != nullptr, COMM_SDK, "name is null");
     COMM_LOGI(COMM_SDK, "service stopped, name=%{public}s", name);
-    std::lock_guard<std::mutex> guard(serverLock_);
-    for (auto it = serverList_.begin(); it != serverList_.end();) {
-        auto server = *it;
-        auto serverImpl = reinterpret_cast<ServerImpl *>(server->GetServerImpl());
-        if (serverImpl != nullptr && serverImpl->name_ == name) {
-            if (serverImpl->GetStopCallback() == nullptr) {
+    std::shared_ptr<::taihe::callback<void(int32_t result)>> callback = nullptr;
+    {
+        std::lock_guard<std::mutex> guard(serverLock_);
+        for (auto it = serverList_.begin(); it != serverList_.end();) {
+            auto server = *it;
+            auto serverImpl = reinterpret_cast<ServerImpl *>(server->GetServerImpl());
+            if (serverImpl != nullptr && serverImpl->name_ == name) {
+                callback = serverImpl->GetStopCallback();
                 it = serverList_.erase(it);
-                return;
+                break;
+            } else {
+                it++;
             }
-            (*serverImpl->GetStopCallback())(static_cast<int32_t>(LINK_ENHANCE_SERVER_STOPPED));
-            it = serverList_.erase(it);
-            return;
-        } else {
-            it++;
         }
+    }
+    if (callback != nullptr) {
+        (*callback)(static_cast<int32_t>(LINK_ENHANCE_SERVER_STOPPED));
     }
 }
 
