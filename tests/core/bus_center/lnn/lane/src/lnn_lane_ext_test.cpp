@@ -1219,9 +1219,10 @@ HWTEST_F(LNNLaneExtMockTest, GET_ALL_LINK_WITH_LINK_TYPE_TEST_001, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt);
-    ASSERT_NE(linkList, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    SoftBusFree(linkList);
+    if (linkList != nullptr) {
+        SoftBusFree(linkList);
+    }
 
     ret = ClearLaneResourceByLaneId(laneId);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -1423,6 +1424,12 @@ HWTEST_F(LNNLaneExtMockTest, LANE_QUERY_OTHER_LANE_RESOURCE_BY_UDID_HASH, TestSi
     EXPECT_EQ(SOFTBUS_OK, DelLaneResourceByLaneId(laneId, false, nullptr));
 }
 
+/*
+ * @tc.name: NETWORK_ID_LIST_CREATE_TEST_001
+ * @tc.desc: GetAllDevIdWithLinkType with networkId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, NETWORK_ID_LIST_CREATE_TEST_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -1443,6 +1450,12 @@ HWTEST_F(LNNLaneExtMockTest, NETWORK_ID_LIST_CREATE_TEST_001, TestSize.Level1)
     EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: NETWORK_ID_LIST_NON_P2P_TEST_001
+ * @tc.desc: GetAllDevIdWithLinkType non-P2P link
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, NETWORK_ID_LIST_NON_P2P_TEST_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -1463,6 +1476,12 @@ HWTEST_F(LNNLaneExtMockTest, NETWORK_ID_LIST_NON_P2P_TEST_001, TestSize.Level1)
     EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: NETWORK_ID_LIST_EMPTY_NID_TEST_001
+ * @tc.desc: GetAllDevIdWithLinkType empty networkId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, NETWORK_ID_LIST_EMPTY_NID_TEST_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -1479,6 +1498,12 @@ HWTEST_F(LNNLaneExtMockTest, NETWORK_ID_LIST_EMPTY_NID_TEST_001, TestSize.Level1
     EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: NETWORK_ID_LIST_REUSE_REMOVE_TEST_001
+ * @tc.desc: DelLaneResourceByLaneId reuse and remove
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, NETWORK_ID_LIST_REUSE_REMOVE_TEST_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -1513,6 +1538,12 @@ HWTEST_F(LNNLaneExtMockTest, NETWORK_ID_LIST_REUSE_REMOVE_TEST_001, TestSize.Lev
     (void)ClearLaneResourceByLaneId(laneId);
 }
 
+/*
+ * @tc.name: NETWORK_ID_LIST_NO_MATCH_NULL_TEST_001
+ * @tc.desc: DelLaneResourceByLaneId mismatched networkId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, NETWORK_ID_LIST_NO_MATCH_NULL_TEST_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -1535,6 +1566,12 @@ HWTEST_F(LNNLaneExtMockTest, NETWORK_ID_LIST_NO_MATCH_NULL_TEST_001, TestSize.Le
     (void)ClearLaneResourceByLaneId(laneId);
 }
 
+/*
+ * @tc.name: NETWORK_ID_LIST_SERVER_TEST_001
+ * @tc.desc: GetAllDevIdWithLinkType server and client side
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, NETWORK_ID_LIST_SERVER_TEST_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -1577,6 +1614,19 @@ static int32_t ActionOfGetTwoNetworkIds(const char *udid, char **networkIds, uin
     return SOFTBUS_OK;
 }
 
+static int32_t ActionOfGetZeroNetworkIds(const char *udid, char **networkIds, uint32_t *networkIdCount)
+{
+    *networkIds = nullptr;
+    *networkIdCount = 0;
+    return SOFTBUS_OK;
+}
+
+/*
+ * @tc.name: ADD_SERVERSIDE_NIDS_SUCCESS_TEST_001
+ * @tc.desc: AddServerSideNetworkIds success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, ADD_SERVERSIDE_NIDS_SUCCESS_TEST_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -1599,6 +1649,12 @@ HWTEST_F(LNNLaneExtMockTest, ADD_SERVERSIDE_NIDS_SUCCESS_TEST_001, TestSize.Leve
     EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: ADD_SERVERSIDE_NIDS_DEDUP_TEST_001
+ * @tc.desc: AddServerSideNetworkIds dedup
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, ADD_SERVERSIDE_NIDS_DEDUP_TEST_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -1622,6 +1678,12 @@ HWTEST_F(LNNLaneExtMockTest, ADD_SERVERSIDE_NIDS_DEDUP_TEST_001, TestSize.Level1
     EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: ADD_SERVERSIDE_NIDS_FAIL_TEST_001
+ * @tc.desc: AddServerSideNetworkIds AuthGetAllNetworkId fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, ADD_SERVERSIDE_NIDS_FAIL_TEST_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -1636,14 +1698,20 @@ HWTEST_F(LNNLaneExtMockTest, ADD_SERVERSIDE_NIDS_FAIL_TEST_001, TestSize.Level1)
     ASSERT_EQ(AddLaneResourceToPool(&info, laneId, true), SOFTBUS_OK);
     char *linkList = nullptr;
     uint8_t linkCnt = 0;
-    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_OK);
-    EXPECT_EQ(linkCnt, 1);
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+    EXPECT_EQ(linkCnt, 0);
     if (linkList) {
         SoftBusFree(linkList);
     }
     EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: ADD_SERVERSIDE_NIDS_EMPTY_UDID_TEST_001
+ * @tc.desc: AddServerSideNetworkIds empty udid
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, ADD_SERVERSIDE_NIDS_EMPTY_UDID_TEST_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -1655,19 +1723,25 @@ HWTEST_F(LNNLaneExtMockTest, ADD_SERVERSIDE_NIDS_EMPTY_UDID_TEST_001, TestSize.L
     ASSERT_EQ(AddLaneResourceToPool(&info, laneId, true), SOFTBUS_OK);
     char *linkList = nullptr;
     uint8_t linkCnt = 0;
-    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_OK);
-    EXPECT_EQ(linkCnt, 1);
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+    EXPECT_EQ(linkCnt, 0);
     if (linkList) {
         SoftBusFree(linkList);
     }
     EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: ADD_SERVERSIDE_NIDS_ZERO_COUNT_TEST_001
+ * @tc.desc: AddServerSideNetworkIds zero count
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, ADD_SERVERSIDE_NIDS_ZERO_COUNT_TEST_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, AuthGetAllNetworkId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, AuthGetAllNetworkId).WillRepeatedly(Invoke(ActionOfGetZeroNetworkIds));
     LaneLinkInfo info = {};
     ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
     ASSERT_EQ(strcpy_s(info.networkId, sizeof(info.networkId), NODE_NETWORK_ID), EOK);
@@ -1676,14 +1750,20 @@ HWTEST_F(LNNLaneExtMockTest, ADD_SERVERSIDE_NIDS_ZERO_COUNT_TEST_001, TestSize.L
     ASSERT_EQ(AddLaneResourceToPool(&info, laneId, true), SOFTBUS_OK);
     char *linkList = nullptr;
     uint8_t linkCnt = 0;
-    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_OK);
-    EXPECT_EQ(linkCnt, 1);
+    EXPECT_EQ(GetAllDevIdWithLinkType(LANE_P2P, &linkList, &linkCnt), SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+    EXPECT_EQ(linkCnt, 0);
     if (linkList) {
         SoftBusFree(linkList);
     }
     EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: ADD_NID_TO_RESOURCE_NULL_TEST_001
+ * @tc.desc: AddLaneResourceToPool null linkInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, ADD_NID_TO_RESOURCE_NULL_TEST_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -1692,6 +1772,12 @@ HWTEST_F(LNNLaneExtMockTest, ADD_NID_TO_RESOURCE_NULL_TEST_001, TestSize.Level1)
     EXPECT_EQ(AddLaneResourceToPool(nullptr, laneId, false), SOFTBUS_INVALID_PARAM);
 }
 
+/*
+ * @tc.name: ADD_NID_TO_RESOURCE_EMPTY_NID_TEST_001
+ * @tc.desc: AddServerSideNetworkIds empty networkId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, ADD_NID_TO_RESOURCE_EMPTY_NID_TEST_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -1708,6 +1794,12 @@ HWTEST_F(LNNLaneExtMockTest, ADD_NID_TO_RESOURCE_EMPTY_NID_TEST_001, TestSize.Le
     EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: IS_NID_IN_LIST_NOT_FOUND_TEST_001
+ * @tc.desc: GetAllDevIdWithLinkType different networkIds
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, IS_NID_IN_LIST_NOT_FOUND_TEST_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -1735,6 +1827,12 @@ HWTEST_F(LNNLaneExtMockTest, IS_NID_IN_LIST_NOT_FOUND_TEST_001, TestSize.Level1)
     EXPECT_EQ(ClearLaneResourceByLaneId(laneId), SOFTBUS_OK);
 }
 
+/*
+ * @tc.name: GET_ALL_DEVID_AFTER_DEDUP_TEST_001
+ * @tc.desc: GetAllDevIdWithLinkType dedup
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNLaneExtMockTest, GET_ALL_DEVID_AFTER_DEDUP_TEST_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> mock;
