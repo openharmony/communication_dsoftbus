@@ -29,15 +29,21 @@ using testing::Return;
 using testing::Invoke;
 
 namespace {
-constexpr uint32_t INVALID_CHANNEL_ID = 0;
+constexpr uint32_t TEST_INVALID_CHANNEL_ID = 0;
 
 int32_t g_openFailReason = 0;
 uint32_t g_openSuccessChannelId = 0;
+int32_t g_disconnectReason = 0;
+uint32_t g_recvDataLen = 0;
+bool g_reconnected = false;
 
 void ResetManagerGlobals()
 {
     g_openFailReason = 0;
     g_openSuccessChannelId = 0;
+    g_disconnectReason = 0;
+    g_recvDataLen = 0;
+    g_reconnected = false;
 }
 
 void TestOnOpenSuccess(uint32_t requestId, ProxyChannel *channel)
@@ -51,6 +57,36 @@ void TestOnOpenFail(uint32_t requestId, int32_t reason, const char *brMac)
     (void)requestId;
     (void)brMac;
     g_openFailReason = reason;
+}
+
+void TestOnDisconnected(ProxyChannel *channel, int32_t reason)
+{
+    (void)channel;
+    g_disconnectReason = reason;
+}
+
+void TestOnDataReceived(ProxyChannel *channel, const uint8_t *data, uint32_t dataLen)
+{
+    (void)channel;
+    (void)data;
+    g_recvDataLen = dataLen;
+}
+
+void TestOnReconnected(char *addr, ProxyChannel *channel)
+{
+    (void)addr;
+    (void)channel;
+    g_reconnected = true;
+}
+
+void RegisterTestListener()
+{
+    ProxyConnectListener listener = {
+        .onProxyChannelDataReceived = TestOnDataReceived,
+        .onProxyChannelDisconnected = TestOnDisconnected,
+        .onProxyChannelReconnected = TestOnReconnected,
+    };
+    GetProxyChannelManager()->registerProxyChannelListener(&listener);
 }
 } // namespace
 
@@ -170,7 +206,7 @@ HWTEST_F(ProxyManagerTest, ProxyManagerTest003, TestSize.Level1)
     std::set<uint32_t> requestIds;
     for (int i = 0; i < 100; ++i) {
         uint32_t reqId = GetProxyChannelManager()->generateRequestId();
-        EXPECT_NE(reqId, INVALID_CHANNEL_ID);
+        EXPECT_NE(reqId, TEST_INVALID_CHANNEL_ID);
         requestIds.insert(reqId);
     }
     EXPECT_EQ(requestIds.size(), 100u);
@@ -282,9 +318,269 @@ HWTEST_F(ProxyManagerTest, ProxyManagerTest008, TestSize.Level1)
     std::set<uint32_t> channelIds;
     for (int i = 0; i < 100; ++i) {
         uint32_t channelId = GetProxyChannelManager()->generateChannelId();
-        EXPECT_NE(channelId, INVALID_CHANNEL_ID);
+        EXPECT_NE(channelId, TEST_INVALID_CHANNEL_ID);
         channelIds.insert(channelId);
     }
     EXPECT_EQ(channelIds.size(), 100u);
     CONN_LOGI(CONN_PROXY, "ProxyManagerTest008 out");
+}
+
+/*
+ * @tc.name: ProxyManagerTest009
+ * @tc.desc: test openProxyChannel success with valid mac and BR connect, data received, then disconnect
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ProxyManagerTest, ProxyManagerTest009, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "ProxyManagerTest009 in");
+    ProxyChannelMock brMock;
+    FarFieldAdapterMock farFieldMock;
+    EXPECT_CALL(brMock, Connect).WillRepeatedly(Return(UNDERLAYER_HANDLE));
+    EXPECT_CALL(brMock, Read).WillOnce(ProxyChannelMock::ActionOfRead).WillRepeatedly(Return(-1));
+    EXPECT_CALL(brMock, IsPairedDevice).WillRepeatedly(Return(true));
+    EXPECT_CALL(farFieldMock, IsDeviceSupport).WillRepeatedly(Return(false));
+
+    RegisterTestListener();
+    ProxyChannelParam param = {};
+    strcpy_s(param.brMac, BT_MAC_MAX_LEN, "11:22:33:44:55:66");
+    param.requestId = 200;
+    param.timeoutMs = CONNECT_TIMEOUT;
+    strcpy_s(param.uuid, UUID_STRING_LEN, "0000FEEA-0000-1000-8000-00805F9B34FB");
+    OpenProxyChannelCallback callback = { .onOpenFail = TestOnOpenFail, .onOpenSuccess = TestOnOpenSuccess };
+    int32_t ret = GetProxyChannelManager()->openProxyChannel(&param, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1 * 2);
+    EXPECT_NE(g_openSuccessChannelId, TEST_INVALID_CHANNEL_ID);
+    EXPECT_NE(g_recvDataLen, 0u);
+    EXPECT_NE(g_disconnectReason, 0);
+    CONN_LOGI(CONN_PROXY, "ProxyManagerTest009 out");
+}
+
+/*
+ * @tc.name: ProxyManagerTest010
+ * @tc.desc: test openProxyChannel BR fail and device not support far field
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ProxyManagerTest, ProxyManagerTest010, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "ProxyManagerTest010 in");
+    ProxyChannelMock brMock;
+    FarFieldAdapterMock farFieldMock;
+    EXPECT_CALL(brMock, Connect).WillRepeatedly(Return(-1));
+    EXPECT_CALL(brMock, IsPairedDevice).WillRepeatedly(Return(true));
+    EXPECT_CALL(farFieldMock, IsDeviceSupport).WillRepeatedly(Return(false));
+
+    RegisterTestListener();
+    ProxyChannelParam param = {};
+    strcpy_s(param.brMac, BT_MAC_MAX_LEN, "22:33:44:55:66:77");
+    param.requestId = 201;
+    param.timeoutMs = CONNECT_TIMEOUT;
+    strcpy_s(param.uuid, UUID_STRING_LEN, "0000FEEA-0000-1000-8000-00805F9B34FB");
+    OpenProxyChannelCallback callback = { .onOpenFail = TestOnOpenFail, .onOpenSuccess = TestOnOpenSuccess };
+    int32_t ret = GetProxyChannelManager()->openProxyChannel(&param, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1 * 2);
+    EXPECT_NE(g_openFailReason, 0);
+    EXPECT_NE(g_openFailReason, SOFTBUS_CONN_PROXY_BR_FAIL_BUT_SUPPORT_FAR_FIELD);
+    CONN_LOGI(CONN_PROXY, "ProxyManagerTest010 out");
+}
+
+/*
+ * @tc.name: ProxyManagerTest011
+ * @tc.desc: test openProxyChannel BR fail but device supports far field
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ProxyManagerTest, ProxyManagerTest011, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "ProxyManagerTest011 in");
+    ProxyChannelMock brMock;
+    FarFieldAdapterMock farFieldMock;
+    EXPECT_CALL(brMock, Connect).WillRepeatedly(Return(-1));
+    EXPECT_CALL(brMock, IsPairedDevice).WillRepeatedly(Return(true));
+    EXPECT_CALL(farFieldMock, IsDeviceSupport).WillRepeatedly(Return(true));
+
+    RegisterTestListener();
+    ProxyChannelParam param = {};
+    strcpy_s(param.brMac, BT_MAC_MAX_LEN, "33:44:55:66:77:88");
+    param.requestId = 202;
+    param.timeoutMs = CONNECT_TIMEOUT;
+    strcpy_s(param.uuid, UUID_STRING_LEN, "0000FEEA-0000-1000-8000-00805F9B34FB");
+    OpenProxyChannelCallback callback = { .onOpenFail = TestOnOpenFail, .onOpenSuccess = TestOnOpenSuccess };
+    int32_t ret = GetProxyChannelManager()->openProxyChannel(&param, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1 * 2);
+    EXPECT_EQ(g_openFailReason, SOFTBUS_CONN_PROXY_BR_FAIL_BUT_SUPPORT_FAR_FIELD);
+    CONN_LOGI(CONN_PROXY, "ProxyManagerTest011 out");
+}
+
+/*
+ * @tc.name: ProxyManagerTest012
+ * @tc.desc: test clearProxyInfo removes the proxy channel info
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ProxyManagerTest, ProxyManagerTest012, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "ProxyManagerTest012 in");
+    ProxyChannelMock brMock;
+    FarFieldAdapterMock farFieldMock;
+    EXPECT_CALL(brMock, Connect).WillRepeatedly(Return(-1));
+    EXPECT_CALL(brMock, IsPairedDevice).WillRepeatedly(Return(true));
+    EXPECT_CALL(farFieldMock, IsDeviceSupport).WillRepeatedly(Return(true));
+
+    RegisterTestListener();
+    ProxyChannelParam param = {};
+    strcpy_s(param.brMac, BT_MAC_MAX_LEN, "33:44:55:66:77:88");
+    param.requestId = 203;
+    param.timeoutMs = CONNECT_TIMEOUT;
+    strcpy_s(param.uuid, UUID_STRING_LEN, "0000FEEA-0000-1000-8000-00805F9B34FB");
+    OpenProxyChannelCallback callback = { .onOpenFail = TestOnOpenFail, .onOpenSuccess = TestOnOpenSuccess };
+    int32_t ret = GetProxyChannelManager()->openProxyChannel(&param, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1 * 2);
+    EXPECT_EQ(g_openFailReason, SOFTBUS_CONN_PROXY_BR_FAIL_BUT_SUPPORT_FAR_FIELD);
+
+    ProxyChannel channel = {};
+    strcpy_s(channel.brMac, BT_MAC_MAX_LEN, "33:44:55:66:77:88");
+    GetProxyChannelManager()->clearProxyInfo(&channel);
+    ProxyChannel nullChannel = {};
+    GetProxyChannelManager()->clearProxyInfo(&nullChannel);
+    CONN_LOGI(CONN_PROXY, "ProxyManagerTest012 out");
+}
+
+/*
+ * @tc.name: ProxyManagerTest013
+ * @tc.desc: test BR success then ACL disconnected triggers far field via OnBrProxyEnable
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ProxyManagerTest, ProxyManagerTest013, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "ProxyManagerTest013 in");
+    ProxyChannelMock brMock;
+    FarFieldAdapterMock farFieldMock;
+    EXPECT_CALL(brMock, Connect).WillRepeatedly(Return(UNDERLAYER_HANDLE));
+    EXPECT_CALL(brMock, Read).WillRepeatedly(Return(-1));
+    EXPECT_CALL(brMock, IsPairedDevice).WillRepeatedly(Return(true));
+    EXPECT_CALL(farFieldMock, IsDeviceSupport).WillRepeatedly(Return(true));
+    EXPECT_CALL(farFieldMock, Init).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(farFieldMock, Deinit).WillRepeatedly(Return());
+    EXPECT_CALL(farFieldMock, OpenP2P).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(farFieldMock, CloseP2P).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(farFieldMock, SendMsg).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(farFieldMock, Refresh).WillRepeatedly(Return(SOFTBUS_OK));
+
+    RegisterTestListener();
+    ProxyChannelParam param = {};
+    strcpy_s(param.brMac, BT_MAC_MAX_LEN, "44:55:66:77:88:99");
+    param.requestId = 204;
+    param.timeoutMs = CONNECT_TIMEOUT;
+    strcpy_s(param.uuid, UUID_STRING_LEN, "0000FEEA-0000-1000-8000-00805F9B34FB");
+    OpenProxyChannelCallback callback = { .onOpenFail = TestOnOpenFail, .onOpenSuccess = TestOnOpenSuccess };
+    int32_t ret = GetProxyChannelManager()->openProxyChannel(&param, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1 * 2);
+    EXPECT_NE(g_openSuccessChannelId, TEST_INVALID_CHANNEL_ID);
+    ResetManagerGlobals();
+
+    SoftBusBtAddr btAddr = { .addr = { 0x44, 0x55, 0x66, 0x77, 0x88, 0x99 } };
+    ProxyChannelMock::InjectBtAclStateChanged(1, &btAddr, SOFTBUS_ACL_STATE_DISCONNECTED, 0);
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1 * 2);
+
+    P2PDeviceInfo device = {};
+    strcpy_s(device.brMac, BT_MAC_LEN, "44:55:66:77:88:99");
+    strcpy_s(device.uuid, UUID_STRING_LEN, "0000FEEA-0000-1000-8000-00805F9B34FB");
+    FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1 * 2);
+    EXPECT_TRUE(g_reconnected);
+
+    FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_DISCONNECT, 0);
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1 * 2);
+    EXPECT_NE(g_disconnectReason, 0);
+
+    ClearFarFieldProxy("44:55:66:77:88:99");
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1);
+    CONN_LOGI(CONN_PROXY, "ProxyManagerTest013 out");
+}
+
+/*
+ * @tc.name: ProxyManagerTest014
+ * @tc.desc: test BR success then ACL disconnected triggers far field open failure
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ProxyManagerTest, ProxyManagerTest014, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "ProxyManagerTest014 in");
+    ProxyChannelMock brMock;
+    FarFieldAdapterMock farFieldMock;
+    EXPECT_CALL(brMock, Connect).WillRepeatedly(Return(UNDERLAYER_HANDLE));
+    EXPECT_CALL(brMock, Read).WillRepeatedly(Return(-1));
+    EXPECT_CALL(brMock, IsPairedDevice).WillRepeatedly(Return(true));
+    EXPECT_CALL(farFieldMock, IsDeviceSupport).WillRepeatedly(Return(true));
+    EXPECT_CALL(farFieldMock, Init).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(farFieldMock, Deinit).WillRepeatedly(Return());
+    EXPECT_CALL(farFieldMock, OpenP2P).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(farFieldMock, CloseP2P).WillRepeatedly(Return(SOFTBUS_OK));
+
+    RegisterTestListener();
+    ProxyChannelParam param = {};
+    strcpy_s(param.brMac, BT_MAC_MAX_LEN, "66:77:88:99:AA:BB");
+    param.requestId = 205;
+    param.timeoutMs = CONNECT_TIMEOUT;
+    strcpy_s(param.uuid, UUID_STRING_LEN, "0000FEEA-0000-1000-8000-00805F9B34FB");
+    OpenProxyChannelCallback callback = { .onOpenFail = TestOnOpenFail, .onOpenSuccess = TestOnOpenSuccess };
+    int32_t ret = GetProxyChannelManager()->openProxyChannel(&param, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1 * 2);
+    EXPECT_NE(g_openSuccessChannelId, TEST_INVALID_CHANNEL_ID);
+    ResetManagerGlobals();
+
+    SoftBusBtAddr btAddr = { .addr = { 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB } };
+    ProxyChannelMock::InjectBtAclStateChanged(1, &btAddr, SOFTBUS_ACL_STATE_DISCONNECTED, 0);
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1 * 2);
+    EXPECT_FALSE(g_reconnected);
+    ClearFarFieldProxy("66:77:88:99:AA:BB");
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1);
+    CONN_LOGI(CONN_PROXY, "ProxyManagerTest014 out");
+}
+
+/*
+ * @tc.name: ProxyManagerTest015
+ * @tc.desc: test BT off then on triggers BR proxy reconnect
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ProxyManagerTest, ProxyManagerTest015, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "ProxyManagerTest015 in");
+    ProxyChannelMock brMock;
+    FarFieldAdapterMock farFieldMock;
+    EXPECT_CALL(brMock, Connect).WillRepeatedly(Return(UNDERLAYER_HANDLE));
+    EXPECT_CALL(brMock, Read).WillRepeatedly(Return(-1));
+    EXPECT_CALL(brMock, IsPairedDevice).WillRepeatedly(Return(true));
+    EXPECT_CALL(farFieldMock, IsDeviceSupport).WillRepeatedly(Return(false));
+
+    RegisterTestListener();
+    ProxyChannelParam param = {};
+    strcpy_s(param.brMac, BT_MAC_MAX_LEN, "77:88:99:AA:BB:CC");
+    param.requestId = 206;
+    param.timeoutMs = CONNECT_TIMEOUT;
+    strcpy_s(param.uuid, UUID_STRING_LEN, "0000FEEA-0000-1000-8000-00805F9B34FB");
+    OpenProxyChannelCallback callback = { .onOpenFail = TestOnOpenFail, .onOpenSuccess = TestOnOpenSuccess };
+    int32_t ret = GetProxyChannelManager()->openProxyChannel(&param, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1 * 2);
+    EXPECT_NE(g_openSuccessChannelId, TEST_INVALID_CHANNEL_ID);
+    ResetManagerGlobals();
+
+    ProxyChannelMock::InjectBtStateChanged(0, SOFTBUS_BR_STATE_TURN_OFF);
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1);
+    ProxyChannelMock::InjectBtStateChanged(0, SOFTBUS_BR_STATE_TURN_ON);
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1 * 3);
+    EXPECT_TRUE(g_reconnected);
+    CONN_LOGI(CONN_PROXY, "ProxyManagerTest015 out");
 }

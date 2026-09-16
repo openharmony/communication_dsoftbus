@@ -52,6 +52,8 @@ group("unittest") {
       "general:GeneralConnectionConstraintTest",
       "general:GeneralNegotiationTest",
       "proxy:BrProxyChannelManagerTest",
+      "proxy:ProxyChannelManagerTest",
+      "proxy:FarFieldProxyChannelManagerTest",
       "ble/unittest/bleConnection:ConnBleConnectionTest",
       "ble/unittest/ble_manager:BleManagerTest",
       "ble:BleSnapshotTest",

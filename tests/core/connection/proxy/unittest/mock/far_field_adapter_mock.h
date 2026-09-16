@@ -31,7 +31,7 @@ public:
     virtual bool IsDeviceSupport(const P2PDeviceInfo *device) = 0;
     virtual int32_t RegisterCallback(const FarFieldCallbackSt *callback) = 0;
     virtual int32_t OpenP2P(const P2PDeviceInfo *device) = 0;
-    virtual int32_t CloseP2P(const P2PDeviceInfo *device) = 0;
+    virtual int32_t CloseP2P(const P2PDeviceInfo *device, bool isNeedCloseSocket) = 0;
     virtual P2PState GetP2PState(const P2PDeviceInfo *device) = 0;
     virtual int32_t SendMsg(const P2PDeviceInfo *device, const uint8_t *data, uint32_t len) = 0;
     virtual int32_t Refresh(const P2PDeviceInfo *device) = 0;
@@ -54,7 +54,7 @@ public:
     MOCK_METHOD(bool, IsDeviceSupport, (const P2PDeviceInfo * device), (override));
     MOCK_METHOD(int32_t, RegisterCallback, (const FarFieldCallbackSt * callback), (override));
     MOCK_METHOD(int32_t, OpenP2P, (const P2PDeviceInfo * device), (override));
-    MOCK_METHOD(int32_t, CloseP2P, (const P2PDeviceInfo * device), (override));
+    MOCK_METHOD(int32_t, CloseP2P, (const P2PDeviceInfo * device, bool isNeedCloseSocket), (override));
     MOCK_METHOD(P2PState, GetP2PState, (const P2PDeviceInfo * device), (override));
     MOCK_METHOD(int32_t, SendMsg,
         (const P2PDeviceInfo * device, const uint8_t *data, uint32_t len), (override));
