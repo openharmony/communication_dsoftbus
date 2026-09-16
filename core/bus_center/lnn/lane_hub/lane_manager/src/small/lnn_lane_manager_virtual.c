@@ -20,14 +20,6 @@
 
 #include "softbus_error_code.h"
 
-int32_t LnnRequestLane(uint32_t laneReqId, const LaneRequestOption *request, const ILaneListener *listener)
-{
-    (void)laneReqId;
-    (void)request;
-    (void)listener;
-    return SOFTBUS_NOT_IMPLEMENT;
-}
-
 int32_t UpdateLaneResourceLaneId(uint64_t oldLaneId, uint64_t newLaneId, const char *peerUdid)
 {
     (void)oldLaneId;
