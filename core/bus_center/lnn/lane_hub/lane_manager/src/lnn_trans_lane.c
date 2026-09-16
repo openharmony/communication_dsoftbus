@@ -1535,7 +1535,11 @@ static void NotifyLinkSucc(uint32_t laneReqId)
     TransReqInfo transReqInfo;
     (void)memset_s(&transReqInfo, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
     if (GetTransReqInfoByLaneReqId(laneReqId, &transReqInfo) == SOFTBUS_OK) {
-        (void)strcpy_s(info.networkId, sizeof(info.networkId), transReqInfo.allocInfo.networkId);
+        if (strcpy_s(info.networkId, sizeof(info.networkId), transReqInfo.allocInfo.networkId) != EOK) {
+            LNN_LOGE(LNN_LANE, "copy networkId fail");
+            ret = SOFTBUS_STRCMP_ERR;
+            goto FAIL;
+        }
     }
     ret = AddLaneResourceToPool(&info, laneId, false);
     if (ret != SOFTBUS_OK) {

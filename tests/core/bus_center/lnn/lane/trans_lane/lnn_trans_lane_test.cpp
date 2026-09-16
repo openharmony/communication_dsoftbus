@@ -1532,6 +1532,12 @@ HWTEST_F(LNNTransLaneMockTest, ALLOC_LANE_BY_SPECIFIED_LINK_TEST_001, TestSize.L
     EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
 }
 
+/*
+* @tc.name: HANDLE_LANE_QOS_CHANGE_NEW_TEST_001
+* @tc.desc: handle lane qos change new
+* @tc.type: FUNC
+* @tc.require:
+*/
 HWTEST_F(LNNTransLaneMockTest, HANDLE_LANE_QOS_CHANGE_NEW_TEST_001, TestSize.Level1)
 {
     LaneLinkInfo info = {};
@@ -1540,6 +1546,6 @@ HWTEST_F(LNNTransLaneMockTest, HANDLE_LANE_QOS_CHANGE_NEW_TEST_001, TestSize.Lev
     EXPECT_EQ(HandleLaneQosChange(&info), SOFTBUS_OK);
     info.type = LANE_P2P;
     ASSERT_EQ(strcpy_s(info.networkId, sizeof(info.networkId), NODE_NETWORK_ID), EOK);
-    EXPECT_NO_FATAL_FAILURE(HandleLaneQosChange(&info));
+    EXPECT_EQ(HandleLaneQosChange(&info), SOFTBUS_OK);
 }
 } // namespace OHOS

@@ -47,6 +47,12 @@ static bool g_enabledLowPower = false;
 typedef int32_t (*LaneLinkByType)(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback);
 typedef bool (*CompareLinkAddr)(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem);
 
+typedef struct {
+    char *networkIds;
+    int32_t fetchResult;
+    uint32_t count;
+} ServerNetworkIdInfo;
+
 static SoftBusList g_laneResource;
 
 static int32_t LaneLock(void)
@@ -484,21 +490,30 @@ static int32_t AddNetworkIdToList(LaneResource *resourceItem, const char *networ
     return SOFTBUS_OK;
 }
 
-static int32_t AddServerSideNetworkIds(LaneResource *resourceItem)
+static int32_t GetServerSideNetworkIds(const char *peerUdid, ServerNetworkIdInfo *serverNetworkIdInfo)
 {
-    const char *peerUdid = resourceItem->link.peerUdid;
     if (peerUdid == NULL || peerUdid[0] == '\0') {
         return SOFTBUS_INVALID_PARAM;
     }
-    char *networkIds = NULL;
-    uint32_t networkIdCount = 0;
-    int32_t ret = AuthGetAllNetworkId(peerUdid, &networkIds, &networkIdCount);
+    serverNetworkIdInfo->networkIds = NULL;
+    serverNetworkIdInfo->count = 0;
+    int32_t ret = AuthGetAllNetworkId(peerUdid, &serverNetworkIdInfo->networkIds, &serverNetworkIdInfo->count);
+    serverNetworkIdInfo->fetchResult = ret;
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get all serverside networkId fail, ret=%{public}d", ret);
         return ret;
     }
-    for (uint32_t i = 0; i < networkIdCount; i++) {
-        char *currNetworkId = networkIds + i * NETWORK_ID_BUF_LEN;
+    return SOFTBUS_OK;
+}
+
+static int32_t AddServerSideNetworkIdsToList(LaneResource *resourceItem,
+    const ServerNetworkIdInfo *serverNetworkIdInfo)
+{
+    if (serverNetworkIdInfo->fetchResult != SOFTBUS_OK) {
+        return serverNetworkIdInfo->fetchResult;
+    }
+    for (uint32_t i = 0; i < serverNetworkIdInfo->count; i++) {
+        const char *currNetworkId = serverNetworkIdInfo->networkIds + i * NETWORK_ID_BUF_LEN;
         char *anonyNetworkId = NULL;
         Anonymize(currNetworkId, &anonyNetworkId);
         LNN_LOGI(LNN_LANE, "serverside networkId[%{public}u]=%{public}s", i, AnonymizeWrapper(anonyNetworkId));
@@ -507,11 +522,11 @@ static int32_t AddServerSideNetworkIds(LaneResource *resourceItem)
             break;
         }
     }
-    SoftBusFree(networkIds);
     return SOFTBUS_OK;
 }
 
-static int32_t AddNetworkIdToResource(LaneResource *resourceItem, const char *networkId, bool isServerSide)
+static int32_t AddNetworkIdToResource(LaneResource *resourceItem, const char *networkId, bool isServerSide,
+    const ServerNetworkIdInfo *serverNetworkIdInfo)
 {
     if (resourceItem == NULL) {
         LNN_LOGE(LNN_LANE, "add networkId to Resource invalid resourceItem");
@@ -525,7 +540,7 @@ static int32_t AddNetworkIdToResource(LaneResource *resourceItem, const char *ne
         ListInit(resourceItem->networkIdList);
     }
     if (isServerSide) {
-        return AddServerSideNetworkIds(resourceItem);
+        return AddServerSideNetworkIdsToList(resourceItem, serverNetworkIdInfo);
     }
     if (networkId == NULL || networkId[0] == '\0') {
         LNN_LOGE(LNN_LANE, "add networkId to Resource invalid networkId");
@@ -583,7 +598,8 @@ static void RemoveNetworkIdFromList(LaneResource *item, const char *networkId)
     }
 }
 
-static int32_t CreateNewLaneResource(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide)
+static int32_t CreateNewLaneResource(const LaneLinkInfo *linkInfo, uint64_t laneId, bool isServerSide,
+    const ServerNetworkIdInfo *serverNetworkIdInfo)
 {
     LaneResource* resourceItem = (LaneResource *)SoftBusCalloc(sizeof(LaneResource));
     if (resourceItem == NULL) {
@@ -605,7 +621,7 @@ static int32_t CreateNewLaneResource(const LaneLinkInfo *linkInfo, uint64_t lane
     }
     ListAdd(&g_laneResource.list, &resourceItem->node);
     g_laneResource.cnt++;
-    if (AddNetworkIdToResource(resourceItem, linkInfo->networkId, isServerSide) != SOFTBUS_OK) {
+    if (AddNetworkIdToResource(resourceItem, linkInfo->networkId, isServerSide, serverNetworkIdInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add networkId to resource fail");
     }
     LaneUnlock();
@@ -650,7 +666,8 @@ static void AddNetworkResourceInner(const LaneLinkInfo *linkInfo, uint64_t laneI
     AnonymizeFree(anonyRemoteUdid);
 }
 
-static int32_t UpdateExistLaneResource(LaneResource *resourceItem, bool isServerSide, const LaneLinkInfo *linkInfo)
+static int32_t UpdateExistLaneResource(LaneResource *resourceItem, bool isServerSide,
+    const LaneLinkInfo *linkInfo, const ServerNetworkIdInfo *serverNetworkIdInfo)
 {
     if (isServerSide) {
         if (resourceItem->isServerSide) {
@@ -661,7 +678,8 @@ static int32_t UpdateExistLaneResource(LaneResource *resourceItem, bool isServer
         resourceItem->isServerSide = true;
         LNN_LOGI(LNN_LANE, "add server laneId=%{public}" PRIu64 " to resource pool succ",
             resourceItem->laneId);
-        if (AddNetworkIdToResource(resourceItem, linkInfo->networkId, isServerSide) != SOFTBUS_OK) {
+        if (AddNetworkIdToResource(resourceItem, linkInfo->networkId, isServerSide,
+            serverNetworkIdInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "add networkId to exist resource fail");
         }
         return SOFTBUS_OK;
@@ -669,7 +687,7 @@ static int32_t UpdateExistLaneResource(LaneResource *resourceItem, bool isServer
     resourceItem->clientRef++;
     LNN_LOGI(LNN_LANE, "add client laneId=%{public}" PRIu64 " to resource pool succ, clientRef=%{public}u",
         resourceItem->laneId, resourceItem->clientRef);
-    if (AddNetworkIdToResource(resourceItem, linkInfo->networkId, isServerSide) != SOFTBUS_OK) {
+    if (AddNetworkIdToResource(resourceItem, linkInfo->networkId, isServerSide, serverNetworkIdInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add networkId to exist resource fail");
     }
     return SOFTBUS_OK;
@@ -681,23 +699,31 @@ int32_t AddLaneResourceToPool(const LaneLinkInfo *linkInfo, uint64_t laneId, boo
         LNN_LOGE(LNN_LANE, "linkInfo is nullptr or invalid laneId");
         return SOFTBUS_INVALID_PARAM;
     }
+    ServerNetworkIdInfo serverNetworkIdInfo = {0};
+    if (isServerSide) {
+        (void)GetServerSideNetworkIds(linkInfo->peerUdid, &serverNetworkIdInfo);
+    }
     if (LaneLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane lock fail");
+        SoftBusFree(serverNetworkIdInfo.networkIds);
         return SOFTBUS_LOCK_ERR;
     }
     int32_t addResult = SOFTBUS_LANE_RESOURCE_EXCEPT;
     LaneResource* resourceItem = GetValidLaneResource(linkInfo);
     if (resourceItem != NULL) {
-        addResult = UpdateExistLaneResource(resourceItem, isServerSide, linkInfo);
+        addResult = UpdateExistLaneResource(resourceItem, isServerSide, linkInfo, &serverNetworkIdInfo);
         LaneUnlock();
+        SoftBusFree(serverNetworkIdInfo.networkIds);
         return addResult;
     }
     LaneUnlock();
-    addResult = CreateNewLaneResource(linkInfo, laneId, isServerSide);
+    addResult = CreateNewLaneResource(linkInfo, laneId, isServerSide, &serverNetworkIdInfo);
     if (addResult != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "create laneResource fail, result=%{public}d", addResult);
+        SoftBusFree(serverNetworkIdInfo.networkIds);
         return addResult;
     }
+    SoftBusFree(serverNetworkIdInfo.networkIds);
     if (!isServerSide) {
         AddNetworkResourceInner(linkInfo, laneId);
     }

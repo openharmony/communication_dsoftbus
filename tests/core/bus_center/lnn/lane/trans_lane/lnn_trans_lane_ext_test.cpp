@@ -428,6 +428,12 @@ HWTEST_F(LNNTransLaneExtTest, LNN_NOTIFY_FREE_LANE_RESULT_002, TestSize.Level1)
     EXPECT_FALSE(g_freeLaneNotified);
 }
 
+/*
+ * @tc.name: FREE_LANE_LINK_FIND_FAIL_TEST_001
+ * @tc.desc: HandleDelayDestroyLink when FindLaneResourceByLaneId fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNTransLaneExtTest, FREE_LANE_LINK_FIND_FAIL_TEST_001, TestSize.Level1)
 {
     SoftBusMessage msg = {
@@ -440,6 +446,12 @@ HWTEST_F(LNNTransLaneExtTest, FREE_LANE_LINK_FIND_FAIL_TEST_001, TestSize.Level1
     EXPECT_NO_FATAL_FAILURE(HandleDelayDestroyLink(&msg));
 }
 
+/*
+ * @tc.name: FREE_LANE_LINK_GET_REQ_FAIL_TEST_001
+ * @tc.desc: HandleDelayDestroyLink when GetTransReqInfoByLaneReqId fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNTransLaneExtTest, FREE_LANE_LINK_GET_REQ_FAIL_TEST_001, TestSize.Level1)
 {
     SoftBusMessage msg = {
@@ -458,6 +470,12 @@ HWTEST_F(LNNTransLaneExtTest, FREE_LANE_LINK_GET_REQ_FAIL_TEST_001, TestSize.Lev
     EXPECT_NO_FATAL_FAILURE(HandleDelayDestroyLink(&msg));
 }
 
+/*
+ * @tc.name: FREE_LANE_LINK_SUCCESS_TEST_001
+ * @tc.desc: HandleDelayDestroyLink success path
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(LNNTransLaneExtTest, FREE_LANE_LINK_SUCCESS_TEST_001, TestSize.Level1)
 {
     SoftBusMessage msg = {
