@@ -315,23 +315,30 @@ static void CloseOtherUser(int32_t userId)
     }
 }
 
-static int32_t RecoveryConnect(const char *brMac, const char *uuid, uint32_t requestId)
+static int32_t RecoveryConnect(BrProxyInfo *recoveryInfo)
 {
+    if (recoveryInfo == NULL) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] recoveryInfo is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     ProxyChannelManager *proxyMgr = GetProxyChannelManager();
     if (proxyMgr == NULL) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] get proxyMgr failed");
         return SOFTBUS_INVALID_PARAM;
     }
     ProxyChannelParam param;
-    param.requestId = requestId;
+    (void)memset_s(&param, sizeof(ProxyChannelParam), 0, sizeof(ProxyChannelParam));
+    param.requestId = recoveryInfo->requestId;
+    param.isFirstConnect = false;
+    param.appIndex = recoveryInfo->appIndex;
 
-    if (strcpy_s(param.brMac, sizeof(param.brMac), brMac) != EOK ||
-        strcpy_s(param.uuid, sizeof(param.uuid), uuid) != EOK) {
+    if (strcpy_s(param.brMac, sizeof(param.brMac), recoveryInfo->proxyInfo.brMac) != EOK ||
+        strcpy_s(param.uuid, sizeof(param.uuid), recoveryInfo->proxyInfo.uuid) != EOK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] copy brMac or uuid failed");
         return SOFTBUS_MEM_ERR;
     }
     param.timeoutMs = BR_PROXY_MAX_WAIT_TIME_MS;
-    TRANS_LOGI(TRANS_SVC, "[br_proxy] recovery connect, requestId=%{public}d", requestId);
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] recovery connect, requestId=%{public}d", recoveryInfo->requestId);
 
     int32_t ret = proxyMgr->openProxyChannel(&param, &g_channelOpen);
     if (ret != SOFTBUS_OK) {
@@ -349,6 +356,7 @@ static void RecoveryCurrentUser(int32_t userId)
     }
     bool flag = false;
     BrProxyInfo recoveryInfo;
+    (void)memset_s(&recoveryInfo, sizeof(BrProxyInfo), 0, sizeof(BrProxyInfo));
     if (SoftBusMutexLock(&(g_proxyList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] lock failed");
         return;
@@ -388,7 +396,7 @@ static void RecoveryCurrentUser(int32_t userId)
             // fall-through
         }
     }
-    RecoveryConnect(recoveryInfo.proxyInfo.brMac, recoveryInfo.proxyInfo.uuid, recoveryInfo.requestId);
+    RecoveryConnect(&recoveryInfo);
 }
 
 static void TryToPullUpHapWhenSwitch(int32_t userId)
