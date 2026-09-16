@@ -66,7 +66,7 @@ void TransTdcSetTimestamp(int32_t channelId, uint64_t timestamp)
 
 static bool CheckInfoAndMutexLock(TcpDirectChannelInfo *info)
 {
-    if (info == NULL) {
+    if (info == NULL || g_tcpDirectChannelInfoList == NULL) {
         TRANS_LOGE(TRANS_SDK, "param invalid.");
         return false;
     }

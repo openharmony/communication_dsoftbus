@@ -289,7 +289,7 @@ int32_t TransProxyPackTlvBytes(
         TRANS_LOGE(TRANS_CTRL, "pack tlv data failed");
         ReleaseTlvValueBuffer(&pktHead);
         SoftBusFree(pktHead.tlvElement);
-        return ret;
+        return SOFTBUS_TRANS_PACK_TLV_DATA_FAILED;
     }
     ReleaseTlvValueBuffer(&pktHead);
     SoftBusFree(pktHead.tlvElement);
