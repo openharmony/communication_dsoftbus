@@ -100,6 +100,8 @@ typedef struct {
     int32_t costTime;
     int32_t sendMsgCnt;
     int32_t receiveMsgCnt;
+    uint64_t negotiateTime;
+    uint64_t linkTime;
 } DfxEventExtra;
 
 typedef struct {

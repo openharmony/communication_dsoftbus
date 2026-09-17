@@ -70,11 +70,13 @@ static int32_t DfxEventCallback(const DfxEventExtra *event)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(event != NULL, SOFTBUS_INVALID_PARAM, CONN_PROXY, "event is null");
     ConnEventExtra extra = {
-        .callerPkg = event->hostPkg,
         .result = event->stageRes,
         .errcode = event->errorCode,
-        .connectReason = event->connectReason,
         .costTime = event->costTime,
+        .callerPkg = event->hostPkg,
+        .negotiateTime = event->negotiateTime,
+        .linkTime = event->linkTime,
+        .connectReason = event->connectReason,
         .sendCnt = event->sendMsgCnt,
         .receiveCnt = event->receiveMsgCnt,
     };

@@ -1292,17 +1292,31 @@ HWTEST_F(BrProxyServerManagerTest, CloseAllBrProxyTest002, TestSize.Level1)
 
 /**
  * @tc.name: RecoveryConnectTest001
- * @tc.desc: RecoveryConnect, brMac is too long and strcpy_s fails returns SOFTBUS_MEM_ERR
+ * @tc.desc: RecoveryConnect, recoveryInfo is null or proxyMgr is null returns SOFTBUS_INVALID_PARAM,
+ *           brMac/uuid copy fails returns SOFTBUS_MEM_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(BrProxyServerManagerTest, RecoveryConnectTest001, TestSize.Level1)
 {
-    std::string longMac(BT_MAC_MAX_LEN + 8, 'x');
-    int32_t ret = RecoveryConnect(longMac.c_str(), TEST_UUID, REQUEST_ID);
+    int32_t ret = RecoveryConnect(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    BrProxyInfo recoveryInfo;
+    (void)memset_s(&recoveryInfo, sizeof(BrProxyInfo), 0, sizeof(BrProxyInfo));
+    (void)memset_s(recoveryInfo.proxyInfo.brMac, sizeof(recoveryInfo.proxyInfo.brMac), 'x',
+        sizeof(recoveryInfo.proxyInfo.brMac));
+    (void)strcpy_s(recoveryInfo.proxyInfo.uuid, sizeof(recoveryInfo.proxyInfo.uuid), TEST_UUID);
+    recoveryInfo.requestId = REQUEST_ID;
+    ret = RecoveryConnect(&recoveryInfo);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
-    std::string longUuid(UUID_STRING_LEN + 8, 'y');
-    ret = RecoveryConnect(VALID_BR_MAC, longUuid.c_str(), REQUEST_ID);
+
+    (void)memset_s(&recoveryInfo, sizeof(BrProxyInfo), 0, sizeof(BrProxyInfo));
+    (void)strcpy_s(recoveryInfo.proxyInfo.brMac, sizeof(recoveryInfo.proxyInfo.brMac), VALID_BR_MAC);
+    (void)memset_s(recoveryInfo.proxyInfo.uuid, sizeof(recoveryInfo.proxyInfo.uuid), 'y',
+        sizeof(recoveryInfo.proxyInfo.uuid));
+    recoveryInfo.requestId = REQUEST_ID;
+    ret = RecoveryConnect(&recoveryInfo);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 }
 
