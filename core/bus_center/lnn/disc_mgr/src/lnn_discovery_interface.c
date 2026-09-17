@@ -116,14 +116,14 @@ int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInner
         if ((ret = DiscStopDiscovery(pkgName, subscribeId, callingPid)) != SOFTBUS_OK) {
             DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_DISCOVERY, pkgName, ret);
             LNN_LOGE(LNN_BUILDER, "DiscStopDiscovery failed\n");
-            return SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL;
+            return ret;
         }
         return SOFTBUS_OK;
     }
     if ((ret = DiscStopAdvertise(MODULE_LNN, subscribeId, callingPid)) != SOFTBUS_OK) {
         DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_DISCOVERY, LNN_DEFAULT_PKG_NAME, ret);
         LNN_LOGE(LNN_BUILDER, "DiscStopAdvertise fail!\n");
-        return SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL;
+        return ret;
     }
     return SOFTBUS_OK;
 }

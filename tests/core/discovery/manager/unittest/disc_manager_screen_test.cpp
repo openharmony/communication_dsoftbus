@@ -31,6 +31,8 @@
 using namespace testing::ext;
 using testing::Return;
 
+#define DISC_SCREEN_CENTER 0
+
 extern "C" {
 int32_t ClientOnPublishLNNResult(const char *pkgName, int32_t pid, int32_t publishId, int32_t reason)
 {
