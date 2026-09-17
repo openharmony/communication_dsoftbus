@@ -319,6 +319,130 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_001, TestSize.L
 }
 
 /*
+ * @tc.name: SoftBusUtilsTest_ConvertBtMacToBinary_002
+ * @tc.desc: Verify ConvertBtMacToBinary works correctly with valid input parameters
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_002, TestSize.Level1)
+{
+    const char *strMac = "AA:BB:CC:DD:EE:FF";
+    uint8_t binMac[6] = {0};
+    uint32_t strMacLen = strlen(strMac) + 1;
+    uint32_t binMacLen = sizeof(binMac);
+    int32_t ret = ConvertBtMacToBinary(strMac, strMacLen, binMac, binMacLen);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(binMac[0], 0xAA);
+    EXPECT_EQ(binMac[1], 0xBB);
+    EXPECT_EQ(binMac[2], 0xCC);
+    EXPECT_EQ(binMac[3], 0xDD);
+    EXPECT_EQ(binMac[4], 0xEE);
+    EXPECT_EQ(binMac[5], 0xFF);
+}
+
+/*
+ * @tc.name: SoftBusUtilsTest_ConvertBtMacToBinary_003
+ * @tc.desc: Verify ConvertBtMacToBinary returns SOFTBUS_INVALID_PARAM when mac value exceeds uint8 range
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_003, TestSize.Level1)
+{
+    const char *strMac = "100:BB:CC:DD:EE:FF";
+    uint8_t binMac[6] = {0};
+    uint32_t strMacLen = strlen(strMac) + 1;
+    uint32_t binMacLen = sizeof(binMac);
+    int32_t ret = ConvertBtMacToBinary(strMac, strMacLen, binMac, binMacLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SoftBusUtilsTest_ConvertBtMacToBinary_004
+ * @tc.desc: Verify ConvertBtMacToBinary returns SOFTBUS_INVALID_PARAM when mac contains non-hex characters
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_004, TestSize.Level1)
+{
+    const char *strMac = "GG:HH:II:JJ:KK:LL";
+    uint8_t binMac[6] = {0};
+    uint32_t strMacLen = strlen(strMac) + 1;
+    uint32_t binMacLen = sizeof(binMac);
+    int32_t ret = ConvertBtMacToBinary(strMac, strMacLen, binMac, binMacLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SoftBusUtilsTest_ConvertBtMacToBinary_005
+ * @tc.desc: Verify ConvertBtMacToBinary returns SOFTBUS_INVALID_PARAM for zero MAC address
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_005, TestSize.Level1)
+{
+    const char *strMac = "00:00:00:00:00:00";
+    uint8_t binMac[6] = {0};
+    uint32_t strMacLen = strlen(strMac) + 1;
+    uint32_t binMacLen = sizeof(binMac);
+    int32_t ret = ConvertBtMacToBinary(strMac, strMacLen, binMac, binMacLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SoftBusUtilsTest_ConvertBtMacToBinary_006
+ * @tc.desc: Verify ConvertBtMacToBinary works with mixed case hex MAC address
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_006, TestSize.Level1)
+{
+    const char *strMac = "aa:bb:cc:dd:ee:ff";
+    uint8_t binMac[6] = {0};
+    uint32_t strMacLen = strlen(strMac) + 1;
+    uint32_t binMacLen = sizeof(binMac);
+    int32_t ret = ConvertBtMacToBinary(strMac, strMacLen, binMac, binMacLen);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(binMac[0], 0xaa);
+    EXPECT_EQ(binMac[1], 0xbb);
+    EXPECT_EQ(binMac[2], 0xcc);
+    EXPECT_EQ(binMac[3], 0xdd);
+    EXPECT_EQ(binMac[4], 0xee);
+    EXPECT_EQ(binMac[5], 0xff);
+}
+
+/*
+ * @tc.name: SoftBusUtilsTest_ConvertBtMacToBinary_007
+ * @tc.desc: Verify ConvertBtMacToBinary returns SOFTBUS_INVALID_PARAM when string is too short
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_007, TestSize.Level1)
+{
+    const char *strMac = "AA:BB:CC:DD:EE";
+    uint8_t binMac[6] = {0};
+    uint32_t strMacLen = strlen(strMac) + 1;
+    uint32_t binMacLen = sizeof(binMac);
+    int32_t ret = ConvertBtMacToBinary(strMac, strMacLen, binMac, binMacLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SoftBusUtilsTest_ConvertBtMacToBinary_008
+ * @tc.desc: Verify ConvertBtMacToBinary returns SOFTBUS_INVALID_PARAM when string is too long
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_008, TestSize.Level1)
+{
+    const char *strMac = "AA:BB:CC:DD:EE:FF:GG";
+    uint8_t binMac[6] = {0};
+    uint32_t strMacLen = strlen(strMac) + 1;
+    uint32_t binMacLen = sizeof(binMac);
+    int32_t ret = ConvertBtMacToBinary(strMac, strMacLen, binMac, binMacLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
  * @tc.name: SoftBusUtilsTest_ConvertBtMacToStr_001
  * @tc.desc: Verify ConvertBtMacToStr returns SOFTBUS_INVALID_PARAM when input parameters are invalid
  * @tc.type: FUNC
