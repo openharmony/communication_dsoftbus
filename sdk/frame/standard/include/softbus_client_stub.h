@@ -91,6 +91,7 @@ private:
     int32_t OnLeaveLNNResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnNodeOnlineStateChangedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnNodeBasicInfoChangedInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnCommandInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnNodeStatusChangedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnLocalNetworkIdChangedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnNodeDeviceTrustedChangeInner(MessageParcel &data, MessageParcel &reply);

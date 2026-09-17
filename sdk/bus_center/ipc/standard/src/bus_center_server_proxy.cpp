@@ -454,3 +454,17 @@ int32_t ServerIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
     int32_t ret = g_serverProxy->GetTrustedDevices(info, nums);
     return ret;
 }
+
+int32_t ServerIpcSetCommand(int32_t code, const char *value, uint32_t inLen)
+{
+    (void)code;
+    (void)value;
+    (void)inLen;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcRegisterCommandCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}

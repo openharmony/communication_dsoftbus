@@ -451,6 +451,22 @@ static void OnDeviceNotTrusted(const char *peerUdid, int32_t localUserId, Handle
     AuthRemoveDeviceKeyByUdidPacked(peerUdid);
 }
 
+int32_t AuthNotifyDeviceNotTrusted(const char *peerUdid, int32_t localUserId)
+{
+    if (peerUdid == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "peerUdid is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    if (LnnGetNetworkIdByUdid(peerUdid, networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+        AUTH_LOGW(AUTH_HICHAIN, "peer device not in ledger, no need offline");
+        return SOFTBUS_NOT_FIND;
+    }
+    AUTH_LOGI(AUTH_HICHAIN, "notify device offline by acl enter");
+    OnDeviceNotTrusted(peerUdid, localUserId, HICHAIN_DEVICE);
+    return SOFTBUS_OK;
+}
+
 int32_t RegAuthVerifyListener(const AuthVerifyListener *listener)
 {
     if (listener == NULL) {

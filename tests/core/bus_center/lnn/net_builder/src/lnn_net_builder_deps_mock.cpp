@@ -19,6 +19,7 @@
 #include <securec.h>
 
 #include "lnn_log.h"
+#include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 
@@ -782,6 +783,21 @@ struct WifiDirectManager* GetWifiDirectManager(void)
 bool LnnIsRemoteSupportAuthCapBit(const char *networkid, AuthCapability capaBit)
 {
     return GetNetBuilderDepsInterface()->LnnIsRemoteSupportAuthCapBit(networkid, capaBit);
+}
+
+int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
+{
+    return 0;
+}
+
+bool LnnIsCommandCbRegistered(void)
+{
+    return false;
+}
+
+const char *LnnGetCommandPkgName(void)
+{
+    return "ohos.distributedhardware.devicemanager";
 }
 } // extern "C"
 } // namespace OHOS

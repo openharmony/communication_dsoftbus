@@ -241,6 +241,15 @@ typedef struct {
     int32_t mainUserId;
 } CredTypeSortInfo;
 
+typedef enum {
+    SORT_PRIORITY_ACCOUNT_RELATED = 0,
+    SORT_PRIORITY_ACCOUNT_RELATED_APP,
+    SORT_PRIORITY_ACCOUNT_SHARED,
+    SORT_PRIORITY_ACCOUNT_UNRELATED,
+    SORT_PRIORITY_DEFAULT,
+    SORT_PRIORITY_BUTT,
+} CredTypeSortPriority;
+
 static void OptString(
     const JsonObj *json, const char * const key, char *target, uint32_t targetLen, const char *defaultValue)
 {
@@ -1028,19 +1037,30 @@ static cJSON *QueryAllCredTypePerPeerUserId(cJSON *peerUserIdsJson, CredTypeQuer
     return credTypesJson;
 }
 
+static int32_t GetCredTypeSortPriority(int32_t credType)
+{
+    switch (credType) {
+        case ACCOUNT_RELATED:
+            return SORT_PRIORITY_ACCOUNT_RELATED;
+        case ACCOUNT_RELATED_APP:
+            return SORT_PRIORITY_ACCOUNT_RELATED_APP;
+        case ACCOUNT_SHARED:
+            return SORT_PRIORITY_ACCOUNT_SHARED;
+        case ACCOUNT_UNRELATED:
+            return SORT_PRIORITY_ACCOUNT_UNRELATED;
+        default:
+            return SORT_PRIORITY_DEFAULT;
+    }
+}
+
 static int32_t CredTypesSortCmp(const void *info1, const void *info2)
 {
     CredTypeSortInfo *credTypeInfo1 = (CredTypeSortInfo *)info1;
     CredTypeSortInfo *credTypeInfo2 = (CredTypeSortInfo *)info2;
     int32_t mainUserId = credTypeInfo1->mainUserId;
     if (credTypeInfo1->peerUserId == credTypeInfo2->peerUserId) {
-        if (credTypeInfo1->credType == ACCOUNT_RELATED) {
-            return -1;
-        } else if (credTypeInfo1->credType == ACCOUNT_UNRELATED) {
-            return 1;
-        } else {
-            return (credTypeInfo2->credType == ACCOUNT_RELATED) ? 1: -1;
-        }
+        return GetCredTypeSortPriority(credTypeInfo1->credType) -
+            GetCredTypeSortPriority(credTypeInfo2->credType);
     }
     if (credTypeInfo1->peerUserId == mainUserId) {
         return -1;

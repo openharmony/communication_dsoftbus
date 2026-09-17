@@ -127,6 +127,10 @@ int32_t UnregisterConversationListenerInner(const ConversationBusiness *info);
 int32_t GetTrustedDevicesInner(DeviceNodeInfo **info, int32_t *nums);
 int32_t LnnConversationRecvMsg(const ConversationBusiness *info, const char *udid, const char *data, uint32_t length);
 void RestartRegisterConversationListener(void);
+int32_t SetCommandInner(int32_t code, const char *value, uint32_t inLen);
+int32_t RegisterCommandCbInner(const char *pkgName, ITrustedDeviceCb *cb);
+int32_t ClientOnCommandInner(int32_t code, const char *value, uint32_t inLen,
+    char *res, uint32_t resLen);
 
 #ifdef __cplusplus
 }

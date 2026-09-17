@@ -14,7 +14,9 @@
  */
 
 #include "hb_medium_mgr_mock.h"
+#include "lnn_local_net_ledger.h"
 #include "softbus_error_code.h"
+#include "softbus_json_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -40,6 +42,37 @@ extern "C" {
 int32_t LnnStartSleOfflineTimingStrategy(const char *networkId)
 {
     return HbMediumMgrExtInterface()->LnnStartSleOfflineTimingStrategy(networkId);
+}
+
+bool AddStringToJsonObject(cJSON *json, const char * const string, const char *value)
+{
+    (void)json;
+    (void)string;
+    (void)value;
+    return true;
+}
+
+bool AddNumberToJsonObject(cJSON *json, const char * const string, int32_t num)
+{
+    (void)json;
+    (void)string;
+    (void)num;
+    return true;
+}
+
+int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
+{
+    return 0;
+}
+
+bool LnnIsCommandCbRegistered(void)
+{
+    return false;
+}
+
+const char *LnnGetCommandPkgName(void)
+{
+    return "ohos.distributedhardware.devicemanager";
 }
 }
 } // namespace OHOS

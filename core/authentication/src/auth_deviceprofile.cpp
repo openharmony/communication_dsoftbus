@@ -1626,3 +1626,11 @@ int32_t IsSKIdFindAclInfo(int32_t sessionKeyId, char *peerUdid)
     LNN_LOGE(LNN_STATE, "key not found");
     return SOFTBUS_AUTH_ACL_NOT_FOUND;
 }
+
+int32_t LnnNotifyCommandToDmAuthPassed(const char *peerUdid, int32_t peerUserId, const char *credId)
+{
+    (void)peerUdid;
+    (void)peerUserId;
+    (void)credId;
+    return SOFTBUS_NOT_IMPLEMENT;
+}

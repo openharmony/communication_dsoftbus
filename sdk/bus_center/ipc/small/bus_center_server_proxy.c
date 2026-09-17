@@ -975,3 +975,49 @@ int32_t ServerIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
     (void)nums;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
+
+int32_t ServerIpcSetCommand(int32_t code, const char *value, uint32_t inLen)
+{
+    if (value == NULL || inLen == 0) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_serverProxy == NULL) {
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    uint8_t data[MAX_SOFT_BUS_IPC_LEN_EX] = {0};
+    IpcIo request = {0};
+    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN_EX, 0);
+    WriteInt32(&request, code);
+    WriteString(&request, value);
+    uint8_t replyData[MAX_SOFT_BUS_IPC_LEN] = {0};
+    IpcIo reply = {0};
+    IpcIoInit(&reply, replyData, MAX_SOFT_BUS_IPC_LEN, 0);
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_SET_COMMAND, &request, &reply, NULL);
+    if (ans != SOFTBUS_OK) {
+        return SOFTBUS_NETWORK_PROXY_INVOKE_FAILED;
+    }
+    int32_t serverRet = 0;
+    if (!ReadInt32(&reply, &serverRet)) {
+        return SOFTBUS_NETWORK_READINT32_FAILED;
+    }
+    return serverRet;
+}
+
+int32_t ServerIpcRegisterCommandCb(const char *pkgName)
+{
+    if (pkgName == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_serverProxy == NULL) {
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
+    IpcIo request = {0};
+    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
+    WriteString(&request, pkgName);
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_REGISTER_COMMAND_CB, &request, NULL, NULL);
+    if (ans != SOFTBUS_OK) {
+        return SOFTBUS_NETWORK_PROXY_INVOKE_FAILED;
+    }
+    return SOFTBUS_OK;
+}
