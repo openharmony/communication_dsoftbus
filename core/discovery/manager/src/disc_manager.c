@@ -1172,22 +1172,30 @@ void DiscOnScreenStatusChanged(int32_t screenId, bool onScreen)
         screenId, onScreen);
     DISC_CHECK_AND_RETURN_LOGE(screenId >= 0, DISC_CONTROL, "invalid screenId=%{public}d", screenId);
 
+    DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_screenStateLock) == SOFTBUS_OK,
+        DISC_CONTROL, "lock fail");
+
+    bool isFirstScreenOn = atomic_load(&g_wasAllScreenOff);
+
     if (screenId == DISC_SCREEN_CENTER) {
-        DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_screenStateLock) == SOFTBUS_OK,
-            DISC_CONTROL, "lock fail");
         bool oldCenterScreenOn = atomic_load(&g_centerScreenOn);
         if (oldCenterScreenOn == onScreen) {
-            DISC_LOGI(DISC_CONTROL, "ignore duplicate event");
+            DISC_LOGI(DISC_CONTROL, "ignore duplicate center screen event");
             (void)SoftBusMutexUnlock(&g_screenStateLock);
             return;
         }
         atomic_store(&g_centerScreenOn, onScreen);
-        (void)SoftBusMutexUnlock(&g_screenStateLock);
     }
 
-    bool isFirstScreenOn = atomic_load(&g_wasAllScreenOff);
     bool allScreenOff = onScreen ? false : LnnIsAllMultiScreenOff();
+    if (!onScreen && allScreenOff && isFirstScreenOn) {
+        DISC_LOGI(DISC_CONTROL, "ignore duplicate all screen off event");
+        (void)SoftBusMutexUnlock(&g_screenStateLock);
+        return;
+    }
     atomic_store(&g_wasAllScreenOff, allScreenOff);
+
+    (void)SoftBusMutexUnlock(&g_screenStateLock);
 
     if (onScreen) {
         DiscScreenOnRecover(screenId, isFirstScreenOn);
