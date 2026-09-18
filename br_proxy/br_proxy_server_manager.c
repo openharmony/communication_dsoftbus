@@ -1244,7 +1244,7 @@ static void OnOpenFail(uint32_t requestId, int32_t reason, const char *brMac)
     BrProxyInfo proxyInfo;
     (void)memset_s(&proxyInfo, sizeof(BrProxyInfo), 0, sizeof(BrProxyInfo));
     ret = GetBrProxy(info.proxyInfo.brMac, info.proxyInfo.uuid, info.requestId, &proxyInfo);
-    if (ret == SOFTBUS_OK && (proxyInfo.isEnable || reason == SOFTBUS_CONN_PROXY_BR_FAIL_BUT_SUPPORT_FAR_FIELD)) {
+    if (ret == SOFTBUS_OK && proxyInfo.isEnable) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] the connecet requestId=%{public}d is virtual connect", requestId);
         (void)SetCurrentConnect(info.proxyInfo.brMac, info.proxyInfo.uuid, requestId, true);
         ClientIpcBrProxyOpened(info.callingPid, info.channelId,

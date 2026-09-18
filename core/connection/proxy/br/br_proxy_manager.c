@@ -391,9 +391,6 @@ static void NotifyOpenProxyChannelResult(struct ProxyConnection *proxyConnection
         return;
     }
 
-    if (connectingChannel->isSupportFarField) {
-        AddReconnectDeviceInfoUnsafe(connectingChannel);
-    }
     ProxyConnectInfo *reconnectDeviceInfo = GetReconnectDeviceInfoByAddrUnsafe(proxyConnection->brMac);
     if (!SoftBusIsBtUnderlayerError(status) && reconnectDeviceInfo != NULL && !reconnectDeviceInfo->isAclConnected) {
         status = SOFTBUS_CONN_PROXY_BR_ACL_NOT_EXIST;
@@ -644,7 +641,7 @@ static void AddReconnectDeviceInfoUnsafe(ProxyConnectInfo *connectInfo)
     CONN_CHECK_AND_RETURN_LOGE(info != NULL, CONN_PROXY, "CopyProxyConnectInfo fail");
     info->isAclConnected = true;
     info->innerRetryNum = 0;
-    (void)IsPairedDevice(info->brMac, true, &info->isSupportHfp);
+    (void)IsPairedDevice(info->brMac, true, &info->isSupportHfp, NULL);
     CONN_LOGI(CONN_PROXY, "isSupportHfp=%{public}d", info->isSupportHfp);
     ListAdd(&GetBrProxyChannelManager()->reconnectDeviceInfos, &info->node);
 }
@@ -797,9 +794,6 @@ int32_t OpenBrProxyChannel(ProxyChannelParam *param, bool isRealMac, bool isSupp
         CONN_PROXY, "onOpenFail is NULL");
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusGetBrState() == BR_ENABLE, SOFTBUS_CONN_BR_DISABLE_ERR,
         CONN_PROXY, "br disable");
-    bool isPairedDevice = IsPairedDevice(param->brMac, isRealMac, NULL);
-    CONN_CHECK_AND_RETURN_RET_LOGE(isPairedDevice, SOFTBUS_CONN_BR_UNPAIRED,
-        CONN_PROXY, "is not paired device");
     char anomizeAddress[BT_MAC_MAX_LEN] = { 0 };
     char anomizeUuid[UUID_STRING_LEN] = { 0 };
     ConvertAnonymizeSensitiveString(anomizeAddress, BT_MAC_MAX_LEN, param->brMac);
@@ -958,13 +952,17 @@ static bool CheckNeedToRetry(char *brAddr, ProxyConnectInfo *reconnectDeviceInfo
 {
     bool isAclConnected = reconnectDeviceInfo->isAclConnected;
     CONN_LOGI(CONN_PROXY, "isAclConnected=%{public}d", isAclConnected);
+    if (reconnectDeviceInfo->isSupportFarField && !isAclConnected) {
+        CONN_LOGW(CONN_PROXY, "open farfield");
+        return false;
+    }
 
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusGetBrState() == BR_ENABLE, false, CONN_PROXY, "br disable");
 
     bool isAlreadyConnected = IsTargetDeviceAlreadyConnected(brAddr);
     CONN_CHECK_AND_RETURN_RET_LOGW(!isAlreadyConnected, false, CONN_PROXY, "exist already connection");
 
-    bool isPairedDevice = IsPairedDevice(brAddr, true, NULL);
+    bool isPairedDevice = IsPairedDevice(brAddr, true, NULL, NULL);
     CONN_CHECK_AND_RETURN_RET_LOGE(isPairedDevice, false, CONN_PROXY, "is not paired device");
     return true;
 }
@@ -1145,7 +1143,6 @@ static void ProxyDeviceUnpaired(const char *brAddr)
     CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_PROXY, "ProxyChannelConstruct fail, ret=%{public}d", ret);
     RemoveReconnectDeviceInfoByAddrUnsafe(brAddr);
     NotifyDisconnected(&proxyChannel, SOFTBUS_CONN_BR_UNPAIRED);
-    GetProxyChannelManager()->clearProxyInfo(&proxyChannel);
 }
 
 static void OnProxyAclStateChanged(

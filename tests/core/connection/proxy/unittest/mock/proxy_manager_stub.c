@@ -26,6 +26,11 @@ static void StubClearProxyInfo(struct ProxyChannel *channel)
     (void)channel;
 }
 
+void ClearFarFieldProxy(const char *addr)
+{
+    (void)addr;
+}
+
 static ProxyChannelManager g_stubProxyChannelManager = {
     .generateChannelId = StubGenerateChannelId,
     .clearProxyInfo = StubClearProxyInfo,
