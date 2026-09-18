@@ -124,6 +124,7 @@ typedef struct {
 
 static atomic_bool g_centerScreenOn = true;
 static atomic_bool g_wasAllScreenOff = false;
+static SoftBusMutex g_screenStateLock = {0};
 #define DISC_SCREEN_CENTER 0
 #endif /* DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER */
 
@@ -1170,16 +1171,36 @@ void DiscOnScreenStatusChanged(int32_t screenId, bool onScreen)
     DISC_LOGI(DISC_CONTROL, "screen status changed, screenId=%{public}d, onScreen=%{public}d",
         screenId, onScreen);
     DISC_CHECK_AND_RETURN_LOGE(screenId >= 0, DISC_CONTROL, "invalid screenId=%{public}d", screenId);
+
+    DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_screenStateLock) == SOFTBUS_OK,
+        DISC_CONTROL, "lock fail");
+
     bool isFirstScreenOn = atomic_load(&g_wasAllScreenOff);
+
     if (screenId == DISC_SCREEN_CENTER) {
+        bool oldCenterScreenOn = atomic_load(&g_centerScreenOn);
+        if (oldCenterScreenOn == onScreen) {
+            DISC_LOGI(DISC_CONTROL, "ignore duplicate center screen event");
+            (void)SoftBusMutexUnlock(&g_screenStateLock);
+            return;
+        }
         atomic_store(&g_centerScreenOn, onScreen);
     }
-    atomic_store(&g_wasAllScreenOff, onScreen ? false : LnnIsAllMultiScreenOff());
+
+    bool allScreenOff = onScreen ? false : LnnIsAllMultiScreenOff();
+    if (!onScreen && allScreenOff && isFirstScreenOn) {
+        DISC_LOGI(DISC_CONTROL, "ignore duplicate all screen off event");
+        (void)SoftBusMutexUnlock(&g_screenStateLock);
+        return;
+    }
+    atomic_store(&g_wasAllScreenOff, allScreenOff);
+
+    (void)SoftBusMutexUnlock(&g_screenStateLock);
 
     if (onScreen) {
         DiscScreenOnRecover(screenId, isFirstScreenOn);
     } else {
-        DiscScreenOffStop(screenId, atomic_load(&g_wasAllScreenOff));
+        DiscScreenOffStop(screenId, allScreenOff);
     }
 }
 
@@ -1936,6 +1957,14 @@ int32_t DiscMgrInit(void)
 #ifdef DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER
     atomic_store(&g_wasAllScreenOff, false);
     atomic_store(&g_centerScreenOn, true);
+    if (SoftBusMutexInit(&g_screenStateLock, NULL) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_INIT, "init screen state lock fail");
+        DestroySoftBusList(g_discoveryInfoList);
+        g_discoveryInfoList = NULL;
+        DestroySoftBusList(g_publishInfoList);
+        g_publishInfoList = NULL;
+        return SOFTBUS_DISCOVER_MANAGER_INIT_FAIL;
+    }
 #endif
 
     g_isInited = true;
@@ -1958,6 +1987,10 @@ void DiscMgrDeinit(void)
     DiscBleDeinit();
     DiscUsbDispatcherDeinit();
     DiscNfcDispatcherDeinit();
+
+#ifdef DSOFTBUS_FEATURE_DISC_COCKPIT_MULTI_USER
+    (void)SoftBusMutexDestroy(&g_screenStateLock);
+#endif
 
     g_isInited = false;
 
