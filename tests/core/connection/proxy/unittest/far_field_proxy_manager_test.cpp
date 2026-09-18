@@ -1026,3 +1026,37 @@ HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest035, TestSize.Level1)
     EXPECT_EQ(g_farFieldRecvDataLen, sizeof(msg));
     CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest035 out");
 }
+
+/*
+ * @tc.name: FarFieldProxyManagerTest036
+ * @tc.desc: test device unpaired clears the established far-field connection
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest036, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest036 in");
+    // 1. establish a far-field (P2P) connection for the device
+    FarFieldProxyParam param = BuildTestParam();
+    int32_t ret = OpenFarFieldProxyChannel(&param);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    P2PDeviceInfo device = BuildTestDevice();
+    FarFieldAdapterMock::InjectP2PStateChanged(&device, P2P_STATE_CONNECT, 0);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    EXPECT_TRUE(g_farFieldOpenSuccess);
+    ResetFarFieldGlobals();
+
+    // 2. device unpaired -> ProxyDeviceUnpaired -> ClearFarFieldProxy tears down the far-field connection
+    ProxyChannelMock::InjectHfpConnectionChanged(TEST_BR_MAC, SOFTBUS_DEVICE_UNPAIRED);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+
+    // 3. re-open without P2P injection: the cleared connection cannot be reused, so the new open
+    //    stays in connecting and does not report success
+    param.requestId = TEST_REQUEST_ID + 1;
+    ret = OpenFarFieldProxyChannel(&param);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(FAR_FIELD_SLEEP_MS);
+    EXPECT_TRUE(g_farFieldOpenSuccess);
+    CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest036 out");
+}

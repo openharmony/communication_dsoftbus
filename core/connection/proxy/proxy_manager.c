@@ -43,6 +43,7 @@ typedef struct {
     SOFT_BUS_RC_OBJECT_BASE;
     ProxyChannelType type;
     bool isDirectly;
+    bool isFirstConnect;
     int32_t requestId;
     char realBrMac[BT_MAC_LEN];
     char srcBrMac[BT_MAC_MAX_LEN];
@@ -200,19 +201,33 @@ static void OnBrOpenFail(uint32_t requestId, int32_t reason, const char *brMac)
         proxyChannel->Dereference((SoftBusRcObject **)&proxyChannel);
         return;
     }
-    proxyChannel->isDirectly = false;
     OpenProxyChannelCallback callback = proxyChannel->callback;
-    bool isSupportFarField = proxyChannel->isSupportFarField;
+    bool isFirstConnect = proxyChannel->isFirstConnect;
     proxyChannel->Unlock((SoftBusRcObject *)proxyChannel);
-    if (!isSupportFarField) {
+    if (isFirstConnect) {
         SoftBusRcRemove(&GetProxyChannelManager()->proxyConnectionList, (SoftBusRcObject *)proxyChannel);
     }
 
-    int32_t retReason = isSupportFarField ? SOFTBUS_CONN_PROXY_BR_FAIL_BUT_SUPPORT_FAR_FIELD : reason;
     proxyChannel->Dereference((SoftBusRcObject **)&proxyChannel);
     if (callback.onOpenFail != NULL) {
-        callback.onOpenFail(requestId, retReason, brMac);
+        callback.onOpenFail(requestId, reason, brMac);
     }
+}
+
+static int32_t UpdateProxyChannelInfo(ProxyChannelInfo *proxyChannel, const ProxyChannelParam *param,
+    const OpenProxyChannelCallback *callback, bool *isSupportFarField)
+{
+    int32_t ret = proxyChannel->Lock((SoftBusRcObject *)proxyChannel);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    proxyChannel->requestId = param->requestId;
+    proxyChannel->isDirectly = true;
+    proxyChannel->isFirstConnect = param->isFirstConnect;
+    proxyChannel->callback = *callback;
+    *isSupportFarField = proxyChannel->isSupportFarField;
+    proxyChannel->Unlock((SoftBusRcObject *)proxyChannel);
+    return SOFTBUS_OK;
 }
 
 static int32_t OpenProxyChannel(ProxyChannelParam *param, const OpenProxyChannelCallback *callback)
@@ -226,6 +241,10 @@ static int32_t OpenProxyChannel(ProxyChannelParam *param, const OpenProxyChannel
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusGetBrState() == BR_ENABLE, SOFTBUS_CONN_BR_DISABLE_ERR,
         CONN_PROXY, "br disable");
     bool isRealMac = IsRealMac(param->brMac);
+    bool isAclConnected = false;
+    bool isPairedDevice = IsPairedDevice(param->brMac, isRealMac, NULL, &isAclConnected);
+    CONN_CHECK_AND_RETURN_RET_LOGE(isPairedDevice, SOFTBUS_CONN_BR_UNPAIRED,
+        CONN_PROXY, "is not paired device");
     ProxyChannelInfo *proxyChannel = (ProxyChannelInfo *)SoftBusRcGetCommon(
         &GetProxyChannelManager()->proxyConnectionList, ProxyChannelInfoMacMatcher, param->brMac);
     if (proxyChannel == NULL) {
@@ -237,19 +256,14 @@ static int32_t OpenProxyChannel(ProxyChannelParam *param, const OpenProxyChannel
             return ret;
         }
     }
-    int32_t ret = proxyChannel->Lock((SoftBusRcObject *)proxyChannel);
+    bool isSupportFarField = false;
+    int32_t ret = UpdateProxyChannelInfo(proxyChannel, param, callback, &isSupportFarField);
     if (ret != SOFTBUS_OK) {
         proxyChannel->Dereference((SoftBusRcObject **)&proxyChannel);
         return ret;
     }
-    proxyChannel->requestId = param->requestId;
-    proxyChannel->isDirectly = true;
-    bool isConnectBr = proxyChannel->type == BR_PROXY;
-    proxyChannel->callback = *callback;
-    bool isSupportFarField = proxyChannel->isSupportFarField;
-    proxyChannel->Unlock((SoftBusRcObject *)proxyChannel);
 
-    bool isOpenBrProxy = (param->isFirstConnect || isConnectBr) ? true : false;
+    bool isOpenBrProxy = (!isSupportFarField || isAclConnected) ? true : false;
     if (isOpenBrProxy) {
         OpenProxyChannelCallback innerCallback = {
             .onOpenSuccess = OnBrOpenSuccess, .onOpenFail = OnBrOpenFail,
@@ -304,13 +318,12 @@ static ProxyChannelType GetProxyChannelType(const struct ProxyChannel *channel)
 
 static void OnBrProxyDisconnected(struct ProxyChannel *channel, int32_t reason)
 {
-    ProxyChannelType type = GetProxyChannelType(channel);
-    if (type != BR_PROXY) {
-        CONN_LOGI(CONN_PROXY, "not br proxy, skip br disconnect, type=%{public}d", type);
-        return;
-    }
     if (g_listener.onProxyChannelDisconnected != NULL) {
         g_listener.onProxyChannelDisconnected(channel, reason);
+    }
+    if (reason == SOFTBUS_CONN_BR_UNPAIRED) {
+        ClearProxyInfo(channel);
+        ClearFarFieldProxy(channel->brMac);
     }
 }
 
@@ -345,7 +358,7 @@ static void OnBrProxyReconnected(const char *addr, struct ProxyChannel *channel)
     proxyChannel->Dereference((SoftBusRcObject **)&proxyChannel);
 }
 
-static void OnBrProxyEnable(uint32_t requestId, const char *addr)
+static void OnBrProxyDisable(uint32_t requestId, const char *addr)
 {
     ProxyChannelInfo *proxyChannel = (ProxyChannelInfo *)SoftBusRcGetCommon(
         &GetProxyChannelManager()->proxyConnectionList, ProxyChannelInfoMacMatcher, addr);
@@ -374,7 +387,6 @@ static void OnBrProxyEnable(uint32_t requestId, const char *addr)
 static void OnFarFieldOpenFail(uint32_t requestId, int32_t reason, const char *brMac)
 {
     CONN_CHECK_AND_RETURN_LOGE(brMac != NULL, CONN_PROXY, "brMac is NULL");
-    CONN_LOGI(CONN_PROXY, "Far field open failed, reason=%{public}d", reason);
     ProxyChannelInfo *proxyChannel = (ProxyChannelInfo *)SoftBusRcGetCommon(
         &GetProxyChannelManager()->proxyConnectionList, ProxyChannelInfoMacMatcher, brMac);
     CONN_CHECK_AND_RETURN_LOGE(proxyChannel != NULL, CONN_PROXY, "proxyChannel is NULL");
@@ -384,12 +396,19 @@ static void OnFarFieldOpenFail(uint32_t requestId, int32_t reason, const char *b
         return;
     }
     bool isDirectly = proxyChannel->isDirectly;
+    bool isFirstConnect = proxyChannel->isFirstConnect;
     OpenProxyChannelCallback callback = proxyChannel->callback;
     proxyChannel->Unlock((SoftBusRcObject *)proxyChannel);
-    proxyChannel->Dereference((SoftBusRcObject **)&proxyChannel);
+    CONN_LOGI(CONN_PROXY, "Far field open failed, reason=%{public}d, isDirectly=%{public}d,"
+        "isFirstConnect=%{public}d", reason, isDirectly, isFirstConnect);
     if (callback.onOpenFail != NULL && isDirectly) {
+        if (isFirstConnect) {
+            ClearFarFieldProxy(brMac);
+            SoftBusRcRemove(&GetProxyChannelManager()->proxyConnectionList, (SoftBusRcObject *)proxyChannel);
+        }
         callback.onOpenFail(requestId, reason, brMac);
     }
+    proxyChannel->Dereference((SoftBusRcObject **)&proxyChannel);
 }
 
 static void OnFarFieldConnected(uint32_t requestId, struct ProxyChannel *channel)
@@ -482,7 +501,7 @@ int32_t ProxyChannelManagerInit(void)
         .onProxyChannelDataReceived = OnProxyChannelDataReceived,
         .onProxyChannelDisconnected = OnBrProxyDisconnected,
         .onProxyChannelReconnected = OnBrProxyReconnected,
-        .onBrProxyStateChanged = OnBrProxyEnable,
+        .onBrProxyStateChanged = OnBrProxyDisable,
     };
     ret = GetBrProxyChannelManager()->registerBrProxyListener(&listener);
     if (ret != SOFTBUS_OK) {

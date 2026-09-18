@@ -145,7 +145,7 @@ static bool IsSupportHfp(const OHOS::Bluetooth::BluetoothRemoteDevice& device)
     return false;
 }
 
-bool IsPairedDevice(const char *addr, bool isRealMac, bool *isSupportHfp)
+bool IsPairedDevice(const char *addr, bool isRealMac, bool *isSupportHfp, bool *isAclConnected)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(addr != nullptr, false, CONN_PROXY, "addr is null");
     std::vector<OHOS::Bluetooth::BluetoothRemoteDevice> remoteDeviceLists;
@@ -161,6 +161,9 @@ bool IsPairedDevice(const char *addr, bool isRealMac, bool *isSupportHfp)
             (!isRealMac && StrCmpIgnoreCase(ConvertRealMacToHashMac(device.GetDeviceAddr()).c_str(), addr) == 0))) {
             if (isSupportHfp != nullptr) {
                 *isSupportHfp = IsSupportHfp(device);
+            }
+            if (isAclConnected != nullptr) {
+                *isAclConnected = device.IsAclConnected();
             }
             return true;
         }

@@ -265,6 +265,7 @@ HWTEST_F(ProxyManagerTest, ProxyManagerTest006, TestSize.Level1)
     // GetRealMac. With GetRealMac failing, CreateProxyChannelInfo returns NULL and openProxyChannel
     // short-circuits with SOFTBUS_MALLOC_ERR before dispatching to BR.
     EXPECT_CALL(brMock, GetRealMac).WillRepeatedly(Return(-1));
+    EXPECT_CALL(brMock, IsPairedDevice).WillRepeatedly(Return(true));
 
     ProxyChannelParam param = {};
     strcpy_s(param.brMac, BT_MAC_MAX_LEN, "11-22-33-44-55-66");
@@ -382,8 +383,7 @@ HWTEST_F(ProxyManagerTest, ProxyManagerTest010, TestSize.Level1)
     int32_t ret = GetProxyChannelManager()->openProxyChannel(&param, &callback);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1 * 2);
-    EXPECT_NE(g_openFailReason, 0);
-    EXPECT_NE(g_openFailReason, SOFTBUS_CONN_PROXY_BR_FAIL_BUT_SUPPORT_FAR_FIELD);
+    EXPECT_EQ(g_openFailReason, SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL);
     CONN_LOGI(CONN_PROXY, "ProxyManagerTest010 out");
 }
 
@@ -399,7 +399,7 @@ HWTEST_F(ProxyManagerTest, ProxyManagerTest011, TestSize.Level1)
     ProxyChannelMock brMock;
     FarFieldAdapterMock farFieldMock;
     EXPECT_CALL(brMock, Connect).WillRepeatedly(Return(-1));
-    EXPECT_CALL(brMock, IsPairedDevice).WillRepeatedly(Return(true));
+    EXPECT_CALL(brMock, IsPairedDevice).WillRepeatedly(ProxyChannelMock::ActionOfIsPairedDevice);
     EXPECT_CALL(farFieldMock, IsDeviceSupport).WillRepeatedly(Return(true));
 
     RegisterTestListener();
@@ -412,7 +412,7 @@ HWTEST_F(ProxyManagerTest, ProxyManagerTest011, TestSize.Level1)
     int32_t ret = GetProxyChannelManager()->openProxyChannel(&param, &callback);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1 * 2);
-    EXPECT_EQ(g_openFailReason, SOFTBUS_CONN_PROXY_BR_FAIL_BUT_SUPPORT_FAR_FIELD);
+    EXPECT_EQ(g_openFailReason, SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL);
     CONN_LOGI(CONN_PROXY, "ProxyManagerTest011 out");
 }
 
@@ -428,7 +428,7 @@ HWTEST_F(ProxyManagerTest, ProxyManagerTest012, TestSize.Level1)
     ProxyChannelMock brMock;
     FarFieldAdapterMock farFieldMock;
     EXPECT_CALL(brMock, Connect).WillRepeatedly(Return(-1));
-    EXPECT_CALL(brMock, IsPairedDevice).WillRepeatedly(Return(true));
+    EXPECT_CALL(brMock, IsPairedDevice).WillRepeatedly(ProxyChannelMock::ActionOfIsPairedDevice);
     EXPECT_CALL(farFieldMock, IsDeviceSupport).WillRepeatedly(Return(true));
 
     RegisterTestListener();
@@ -441,7 +441,7 @@ HWTEST_F(ProxyManagerTest, ProxyManagerTest012, TestSize.Level1)
     int32_t ret = GetProxyChannelManager()->openProxyChannel(&param, &callback);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1 * 2);
-    EXPECT_EQ(g_openFailReason, SOFTBUS_CONN_PROXY_BR_FAIL_BUT_SUPPORT_FAR_FIELD);
+    EXPECT_EQ(g_openFailReason, SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL);
 
     ProxyChannel channel = {};
     strcpy_s(channel.brMac, BT_MAC_MAX_LEN, "33:44:55:66:77:88");
@@ -464,7 +464,7 @@ HWTEST_F(ProxyManagerTest, ProxyManagerTest013, TestSize.Level1)
     FarFieldAdapterMock farFieldMock;
     EXPECT_CALL(brMock, Connect).WillRepeatedly(Return(UNDERLAYER_HANDLE));
     EXPECT_CALL(brMock, Read).WillRepeatedly(Return(-1));
-    EXPECT_CALL(brMock, IsPairedDevice).WillRepeatedly(Return(true));
+    EXPECT_CALL(brMock, IsPairedDevice).WillRepeatedly(ProxyChannelMock::ActionOfIsPairedDevice);
     EXPECT_CALL(farFieldMock, IsDeviceSupport).WillRepeatedly(Return(true));
     EXPECT_CALL(farFieldMock, Init).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(farFieldMock, Deinit).WillRepeatedly(Return());
@@ -519,7 +519,7 @@ HWTEST_F(ProxyManagerTest, ProxyManagerTest014, TestSize.Level1)
     FarFieldAdapterMock farFieldMock;
     EXPECT_CALL(brMock, Connect).WillRepeatedly(Return(UNDERLAYER_HANDLE));
     EXPECT_CALL(brMock, Read).WillRepeatedly(Return(-1));
-    EXPECT_CALL(brMock, IsPairedDevice).WillRepeatedly(Return(true));
+    EXPECT_CALL(brMock, IsPairedDevice).WillRepeatedly(ProxyChannelMock::ActionOfIsPairedDevice);
     EXPECT_CALL(farFieldMock, IsDeviceSupport).WillRepeatedly(Return(true));
     EXPECT_CALL(farFieldMock, Init).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(farFieldMock, Deinit).WillRepeatedly(Return());

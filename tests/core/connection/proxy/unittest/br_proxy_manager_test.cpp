@@ -1578,7 +1578,9 @@ HWTEST_F(BrProxyManagerTest, BrProxyManagerTest043, TestSize.Level1)
     EXPECT_CALL(mock, IsPairedDevice).WillRepeatedly(Return(false));
 
     int32_t ret = OpenProxyChannelWithMac("11:22:33:44:55:66");
-    EXPECT_EQ(ret, SOFTBUS_CONN_BR_UNPAIRED);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(1000);
+    CleanupProxyChannelRequestInfo();
     CONN_LOGI(CONN_PROXY, "BrProxyManagerTest043 out");
 }
 
