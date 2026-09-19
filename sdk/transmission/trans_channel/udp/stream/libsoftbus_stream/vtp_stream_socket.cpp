@@ -1185,6 +1185,10 @@ void VtpStreamSocket::DoStreamRecv()
         TRANS_LOGD(TRANS_STREAM,
             "recv a new frame, dataLen=%{public}d, streamType=%{public}d", dataLength, streamType_);
         dataBuffer = VtpStreamSocket::RecvStream(dataLength);
+        if (dataBuffer == nullptr) {
+            TRANS_LOGE(TRANS_STREAM, "recv stream data failed, dataBuffer is null");
+            break;
+        }
 
         if (streamType_ == COMMON_VIDEO_STREAM || streamType_ == COMMON_AUDIO_STREAM) {
             if (!ProcessCommonDataStream(dataBuffer, dataLength, extBuffer, extLen, info)) {
