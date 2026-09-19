@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 #include <set>
+#include <string>
 
 #include "mock/proxy_manager_mock.h"
 #include "mock/far_field_adapter_mock.h"
@@ -550,7 +551,7 @@ HWTEST_F(ProxyManagerTest, ProxyManagerTest014, TestSize.Level1)
 
 /*
  * @tc.name: ProxyManagerTest015
- * @tc.desc: test BT off then on triggers BR proxy reconnect
+ * @tc.desc: test BT off then on triggers BR proxy reconnect; isDirectly=true path calls onOpenSuccess
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -581,6 +582,63 @@ HWTEST_F(ProxyManagerTest, ProxyManagerTest015, TestSize.Level1)
     SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1);
     ProxyChannelMock::InjectBtStateChanged(0, SOFTBUS_BR_STATE_TURN_ON);
     SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1 * 3);
-    EXPECT_TRUE(g_reconnected);
+    // isDirectly is still true (set by openProxyChannel, never reset since far field was not started),
+    // so OnBrProxyReconnected calls callback.onOpenSuccess, not g_listener.onProxyChannelReconnected.
+    EXPECT_NE(g_openSuccessChannelId, TEST_INVALID_CHANNEL_ID);
+    EXPECT_FALSE(g_reconnected);
     CONN_LOGI(CONN_PROXY, "ProxyManagerTest015 out");
+}
+
+/*
+ * @tc.name: ProxyManagerTest017
+ * @tc.desc: test BR reconnect after far field fallback calls onProxyChannelReconnected (isDirectly=false)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ProxyManagerTest, ProxyManagerTest017, TestSize.Level1)
+{
+    CONN_LOGI(CONN_PROXY, "ProxyManagerTest017 in");
+    ProxyChannelMock brMock;
+    FarFieldAdapterMock farFieldMock;
+    EXPECT_CALL(brMock, Connect).WillRepeatedly(Return(UNDERLAYER_HANDLE));
+    EXPECT_CALL(brMock, Read).WillRepeatedly(Return(-1));
+    EXPECT_CALL(brMock, IsPairedDevice).WillRepeatedly(ProxyChannelMock::ActionOfIsPairedDevice);
+    EXPECT_CALL(farFieldMock, IsDeviceSupport).WillRepeatedly(Return(true));
+    EXPECT_CALL(farFieldMock, Init).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(farFieldMock, Deinit).WillRepeatedly(Return());
+    EXPECT_CALL(farFieldMock, OpenP2P).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(farFieldMock, CloseP2P).WillRepeatedly(Return(SOFTBUS_OK));
+
+    RegisterTestListener();
+    // 1. open BR proxy channel → success (isDirectly=true)
+    ProxyChannelParam param = {};
+    strcpy_s(param.brMac, BT_MAC_MAX_LEN, "99:AA:BB:CC:DD:EE");
+    param.requestId = 209;
+    param.timeoutMs = CONNECT_TIMEOUT;
+    strcpy_s(param.uuid, UUID_STRING_LEN, "0000FEEA-0000-1000-8000-00805F9B34FB");
+    OpenProxyChannelCallback callback = { .onOpenFail = TestOnOpenFail, .onOpenSuccess = TestOnOpenSuccess };
+    int32_t ret = GetProxyChannelManager()->openProxyChannel(&param, &callback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1 * 2);
+    EXPECT_NE(g_openSuccessChannelId, TEST_INVALID_CHANNEL_ID);
+    ResetManagerGlobals();
+    // SetUp() disables retry policies; restore them so BR reconnect can proceed
+    ProxyChannelMock::InjectProxyConfigRestoreRetryConnect();
+
+    // 2. ACL disconnected → OnBrProxyDisable → isDirectly=false → far field starts
+    SoftBusBtAddr btAddr = { .addr = { 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE } };
+    ProxyChannelMock::InjectBtAclStateChanged(1, &btAddr, SOFTBUS_ACL_STATE_DISCONNECTED, 0);
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1 * 2);
+
+    // 3. ACL reconnected → BR reconnects → OnBrProxyReconnected (isDirectly=false) → onProxyChannelReconnected
+    ProxyChannelMock::InjectBtAclStateChanged(1, &btAddr, SOFTBUS_ACL_STATE_CONNECTED, 0);
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1);
+    std::string addr = "99:AA:BB:CC:DD:EE";
+    ProxyChannelMock::InjectHfpConnectionChanged(addr, SOFTBUS_HFP_CONNECTED);
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1 * 3);
+    EXPECT_TRUE(g_reconnected);
+
+    ClearFarFieldProxy("99:AA:BB:CC:DD:EE");
+    SoftBusSleepMs(CONNECT_SLEEP_TIME_MS1);
+    CONN_LOGI(CONN_PROXY, "ProxyManagerTest017 out");
 }

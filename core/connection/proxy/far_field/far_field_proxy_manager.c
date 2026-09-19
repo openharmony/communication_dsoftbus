@@ -315,8 +315,7 @@ static int32_t SubmitStateMachineEvent(const P2PDeviceInfo *device, const StateM
         return ret;
     }
 
-    CONN_LOGI(CONN_PROXY, "event=%{public}d, reason=%{public}d",
-              eventData->event, eventData->reason);
+    CONN_LOGI(CONN_PROXY, "event=%{public}d, reason=%{public}d", eventData->event, eventData->reason);
     return SOFTBUS_OK;
 }
 
