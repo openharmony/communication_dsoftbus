@@ -924,4 +924,43 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_PROCESS_ACCOUNT_AUTH_Test001, TestSize
     ret = ProcessAccountAuth(TEST_PKG_NAME, 0, (uint8_t*)TEST_MSG, strlen(TEST_MSG) + 1, &cb);
     EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
 }
+
+HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_PERCEPTION_Test001, TestSize.Level1)
+{
+    PerceptionType type = PERCEPTION_TYPE_COLLABORATIVE_WAKE;
+    PerceptionAdvParam param = {};
+    PerceptionAdvParam badParam = {};
+    badParam.customDataLen = PERCEPTION_CUSTOM_DATA_MAX_LEN + 1;
+    PerceptionDeviceInfo *list = nullptr;
+    uint32_t count = 0;
+
+    EXPECT_EQ(StartPerceptionAdv(nullptr, type, &param), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(StartPerceptionAdv(TEST_PKG_NAME, PERCEPTION_TYPE_BUTT, &param), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(StartPerceptionAdv(TEST_PKG_NAME, type, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(StartPerceptionAdv(TEST_PKG_NAME, type, &badParam), SOFTBUS_INVALID_PARAM);
+    EXPECT_NE(StartPerceptionAdv(TEST_PKG_NAME, type, &param), SOFTBUS_OK);
+
+    EXPECT_EQ(SetPerceptionAdvHighFreq(nullptr, type, &param), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(SetPerceptionAdvHighFreq(TEST_PKG_NAME, PERCEPTION_TYPE_BUTT, &param), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(SetPerceptionAdvHighFreq(TEST_PKG_NAME, type, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(SetPerceptionAdvHighFreq(TEST_PKG_NAME, type, &badParam), SOFTBUS_INVALID_PARAM);
+
+    EXPECT_EQ(StopPerceptionAdv(nullptr, type), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(StopPerceptionAdv(TEST_PKG_NAME, PERCEPTION_TYPE_BUTT), SOFTBUS_INVALID_PARAM);
+
+    EXPECT_EQ(StartPerceptionScan(nullptr, type, PERCEPTION_CYCLE_LOW), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(StartPerceptionScan(TEST_PKG_NAME, PERCEPTION_TYPE_BUTT, PERCEPTION_CYCLE_LOW), SOFTBUS_INVALID_PARAM);
+    EXPECT_NE(StartPerceptionScan(TEST_PKG_NAME, type, PERCEPTION_CYCLE_LOW), SOFTBUS_OK);
+
+    EXPECT_EQ(StopPerceptionScan(nullptr, type), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(StopPerceptionScan(TEST_PKG_NAME, PERCEPTION_TYPE_BUTT), SOFTBUS_INVALID_PARAM);
+
+    EXPECT_EQ(GetPerceptionDeviceList(nullptr, type, &list, &count), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(GetPerceptionDeviceList(TEST_PKG_NAME, PERCEPTION_TYPE_BUTT, &list, &count), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(GetPerceptionDeviceList(TEST_PKG_NAME, type, nullptr, &count), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(GetPerceptionDeviceList(TEST_PKG_NAME, type, &list, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_NE(GetPerceptionDeviceList(TEST_PKG_NAME, type, &list, &count), SOFTBUS_OK);
+    FreePerceptionDeviceList(list);
+    FreePerceptionDeviceList(nullptr);
+}
 } // namespace OHOS

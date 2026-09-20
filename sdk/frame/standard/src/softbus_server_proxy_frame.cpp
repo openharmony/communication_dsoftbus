@@ -210,6 +210,8 @@ void ClientDeathProcTask(void)
     DiscRecoveryPublish();
     DiscRecoverySubscribe();
     DiscRecoveryPolicyPacked();
+    PerceptionRecoveryAdv();
+    PerceptionRecoveryScan();
     RestartRegDataLevelChange();
     RestartRegisterConversationListener();
 }

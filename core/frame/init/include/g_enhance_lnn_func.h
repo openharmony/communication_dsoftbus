@@ -43,6 +43,7 @@
 #include "lnn_time_sync_impl_struct.h"
 #include "lnn_trans_lane_struct.h"
 #include "softbus_adapter_crypto.h"
+#include "lnn_perception.h"
 #include "softbus_broadcast_type_struct.h"
 #include "softbus_bus_center.h"
 
@@ -312,6 +313,14 @@ typedef bool (*FarfieldParseModuleTypeFunc)(const uint8_t *data, uint32_t dataLe
 typedef int32_t (*PostLnnCloudEventFunc)(LnnCloudMsgType event, LnnCloudHandler handler,
     const void *obj, uint32_t size, uint64_t delayMs);
 typedef int32_t (*RemoveLnnCloudEventFunc)(LnnCloudMsgType event, LnnCloudRemoveCompareFunc func, void *param);
+typedef int32_t (*PerceptionBuildAdvDataFunc)(const PerceptionType *type, const PerceptionAdvParam *params,
+    uint32_t paramCnt, BroadcastPacket *packet);
+typedef int32_t (*PerceptionBuildScanFilterFunc)(BcScanFilter **filter, uint8_t *filterNum);
+typedef int32_t (*PerceptionGetDeviceInfoListFunc)(PerceptionType type, PerceptionDeviceInfo **list, uint32_t *count);
+typedef int32_t (*PerceptionSyncStateFunc)(PerceptionState state);
+typedef int32_t (*PerceptionSyncCycleFunc)(PerceptionType type, uint32_t cycle);
+typedef int32_t (*PerceptionEnhanceInitFunc)(void);
+typedef void (*PerceptionEnhanceDeinitFunc)(void);
 typedef int32_t (*AuthMetaOpenConnWithOtherOsTypeFunc)(const AuthConnInfo *info, const char *networkId,
     uint32_t requestId, const AuthConnCallback *callback);
 
@@ -573,6 +582,13 @@ typedef struct TagLnnEnhanceFuncList {
     AuthMetaGetIpByMetaNodeIdFunc authMetaGetIpByMetaNodeId;
     AuthMetaGetLocalIpByMetaNodeIdFunc authMetaGetLocalIpByMetaNodeId;
     AuthMetaGetConnectionTypeByMetaNodeIdFunc authMetaGetConnectionTypeByMetaNodeId;
+    PerceptionBuildAdvDataFunc perceptionBuildAdvData;
+    PerceptionBuildScanFilterFunc perceptionBuildScanFilter;
+    PerceptionGetDeviceInfoListFunc perceptionGetDeviceInfoList;
+    PerceptionSyncStateFunc perceptionSyncState;
+    PerceptionSyncCycleFunc perceptionSyncCycle;
+    PerceptionEnhanceInitFunc perceptionEnhanceInit;
+    PerceptionEnhanceDeinitFunc perceptionEnhanceDeinit;
 } LnnEnhanceFuncList;
 
 LnnEnhanceFuncList *LnnEnhanceFuncListGet(void);

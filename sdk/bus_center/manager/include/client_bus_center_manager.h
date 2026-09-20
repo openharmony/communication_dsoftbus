@@ -22,6 +22,7 @@
 #include "ble_range.h"
 #include "data_level.h"
 #include "data_level_inner.h"
+#include "lnn_perception.h"
 #include "softbus_agent_communication.h"
 #include "softbus_bus_center.h"
 
@@ -119,12 +120,21 @@ void LnnOnErrorAuthResult(const char *pkgName, int64_t requestId, int32_t operat
 
 int32_t DiscRecoveryPublish(void);
 int32_t DiscRecoverySubscribe(void);
+int32_t PerceptionRecoveryAdv(void);
+int32_t PerceptionRecoveryScan(void);
 
 int32_t PostConversationDataInner(const char *networkId, const ConversationBusiness *info,
     const char *data, uint32_t len);
 int32_t RegisterConversationListenerInner(const ConversationBusiness *info, const ConversationListener *listener);
 int32_t UnregisterConversationListenerInner(const ConversationBusiness *info);
 int32_t GetTrustedDevicesInner(DeviceNodeInfo **info, int32_t *nums);
+int32_t StartPerceptionAdvInner(const char *pkgName, PerceptionType type, const PerceptionAdvParam *param);
+int32_t SetPerceptionAdvHighFreqInner(const char *pkgName, PerceptionType type, const PerceptionAdvParam *param);
+int32_t StopPerceptionAdvInner(const char *pkgName, PerceptionType type);
+int32_t StartPerceptionScanInner(const char *pkgName, PerceptionType type, PerceptionCycle cycle);
+int32_t StopPerceptionScanInner(const char *pkgName, PerceptionType type);
+int32_t GetPerceptionDeviceListInner(
+    const char *pkgName, PerceptionType type, PerceptionDeviceInfo **list, uint32_t *count);
 int32_t LnnConversationRecvMsg(const ConversationBusiness *info, const char *udid, const char *data, uint32_t length);
 void RestartRegisterConversationListener(void);
 

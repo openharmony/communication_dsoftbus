@@ -46,6 +46,7 @@
 #include "lnn_async_callback_utils_struct.h"
 #include "lnn_lane_struct.h"
 #include "lnn_lane_def_struct.h"
+#include "lnn_perception.h"
 #include "message_handler.h"
 #include "softbus_broadcast_type_struct.h"
 #include "softbus_broadcast_manager_struct.h"

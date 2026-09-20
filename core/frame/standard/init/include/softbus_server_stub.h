@@ -104,7 +104,14 @@ private:
     int32_t PostConversationDataInner(MessageParcel &data, MessageParcel &reply);
     int32_t RegisterConversationListenerInner(MessageParcel &data, MessageParcel &reply);
     int32_t UnregisterConversationListenerInner(MessageParcel &data, MessageParcel &reply);
+    int32_t StartPerceptionAdvInner(MessageParcel &data, MessageParcel &reply);
+    int32_t SetPerceptionAdvHighFreqInner(MessageParcel &data, MessageParcel &reply);
+    int32_t StopPerceptionAdvInner(MessageParcel &data, MessageParcel &reply);
+    int32_t StartPerceptionScanInner(MessageParcel &data, MessageParcel &reply);
+    int32_t StopPerceptionScanInner(MessageParcel &data, MessageParcel &reply);
+    int32_t GetPerceptionDeviceListInner(MessageParcel &data, MessageParcel &reply);
     int32_t BasicPermissionVerify(uint32_t code);
+    int32_t SysHapPermissionVerify(uint32_t code);
     int32_t PermissionVerify(uint32_t code);
     int32_t CheckPermission(uint32_t code);
     int32_t CheckAccountConstraint(uint32_t code);

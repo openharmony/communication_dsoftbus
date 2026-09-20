@@ -34,6 +34,7 @@
 #define LP_DELIVERY_MODE_REPLY      0xF0
 #define LP_ADV_DURATION_MS          0
 #define LP_BT_UUID_VLINK            "43d4a49f-606d-45b5-9302-4ddbbfd538fd"
+#define LP_BT_UUID_PERCEPTION       "43d4a49f-607d-45b5-9302-4ddbbfd538fd"
 #define MAX_FILTER_SIZE 16
 
 typedef struct {
@@ -1024,6 +1025,9 @@ static int32_t SetBtUuidByBroadCastType(LpServerType type, BtUuid *btUuid)
             break;
         case SOFTBUS_VIRTUAL_SCAN_TYPE:
             btUuid->uuid = LP_BT_UUID_VLINK;
+            break;
+        case SOFTBUS_PERCEPTION_TYPE:
+            btUuid->uuid = LP_BT_UUID_PERCEPTION;
             break;
         default:
             DISC_LOGE(DISC_BLE_ADAPTER, "invalid type, type=%{public}d", type);

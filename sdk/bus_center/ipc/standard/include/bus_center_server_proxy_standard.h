@@ -18,6 +18,7 @@
 #define INTERFACES_INNERKITS_BUS_CENTER_SERVER_PROXY_STANDARD_H_
 
 #include "if_softbus_server.h"
+#include "lnn_perception.h"
 
 namespace OHOS {
 class BusCenterServerProxy : public IRemoteProxy<ISoftBusServer> {
@@ -92,6 +93,13 @@ public:
     int32_t RegisterConversationListener(const ConversationBusiness *info) override;
     int32_t UnregisterConversationListener(const ConversationBusiness *info) override;
     int32_t GetTrustedDevices(DeviceNodeInfo **info, int32_t *nums) override;
+    int32_t StartPerceptionAdv(const char *pkgName, PerceptionType type, const PerceptionAdvParam *param);
+    int32_t SetPerceptionAdvHighFreq(const char *pkgName, PerceptionType type, const PerceptionAdvParam *param);
+    int32_t StopPerceptionAdv(const char *pkgName, PerceptionType type);
+    int32_t StartPerceptionScan(const char *pkgName, PerceptionType type, PerceptionCycle cycle);
+    int32_t StopPerceptionScan(const char *pkgName, PerceptionType type);
+    int32_t GetPerceptionDeviceList(
+        const char *pkgName, PerceptionType type, PerceptionDeviceInfo **list, uint32_t *count);
 
 private:
     static inline BrokerDelegator<BusCenterServerProxy> delegator_;

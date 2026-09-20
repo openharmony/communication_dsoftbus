@@ -975,3 +975,53 @@ int32_t ServerIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
     (void)nums;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
+
+int32_t ServerIpcStartPerceptionAdv(const char *pkgName, PerceptionType type, const PerceptionAdvParam *param)
+{
+    (void)pkgName;
+    (void)type;
+    (void)param;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcSetPerceptionAdvHighFreq(const char *pkgName, PerceptionType type, const PerceptionAdvParam *param)
+{
+    (void)pkgName;
+    (void)type;
+    (void)param;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcStopPerceptionAdv(const char *pkgName, PerceptionType type)
+{
+    (void)pkgName;
+    (void)type;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcStartPerceptionScan(const char *pkgName, PerceptionType type, PerceptionCycle cycle)
+{
+    (void)pkgName;
+    (void)type;
+    (void)cycle;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcStopPerceptionScan(const char *pkgName, PerceptionType type)
+{
+    (void)pkgName;
+    (void)type;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcGetPerceptionDeviceList(
+    const char *pkgName, PerceptionType type, PerceptionDeviceInfo **list, uint32_t *count)
+{
+    (void)pkgName;
+    (void)type;
+    (void)list;
+    if (count != NULL) {
+        *count = 0;
+    }
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}

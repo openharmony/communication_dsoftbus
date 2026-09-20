@@ -28,17 +28,18 @@
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
 
+#include "lnn_conversation_query.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_log.h"
 #include "lnn_meta_node_ledger.h"
-#include "lnn_time_sync_manager.h"
-#include "softbus_def.h"
-#include "softbus_ddos.h"
-#include "softbus_error_code.h"
-#include "softbus_permission.h"
-#include "lnn_conversation_query.h"
 #include "lnn_ranging_manager.h"
+#include "lnn_time_sync_manager.h"
+#include "perception_manager.h"
+#include "softbus_ddos.h"
+#include "softbus_def.h"
+#include "softbus_error_code.h"
 #include "softbus_init_common.h"
+#include "softbus_permission.h"
 
 struct JoinLnnRequestInfo {
     char pkgName[PKG_NAME_SIZE_MAX];
@@ -1339,4 +1340,35 @@ int32_t LnnIpcUnregisterConversationListener(const ConversationBusiness *info, i
 int32_t LnnIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
 {
     return LnnGetTrustedDevices(info, nums);
+}
+
+int32_t LnnIpcStartPerceptionAdv(const char *pkgName, PerceptionType type, const PerceptionAdvParam *param)
+{
+    return LnnStartPerceptionAdv(pkgName, type, param);
+}
+
+int32_t LnnIpcSetPerceptionAdvHighFreq(const char *pkgName, PerceptionType type, const PerceptionAdvParam *param)
+{
+    return LnnSetPerceptionAdvHighFreq(pkgName, type, param);
+}
+
+int32_t LnnIpcStopPerceptionAdv(const char *pkgName, PerceptionType type)
+{
+    return LnnStopPerceptionAdv(pkgName, type);
+}
+
+int32_t LnnIpcStartPerceptionScan(const char *pkgName, PerceptionType type, PerceptionCycle cycle)
+{
+    return LnnStartPerceptionScan(pkgName, type, cycle);
+}
+
+int32_t LnnIpcStopPerceptionScan(const char *pkgName, PerceptionType type)
+{
+    return LnnStopPerceptionScan(pkgName, type);
+}
+
+int32_t LnnIpcGetPerceptionDeviceList(
+    const char *pkgName, PerceptionType type, PerceptionDeviceInfo **list, uint32_t *count)
+{
+    return LnnGetPerceptionDeviceList(pkgName, type, list, count);
 }
