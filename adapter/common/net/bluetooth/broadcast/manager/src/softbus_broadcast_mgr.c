@@ -2376,6 +2376,17 @@ int32_t SetBroadcastingParam(int32_t bcId, const BroadcastParam *param)
     return PerformSetBroadcastingParam(bcId, &softbusBcParam);
 }
 
+static void LogStopSrvType(int32_t bcId)
+{
+    if (g_bcManager[bcId].srvType == SRV_TYPE_HB || g_bcManager[bcId].srvType == SRV_TYPE_LP_HB) {
+        DISC_LOGD(DISC_BROADCAST, "stop srvType=%{public}s, bcId=%{public}d",
+            GetSrvType(g_bcManager[bcId].srvType), bcId);
+    } else {
+        DISC_LOGI(DISC_BROADCAST, "stop srvType=%{public}s, bcId=%{public}d",
+            GetSrvType(g_bcManager[bcId].srvType), bcId);
+    }
+}
+
 int32_t StopBroadcasting(int32_t bcId)
 {
     int32_t ret = SoftBusMutexLock(&g_bcLock);
@@ -2386,20 +2397,17 @@ int32_t StopBroadcasting(int32_t bcId)
         return SOFTBUS_BC_MGR_INVALID_BC_ID;
     }
     BroadcastProtocol protocol = g_bcManager[bcId].protocol;
-
     if (!CheckProtocolIsValid(protocol) || CheckInterface(protocol, false) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BROADCAST, "interface check failed, bcId=%{public}d", bcId);
         SoftBusMutexUnlock(&g_bcLock);
         return SOFTBUS_INVALID_PARAM;
     }
-
     int64_t time = MgrGetSysTime();
     if (time - g_bcManager[bcId].time < BC_WAIT_TIME_MICROSEC) {
         int64_t diffTime = g_bcManager[bcId].time + BC_WAIT_TIME_MICROSEC - time;
         DISC_LOGW(DISC_BROADCAST, "wait %{public}d us", (int32_t)diffTime);
         usleep(diffTime);
     }
-
     if (!g_bcManager[bcId].isStarted) {
         DISC_LOGW(DISC_BROADCAST, "bcId is not start, bcId=%{public}d", bcId);
         SoftBusMutexUnlock(&g_bcLock);
@@ -2410,8 +2418,7 @@ int32_t StopBroadcasting(int32_t bcId)
         SoftBusMutexUnlock(&g_bcLock);
         return SOFTBUS_BC_MGR_INVALID_BC_ID;
     }
-
-    DISC_LOGI(DISC_BROADCAST, "stop srvType=%{public}s, bcId=%{public}d", GetSrvType(g_bcManager[bcId].srvType), bcId);
+    LogStopSrvType(bcId);
     BroadcastCallback callback = *(g_bcManager[bcId].bcCallback);
     SoftBusMutexUnlock(&g_bcLock);
     ret = g_interface[protocol]->StopBroadcasting(g_bcManager[bcId].adapterBcId);
