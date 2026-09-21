@@ -69,29 +69,30 @@ static bool CheckPkgNameInfo(const char *pkgName)
 
 static int32_t AddClientPkgName(const char *pkgName)
 {
-    if (!CheckPkgNameInfo(pkgName)) {
-        COMM_LOGD(COMM_SDK, "check PkgNameInfo invalid.");
-        return SOFTBUS_INVALID_PKGNAME;
-    }
     if (SoftBusMutexLock(&g_pkgNameLock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "lock init failed");
         return SOFTBUS_LOCK_ERR;
     }
+    if (!CheckPkgNameInfo(pkgName)) {
+        COMM_LOGD(COMM_SDK, "check PkgNameInfo invalid.");
+        (void)SoftBusMutexUnlock(&g_pkgNameLock);
+        return SOFTBUS_INVALID_PKGNAME;
+    }
     PkgNameInfo *info = (PkgNameInfo *)SoftBusCalloc(sizeof(PkgNameInfo));
     if (info == NULL) {
         COMM_LOGE(COMM_SDK, "Create PkgNameInfo malloc fail.");
-        SoftBusMutexUnlock(&g_pkgNameLock);
+        (void)SoftBusMutexUnlock(&g_pkgNameLock);
         return SOFTBUS_MALLOC_ERR;
     }
     if (strcpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
         COMM_LOGE(COMM_SDK, "strcpy_s pkgName failed.");
         SoftBusFree(info);
-        SoftBusMutexUnlock(&g_pkgNameLock);
+        (void)SoftBusMutexUnlock(&g_pkgNameLock);
         return SOFTBUS_STRCPY_ERR;
     }
     ListInit(&info->node);
     ListAdd(&g_pkgNameList, &info->node);
-    SoftBusMutexUnlock(&g_pkgNameLock);
+    (void)SoftBusMutexUnlock(&g_pkgNameLock);
     return SOFTBUS_OK;
 }
 
@@ -112,7 +113,7 @@ static void DelClientPkgName(const char *pkgName)
             break;
         }
     }
-    SoftBusMutexUnlock(&g_pkgNameLock);
+    (void)SoftBusMutexUnlock(&g_pkgNameLock);
 }
 
 static int32_t ClientRegisterPkgName(const char *pkgName)
@@ -146,7 +147,7 @@ void FreeClientPkgName(void)
         ListDelete(&info->node);
         SoftBusFree(info);
     }
-    SoftBusMutexUnlock(&g_pkgNameLock);
+    (void)SoftBusMutexUnlock(&g_pkgNameLock);
 }
 
 static void ConnClientDeinit(void)
@@ -259,11 +260,11 @@ int32_t InitSoftBus(const char *pkgName)
 
     if (g_isInited) {
         (void)ClientRegisterPkgName(pkgName);
-        SoftBusMutexUnlock(&g_isInitedLock);
+        (void)SoftBusMutexUnlock(&g_isInitedLock);
         return SOFTBUS_OK;
     }
     if (AddClientPkgName(pkgName) != SOFTBUS_OK) {
-        SoftBusMutexUnlock(&g_isInitedLock);
+        (void)SoftBusMutexUnlock(&g_isInitedLock);
         COMM_LOGE(COMM_SDK, "AddClientPkgName failed.");
         return SOFTBUS_INVALID_PKGNAME;
     }
@@ -285,7 +286,7 @@ int32_t InitSoftBus(const char *pkgName)
         goto EXIT_DEINIT_MODULE;
     }
     g_isInited = true;
-    SoftBusMutexUnlock(&g_isInitedLock);
+    (void)SoftBusMutexUnlock(&g_isInitedLock);
     COMM_LOGD(COMM_SDK, "softbus sdk frame init success.");
     return SOFTBUS_OK;
 
@@ -295,7 +296,7 @@ EXIT_DEINIT_TIMER:
     SoftBusTimerDeInit();
 EXIT_FREE_PKG:
     FreeClientPkgName();
-    SoftBusMutexUnlock(&g_isInitedLock);
+    (void)SoftBusMutexUnlock(&g_isInitedLock);
     return SOFTBUS_NO_INIT;
 }
 
@@ -328,14 +329,14 @@ uint32_t GetSoftBusClientNameList(char *pkgList[], uint32_t len)
             break;
         }
     }
-    SoftBusMutexUnlock(&g_pkgNameLock);
+    (void)SoftBusMutexUnlock(&g_pkgNameLock);
     return subscript;
 
 EXIT:
     for (uint32_t i = 0; i < subscript; i++) {
         SoftBusFree(pkgList[i]);
     }
-    SoftBusMutexUnlock(&g_pkgNameLock);
+    (void)SoftBusMutexUnlock(&g_pkgNameLock);
     return 0;
 }
 
@@ -354,11 +355,11 @@ int32_t CheckPackageName(const char *pkgName)
     LIST_FOR_EACH(item, &g_pkgNameList) {
         info = LIST_ENTRY(item, PkgNameInfo, node);
         if (strcmp(info->pkgName, pkgName) == 0) {
-            SoftBusMutexUnlock(&g_pkgNameLock);
+            (void)SoftBusMutexUnlock(&g_pkgNameLock);
             return SOFTBUS_OK;
         }
     }
-    SoftBusMutexUnlock(&g_pkgNameLock);
+    (void)SoftBusMutexUnlock(&g_pkgNameLock);
     return SOFTBUS_INVALID_PKGNAME;
 #endif
 }

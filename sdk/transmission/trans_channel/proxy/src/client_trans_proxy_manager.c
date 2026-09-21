@@ -1256,7 +1256,7 @@ static int32_t ClientTransProxyNoSubPacketProc(int32_t channelId, const char *da
         }
     }
     bool supportTlv = false;
-    int32_t res = GetSupportTlvAndNeedAckById(channelId, CHANNEL_TYPE_PROXY, &supportTlv, NULL);
+    ret = GetSupportTlvAndNeedAckById(channelId, CHANNEL_TYPE_PROXY, &supportTlv, NULL);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "get support tlv failed, channelId=%{public}d", channelId);
         return ret;
@@ -1268,7 +1268,7 @@ static int32_t ClientTransProxyNoSubPacketProc(int32_t channelId, const char *da
     ret = TransProxyNoSubPacketProc(&head, len, data, channelId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "no sub packet failed, channelId=%{public}d, len=%{public}d", channelId, len);
-        return res;
+        return ret;
     }
 
     ret = ClientTransProxyProcessSessionData(channelId, &head, data + sizeof(PacketHead));
