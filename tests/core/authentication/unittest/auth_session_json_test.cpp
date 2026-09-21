@@ -930,4 +930,95 @@ HWTEST_F(AuthSessionJsonTest, GenerateUdidShortHash_TEST_001, TestSize.Level1)
     EXPECT_TRUE(GenerateUdidShortHash(udid, udidHashHexStr, SHA_256_HEX_HASH_LEN));
     EXPECT_TRUE(!GenerateUdidShortHash(udid, udidHashHexStr, 10));
 }
+
+/*
+ * @tc.name: CRED_TYPES_SORT_CMP_DIFF_TYPE_TEST_001
+ * @tc.desc: credTypes sort cmp with different credType
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonTest, CRED_TYPES_SORT_CMP_DIFF_TYPE_TEST_001, TestSize.Level1)
+{
+    CredTypeSortInfo info1 = { .localUserId = 100, .credType = ACCOUNT_RELATED,
+        .peerUserId = 100, .mainUserId = 100 };
+    CredTypeSortInfo info2 = { .localUserId = 100, .credType = ACCOUNT_RELATED_APP,
+        .peerUserId = 100, .mainUserId = 100 };
+    CredTypeSortInfo info3 = { .localUserId = 100, .credType = ACCOUNT_SHARED,
+        .peerUserId = 100, .mainUserId = 100 };
+    CredTypeSortInfo info4 = { .localUserId = 100, .credType = ACCOUNT_UNRELATED,
+        .peerUserId = 100, .mainUserId = 100 };
+
+    /* priority: RELATED > RELATED_APP > SHARED > UNRELATED */
+    EXPECT_LT(CredTypesSortCmp(&info1, &info2), 0);
+    EXPECT_LT(CredTypesSortCmp(&info1, &info3), 0);
+    EXPECT_LT(CredTypesSortCmp(&info1, &info4), 0);
+    EXPECT_LT(CredTypesSortCmp(&info2, &info3), 0);
+    EXPECT_LT(CredTypesSortCmp(&info2, &info4), 0);
+    EXPECT_LT(CredTypesSortCmp(&info3, &info4), 0);
+
+    EXPECT_GT(CredTypesSortCmp(&info2, &info1), 0);
+    EXPECT_GT(CredTypesSortCmp(&info3, &info1), 0);
+    EXPECT_GT(CredTypesSortCmp(&info4, &info1), 0);
+    EXPECT_GT(CredTypesSortCmp(&info3, &info2), 0);
+    EXPECT_GT(CredTypesSortCmp(&info4, &info2), 0);
+    EXPECT_GT(CredTypesSortCmp(&info4, &info3), 0);
+}
+
+/*
+ * @tc.name: CRED_TYPES_SORT_CMP_SAME_TYPE_TEST_001
+ * @tc.desc: credTypes sort cmp with same credType returns zero
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonTest, CRED_TYPES_SORT_CMP_SAME_TYPE_TEST_001, TestSize.Level1)
+{
+    CredTypeSortInfo info1 = { .localUserId = 100, .credType = ACCOUNT_RELATED,
+        .peerUserId = 100, .mainUserId = 100 };
+    CredTypeSortInfo info2 = { .localUserId = 100, .credType = ACCOUNT_RELATED_APP,
+        .peerUserId = 100, .mainUserId = 100 };
+    CredTypeSortInfo info3 = { .localUserId = 100, .credType = ACCOUNT_SHARED,
+        .peerUserId = 100, .mainUserId = 100 };
+    CredTypeSortInfo info4 = { .localUserId = 100, .credType = ACCOUNT_UNRELATED,
+        .peerUserId = 100, .mainUserId = 100 };
+
+    EXPECT_EQ(CredTypesSortCmp(&info1, &info1), 0);
+    EXPECT_EQ(CredTypesSortCmp(&info2, &info2), 0);
+    EXPECT_EQ(CredTypesSortCmp(&info3, &info3), 0);
+    EXPECT_EQ(CredTypesSortCmp(&info4, &info4), 0);
+}
+
+/*
+ * @tc.name: CRED_TYPES_SORT_CMP_MAIN_USER_TEST_001
+ * @tc.desc: credTypes sort cmp with main user id priority
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonTest, CRED_TYPES_SORT_CMP_MAIN_USER_TEST_001, TestSize.Level1)
+{
+    CredTypeSortInfo info1 = { .localUserId = 100, .credType = ACCOUNT_SHARED,
+        .peerUserId = 100, .mainUserId = 100 };
+    CredTypeSortInfo info2 = { .localUserId = 100, .credType = ACCOUNT_RELATED,
+        .peerUserId = 101, .mainUserId = 100 };
+
+    EXPECT_EQ(CredTypesSortCmp(&info1, &info2), -1);
+    EXPECT_EQ(CredTypesSortCmp(&info2, &info1), 1);
+}
+
+/*
+ * @tc.name: CRED_TYPES_SORT_CMP_USER_ID_TEST_001
+ * @tc.desc: credTypes sort cmp without main user id sorts by peer user id
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonTest, CRED_TYPES_SORT_CMP_USER_ID_TEST_001, TestSize.Level1)
+{
+    CredTypeSortInfo info1 = { .localUserId = 100, .credType = ACCOUNT_SHARED,
+        .peerUserId = 100, .mainUserId = 200 };
+    CredTypeSortInfo info2 = { .localUserId = 100, .credType = ACCOUNT_RELATED,
+        .peerUserId = 101, .mainUserId = 200 };
+
+    EXPECT_EQ(CredTypesSortCmp(&info1, &info2), -1);
+    EXPECT_EQ(CredTypesSortCmp(&info2, &info1), 1);
+}
+
 } // namespace OHOS

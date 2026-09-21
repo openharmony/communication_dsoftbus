@@ -16,6 +16,8 @@
 #include "bus_center_manager.h"
 
 
+#include "auth_device.h"
+#include "auth_deviceprofile.h"
 #include "bus_center_decision_center.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
@@ -26,10 +28,16 @@
 #include "lnn_multi_user_process.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger.h"
+#include "lnn_bus_center_ipc.h"
+#include "lnn_log.h"
+#include "cJSON.h"
+
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account_adapter.h"
+#include "anonymizer.h"
 #include "auth_pre_link.h"
 #include "legacy/softbus_adapter_xcollie.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_feature_config.h"
 #include "softbus_permission.h"
 
@@ -38,6 +46,11 @@
 #define WATCHDOG_DELAY_TIME 5000
 #define DEFAULT_DELAY_LEN 1500
 #define RETRY_MAX 10
+
+static char g_commandPkg[PKG_NAME_SIZE_MAX] = {0};
+static uint32_t g_commandUid = 0;
+static bool g_commandRegistered = false;
+static SoftBusMutex g_commandLock;
 
 int32_t __attribute__((weak)) InitNodeAddrAllocator(void)
 {
@@ -341,12 +354,17 @@ int32_t BusCenterServerInit(void)
     if (ret != SOFTBUS_OK) {
         return ret;
     }
+    if (SoftBusMutexInit(&g_commandLock, NULL) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init command lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
     LNN_LOGI(LNN_INIT, "bus center server init ok");
     return SOFTBUS_OK;
 }
 
 void BusCenterServerDeinit(void)
 {
+    (void)SoftBusMutexDestroy(&g_commandLock);
     LnnDeinitPermission();
     RouteLSDeinit();
     DeinitNodeAddrAllocator();
@@ -367,3 +385,128 @@ void BusCenterServerDeinit(void)
     DeinitConversationQuery();
     LNN_LOGI(LNN_INIT, "bus center server deinit");
 }
+
+int32_t LnnRegisterCommandCb(const char *pkgName, uint32_t callingUid)
+{
+    if (pkgName == NULL || strcmp(pkgName, LNN_DM_PKG_NAME) != 0) {
+        LNN_LOGE(LNN_STATE, "invalid pkgName");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_commandLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "lock command cb fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (strcpy_s(g_commandPkg, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
+        (void)SoftBusMutexUnlock(&g_commandLock);
+        return SOFTBUS_MEM_ERR;
+    }
+    g_commandUid = callingUid;
+    g_commandRegistered = true;
+    (void)SoftBusMutexUnlock(&g_commandLock);
+    LNN_LOGI(LNN_STATE, "command cb registered for DM, uid=%{public}u", callingUid);
+    return SOFTBUS_OK;
+}
+
+bool LnnIsCommandCbRegistered(void)
+{
+    bool isRegistered = false;
+    if (SoftBusMutexLock(&g_commandLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "lock command cb fail");
+        return false;
+    }
+    isRegistered = g_commandRegistered;
+    (void)SoftBusMutexUnlock(&g_commandLock);
+    return isRegistered;
+}
+
+const char *LnnGetCommandPkgName(void)
+{
+    /* pkg name is always the validated constant DM package name */
+    return g_commandPkg;
+}
+
+static int32_t UnpackCommandAclMsg(const char *value, uint32_t inLen, char *peerUdid, uint32_t peerUdidLen,
+    int32_t *localUserId)
+{
+    cJSON *json = cJSON_ParseWithLength(value, inLen);
+    if (json == NULL) {
+        LNN_LOGE(LNN_STATE, "parse value json fail");
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    /* deleted ACL profile: { bindType, authenticationType, bindLevel, trustDeviceId,
+       accesser{deviceId,userId,accountId,tokenId,bundleName,deviceName,credentialId},
+       accessee{...} } */
+    cJSON *trustDeviceIdJson = cJSON_GetObjectItem(json, ACL_KEY_TRUST_DEVICE_ID);
+    cJSON *accesserJson = cJSON_GetObjectItem(json, ACL_KEY_ACCESSER);
+    cJSON *accesseeJson = cJSON_GetObjectItem(json, ACL_KEY_ACCESSEE);
+    if (trustDeviceIdJson == NULL || !cJSON_IsString(trustDeviceIdJson) ||
+        accesserJson == NULL || accesseeJson == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid acl fields");
+        cJSON_Delete(json);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *peerUdidTmp = cJSON_GetStringValue(trustDeviceIdJson);
+    if (strcpy_s(peerUdid, peerUdidLen, peerUdidTmp) != EOK) {
+        LNN_LOGE(LNN_STATE, "copy peerUdid fail");
+        cJSON_Delete(json);
+        return SOFTBUS_MEM_ERR;
+    }
+    cJSON *localUserIdJson = cJSON_GetObjectItem(accesserJson, ACL_KEY_USER_ID);
+    cJSON *peerUserIdJson = cJSON_GetObjectItem(accesseeJson, ACL_KEY_USER_ID);
+    *localUserId = (localUserIdJson != NULL && cJSON_IsNumber(localUserIdJson)) ?
+        (int32_t)localUserIdJson->valuedouble : -1;
+    int32_t peerUserId = (peerUserIdJson != NULL && cJSON_IsNumber(peerUserIdJson)) ?
+        (int32_t)peerUserIdJson->valuedouble : -1;
+    cJSON *accesserDevJson = cJSON_GetObjectItem(accesserJson, ACL_KEY_DEVICE_ID);
+    char accesserDevId[UDID_BUF_LEN] = {0};
+    if (accesserDevJson != NULL && cJSON_IsString(accesserDevJson)) {
+        (void)strcpy_s(accesserDevId, UDID_BUF_LEN, cJSON_GetStringValue(accesserDevJson));
+    }
+    cJSON_Delete(json);
+    char *anonyPeerUdid = NULL;
+    char *anonyAccesserDevId = NULL;
+    Anonymize(peerUdid, &anonyPeerUdid);
+    Anonymize(accesserDevId, &anonyAccesserDevId);
+    LNN_LOGI(LNN_STATE,
+        "offline by acl: peer(trustDeviceId)=%{public}s, local(accesser)=%{public}s, "
+        "localUserId=%{public}d, peerUserId=%{public}d",
+        anonyPeerUdid, anonyAccesserDevId, *localUserId, peerUserId);
+    AnonymizeFree(anonyPeerUdid);
+    AnonymizeFree(anonyAccesserDevId);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnSetCommand(int32_t code, const char *value, uint32_t inLen, uint32_t callingUid)
+{
+    if (value == NULL || inLen == 0) {
+        LNN_LOGE(LNN_STATE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_commandLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "lock command fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    bool registered = g_commandRegistered;
+    uint32_t registeredUid = g_commandUid;
+    (void)SoftBusMutexUnlock(&g_commandLock);
+    if (!registered || registeredUid != callingUid) {
+        LNN_LOGE(LNN_STATE, "command not registered or uid mismatch");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    if (code != 0) {
+        LNN_LOGE(LNN_STATE, "unknown command code=%{public}d", code);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char peerUdid[UDID_BUF_LEN] = {0};
+    int32_t localUserId = -1;
+    int32_t ret = UnpackCommandAclMsg(value, inLen, peerUdid, UDID_BUF_LEN, &localUserId);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    ret = AuthNotifyDeviceNotTrusted(peerUdid, localUserId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGW(LNN_STATE, "AuthNotifyDeviceNotTrusted ret=%{public}d, peer not connected, skip", ret);
+    }
+    return SOFTBUS_OK;
+}
+

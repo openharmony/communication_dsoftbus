@@ -250,6 +250,20 @@ int32_t ServerIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
+int32_t ServerIpcSetCommand(int32_t code, const char *value, uint32_t inLen)
+{
+    (void)code;
+    (void)value;
+    (void)inLen;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcRegisterCommandCb(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
 int32_t ServerIpcStartPerceptionAdv(const char *pkgName, PerceptionType type, const PerceptionAdvParam *param)
 {
     (void)pkgName;
@@ -297,5 +311,4 @@ int32_t ServerIpcGetPerceptionDeviceList(
     if (count != NULL) {
         *count = 0;
     }
-    return SOFTBUS_FUNC_NOT_SUPPORT;
 }

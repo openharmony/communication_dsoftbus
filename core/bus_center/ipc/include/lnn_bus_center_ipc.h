@@ -25,6 +25,8 @@
 #include "softbus_agent_communication.h"
 #include "softbus_bus_center.h"
 
+#define LNN_DM_PKG_NAME "ohos.distributedhardware.devicemanager"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -57,6 +59,9 @@ int32_t LnnIpcGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum);
 int32_t LnnIpcNotifyJoinResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode);
 int32_t LnnIpcNotifyLeaveResult(const char *networkId, int32_t retCode);
 int32_t LnnIpcNotifyOnlineState(bool isOnline, void *info, uint32_t infoTypeLen);
+int32_t LnnIpcSetCommand(int32_t code, const char *value, uint32_t inLen, uint32_t callingUid);
+int32_t LnnIpcRegisterCommandCb(const char *pkgName, uint32_t callingUid);
+int32_t LnnIpcNotifyCommandToDm(const char *pkgName, int32_t code, const char *value, uint32_t inLen);
 int32_t LnnIpcNotifyBasicInfoChanged(void *info, uint32_t infoTypeLen, int32_t type);
 int32_t LnnIpcNotifyNodeStatusChanged(void *info, uint32_t infoTypeLen, int32_t type);
 int32_t LnnIpcLocalNetworkIdChanged(void);

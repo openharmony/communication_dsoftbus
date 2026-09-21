@@ -31,6 +31,7 @@ typedef enum {
     ACCOUNT_RELATED = 1, /**< ACCOUNT_RELATED form identity_service_define */
     ACCOUNT_UNRELATED = 2, /**< ACCOUNT_UNRELATED form identity_service_define */
     ACCOUNT_SHARED = 3, /**< ACCOUNT_SHARED form identity_service_define */
+    ACCOUNT_RELATED_APP = 4, /**< app-level same-account */
     ACCOUNT_BUTT,
 } SoftbusCredType;
 

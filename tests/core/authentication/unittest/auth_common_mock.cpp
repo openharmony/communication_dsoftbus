@@ -15,6 +15,8 @@
 
 #include "auth_common_mock.h"
 
+#include "softbus_json_utils.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -222,6 +224,32 @@ int32_t LnnGetNetworkIdByUdidHash(
     const uint8_t *udidHash, uint32_t udidHashLen, char *buf, uint32_t len, bool needOnline)
 {
     return GetCommonInterface()->LnnGetNetworkIdByUdidHash(udidHash, udidHashLen, buf, len, needOnline);
+}
+
+bool AddStringToJsonObject(cJSON *json, const char * const string, const char *value)
+{
+    (void)json;
+    (void)string;
+    (void)value;
+    return true;
+}
+
+bool AddNumberToJsonObject(cJSON *json, const char * const string, int32_t num)
+{
+    (void)json;
+    (void)string;
+    (void)num;
+    return true;
+}
+
+bool LnnIsCommandCbRegistered(void)
+{
+    return false;
+}
+
+const char *LnnGetCommandPkgName(void)
+{
+    return "ohos.distributedhardware.devicemanager";
 }
 }
 } // namespace OHOS

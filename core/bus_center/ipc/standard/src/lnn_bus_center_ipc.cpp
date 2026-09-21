@@ -1342,6 +1342,16 @@ int32_t LnnIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
     return LnnGetTrustedDevices(info, nums);
 }
 
+int32_t LnnIpcNotifyCommandToDm(const char *pkgName, int32_t code, const char *value, uint32_t inLen)
+{
+    (void)pkgName;
+    (void)code;
+    (void)value;
+    (void)inLen;
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
 int32_t LnnIpcStartPerceptionAdv(const char *pkgName, PerceptionType type, const PerceptionAdvParam *param)
 {
     return LnnStartPerceptionAdv(pkgName, type, param);

@@ -15,6 +15,8 @@
 
 #include "ledger_mock.h"
 
+#include "lnn_local_net_ledger.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -205,4 +207,10 @@ int32_t LedgerInterfaceMock::ActofNodeInfo(NodeBasicInfo **info, int32_t *infoNu
     strcpy_s((*info)->deviceName, DEVICE_NAME_BUF_LEN, "Device ***");
     return SOFTBUS_OK;
 }
+
+extern "C" const NodeInfo *LnnGetLocalNodeInfo(void)
+{
+    return nullptr;
+}
 } // namespace OHOS
+

@@ -50,6 +50,8 @@ int32_t ServerShiftLnnGear(IpcIo *req, IpcIo *reply);
 int32_t ServerTriggerRangeForMsdp(IpcIo *req, IpcIo *reply);
 int32_t ServerRegRangeCbForMsdp(IpcIo *req, IpcIo *reply);
 int32_t ServerUnregRangeCbForMsdp(IpcIo *req, IpcIo *reply);
+int32_t ServerSetCommand(IpcIo *req, IpcIo *reply);
+int32_t ServerRegisterCommandCb(IpcIo *req, IpcIo *reply);
 
 #ifdef __cplusplus
 #if __cplusplus

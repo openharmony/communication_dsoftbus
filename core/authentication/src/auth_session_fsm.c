@@ -594,6 +594,7 @@ static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
     if (result == SOFTBUS_OK) {
         AuthManagerSetAuthFinished(authFsm->authSeq, &authFsm->info);
         UpdateDpAclSKId(authFsm);
+        LnnNotifyCommandToDmAuthPassed(authFsm->info.udid, authFsm->info.userId, authFsm->info.credId);
         if (authFsm->info.normalizedType == NORMALIZED_KEY_ERROR) {
             AUTH_LOGI(AUTH_FSM, "only hichain verify, save the device key");
             SaveDeviceKey(authFsm, AUTH_LINK_TYPE_NORMALIZED, authFsm->info.connInfo.type);

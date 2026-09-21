@@ -632,3 +632,32 @@ int32_t LnnIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
     LNN_LOGI(LNN_EVENT, "not implement");
     return SOFTBUS_OK;
 }
+
+int32_t LnnIpcSetCommand(int32_t code, const char *value, uint32_t inLen, uint32_t callingUid)
+{
+    if (value == NULL || inLen == 0) {
+        LNN_LOGE(LNN_EVENT, "set command invalid param, value is null, inLen=%{public}u", inLen);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return LnnSetCommand(code, value, inLen, callingUid);
+}
+
+int32_t LnnIpcRegisterCommandCb(const char *pkgName, uint32_t callingUid)
+{
+    if (pkgName == NULL) {
+        LNN_LOGE(LNN_EVENT, "register command cb invalid param, pkgName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return LnnRegisterCommandCb(pkgName, callingUid);
+}
+
+int32_t LnnIpcNotifyCommandToDm(const char *pkgName, int32_t code, const char *value, uint32_t inLen)
+{
+    if (pkgName == NULL || value == NULL || inLen == 0) {
+        LNN_LOGE(LNN_EVENT, "notify command to dm invalid param, pkgName null=%{public}d, "
+            "value null=%{public}d, inLen=%{public}u",
+            pkgName == NULL, value == NULL, inLen);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return ClientOnCommand(pkgName, code, value);
+}

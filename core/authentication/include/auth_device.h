@@ -49,6 +49,7 @@ void AuthNotifyDeviceDisconnect(AuthHandle authHandle);
 void AuthAddNodeToLimitMap(const char *udid, int32_t reason);
 void AuthDeleteLimitMap(const char *udidHash);
 int32_t AuthRegisterToDpDelay(void);
+int32_t AuthNotifyDeviceNotTrusted(const char *peerUdid, int32_t localUserId);
 
 #ifdef __cplusplus
 #if __cplusplus

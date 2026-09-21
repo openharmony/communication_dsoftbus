@@ -28,6 +28,7 @@
 #include "lnn_devicename_info.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_kv_adapter_wrapper.h"
+#include "softbus_adapter_json.h"
 #include "lnn_network_info.h"
 #include "lnn_node_weight.h"
 #include "lnn_physical_subnet_manager.h"
@@ -721,6 +722,91 @@ static bool IsNeedNotifyOfflineByAdv(const char *udid)
     return true;
 }
 
+static char *PackNotTrustedMsg(const char *networkId, const int64_t *authSeq, uint32_t num)
+{
+    uint32_t discoveryType = 0;
+    if (LnnGetRemoteNumInfo(networkId, NUM_KEY_DISCOVERY_TYPE, (int32_t *)&discoveryType) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get remote discoveryType fail");
+        return NULL;
+    }
+    JsonObj *json = JSON_CreateObject();
+    if (json == NULL) {
+        LNN_LOGE(LNN_BUILDER, "create json fail");
+        return NULL;
+    }
+
+    NodeInfo nodeInfo = {.discoveryType = discoveryType};
+    int64_t seq = authSeq[DISCOVERY_TYPE_WIFI];
+
+    if (LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_WIFI) &&
+        !JSON_AddInt64ToObject(json, NETWORK_TYPE_WIFI, seq)) {
+        LNN_LOGE(LNN_BUILDER, "add wifi authSeq to json fail");
+        JSON_Delete(json);
+        return NULL;
+    }
+    if (LnnIsRemoteSupportAuthCapBit(networkId, BIT_SUPPORT_SESSION_NOT_TRUST_OFFLINE)) {
+        seq = authSeq[DISCOVERY_TYPE_SESSION_KEY];
+        if (LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_SESSION_KEY) &&
+            !JSON_AddInt64ToObject(json, NETWORK_TYPE_SESSION_KEY, seq)) {
+            LNN_LOGE(LNN_BUILDER, "add sessionKey authSeq to json fail");
+            JSON_Delete(json);
+            return NULL;
+        }
+    }
+    char *msg = JSON_PrintUnformatted(json);
+    JSON_Delete(json);
+    if (msg == NULL) {
+        LNN_LOGE(LNN_BUILDER, "print json to string fail");
+    }
+    return msg;
+}
+
+__attribute__((weak)) int32_t LnnSendNotTrustedInfo(const NotTrustedDelayInfo *info, uint32_t num,
+    LnnSyncInfoMsgComplete complete)
+{
+    LNN_LOGI(LNN_BUILDER, "begin");
+    if (info == NULL || num != DISCOVERY_TYPE_COUNT) {
+        LNN_LOGE(LNN_BUILDER, "invalid param, info=%{public}d, num=%{public}u",
+            info != NULL, num);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    uint32_t udidLen = strlen(info->udid) + 1;
+    if (udidLen > UDID_BUF_LEN) {
+        LNN_LOGE(LNN_BUILDER, "udid too long, len=%{public}u", udidLen);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LnnConvertDlId(info->udid, CATEGORY_UDID, CATEGORY_NETWORK_ID,
+        networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "convert udid to networkId fail");
+        return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
+    }
+    char *msg = PackNotTrustedMsg(networkId, info->authSeq, num);
+    if (msg == NULL) {
+        LNN_LOGE(LNN_BUILDER, "pack not trusted msg fail");
+        return SOFTBUS_CREATE_JSON_ERR;
+    }
+    LNN_LOGI(LNN_BUILDER, "send not trusted msg=%{public}s", msg);
+    SendSyncInfoParam *data = CreateSyncInfoParam(LNN_INFO_TYPE_NOT_TRUSTED, networkId, (uint8_t *)msg,
+        strlen(msg) + 1, complete);
+    if (data == NULL) {
+        LNN_LOGE(LNN_BUILDER, "create sync info param fail");
+        JSON_Free(msg);
+        return SOFTBUS_NETWORK_SEND_SYNC_INFO_FAILED;
+    }
+    int32_t ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT),
+        LnnSendAsyncInfoMsg, (void *)data);
+    JSON_Free(msg);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async callback helper fail, ret=%{public}d", ret);
+        SoftBusFree(data->msg);
+        SoftBusFree(data);
+        return ret;
+    }
+    LNN_LOGI(LNN_BUILDER, "lnn send not trusted info success");
+    return SOFTBUS_OK;
+}
+
 static void OnDeviceNotTrusted(const char *peerUdid)
 {
     if (peerUdid == NULL) {
@@ -758,7 +844,7 @@ static void OnDeviceNotTrusted(const char *peerUdid)
         SoftBusFree(info);
         return;
     }
-    if (LnnSendNotTrustedInfoPacked(info, DISCOVERY_TYPE_COUNT,
+    if (LnnSendNotTrustedInfo(info, DISCOVERY_TYPE_COUNT,
         LnnProcessCompleteNotTrustedMsg) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "send NotTrustedInfo fail");
         OnLnnProcessNotTrustedMsgDelay((void *)info);
@@ -829,6 +915,10 @@ static int32_t InitSyncInfoReg(void)
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "register node addr changed msg fail, rc=%{public}d", rc);
         return rc;
+    }
+    rc = LnnRegSyncInfoHandler(LNN_INFO_TYPE_NOT_TRUSTED, LnnProcessCompleteNotTrustedMsg);
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "regist not trusted handler fail, rc=%{public}d", rc);
     }
     return SOFTBUS_OK;
 }
