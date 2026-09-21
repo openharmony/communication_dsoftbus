@@ -65,6 +65,7 @@ extern "C" {
 #define OHOS_PERMISSION_SEC_ACCESS_UDID "ohos.permission.sec.ACCESS_UDID"
 #define OHOS_PERMISSION_ACCESS_SERVICE_DM "ohos.permission.ACCESS_SERVICE_DM"
 #define OHOS_PERMISSION_SOFTBUS_MANAGER_RESOURCE "ohos.permission.SOFTBUS_MANAGER_RESOURCE"
+#define OHOS_PERMISSION_ACCESS_SOFTBUS_SYS_HAP "ohos.permission.ACCESS_SOFTBUS_SYS_HAP"
 
 /**
  * @brief Indicates the length of the Bluetooth device MAC address in string format,

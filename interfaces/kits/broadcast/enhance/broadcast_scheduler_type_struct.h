@@ -50,6 +50,7 @@ typedef enum {
     BC_TYPE_SD,
     BC_TYPE_PC_COLLABORATION,
     BC_TYPE_RAW_BLE_DIRECT,
+    BC_TYPE_PERCEPTION,
     BC_TYPE_SCHEDULER_BUTT,
 } BroadcastContentType;
 

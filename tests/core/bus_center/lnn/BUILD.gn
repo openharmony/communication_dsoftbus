@@ -3034,6 +3034,7 @@ ohos_unittest("LNNLaneHubTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane/lane_hub/",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/perception/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_qos/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/time_sync/include",
@@ -3046,6 +3047,42 @@ ohos_unittest("LNNLaneHubTest") {
     "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/tests/interfaces/enhance",
     "lane/include",
+  ]
+
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
+
+  external_deps = [
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+
+  if (is_standard_system) {
+    external_deps += [
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+    ]
+  }
+}
+
+ohos_unittest("PerceptionManagerTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/perception/src/perception_manager.c",
+    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_async_callback_utils.c",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/lane_hub/perception/perception_deps_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/lane_hub/perception/perception_manager_test.cpp",
+  ]
+
+  include_dirs = lnn_mock_test_include_dirs
+  include_dirs += [
+    "$dsoftbus_root_path/core/bus_center/lnn/lane/lane_hub/perception",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/perception/include",
+    "$dsoftbus_root_path/core/frame/init/include",
   ]
 
   deps = [
@@ -4391,6 +4428,10 @@ group("unittest") {
     ":LnnFragmentRecvTest",
     ":BusCenterClientAgentTest",
   ]
+  if (dsoftbus_feature_lnn_frame && dsoftbus_feature_lnn_ble && dsoftbus_feature_conn_ble &&
+      dsoftbus_feature_inner_disc_broadcast) {
+    deps += [ ":PerceptionManagerTest" ]
+  }
   if (dsoftbus_feature_lnn_lane_mgr) {
     deps += [
       ":LNNLaneAllocTest",

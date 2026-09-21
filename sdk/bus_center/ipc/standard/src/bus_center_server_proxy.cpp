@@ -16,14 +16,13 @@
 #include "bus_center_server_proxy.h"
 #include "bus_center_server_proxy_standard.h"
 
-#include <mutex>
 #include "comm_log.h"
 #include "g_enhance_sdk_func.h"
 #include "ipc_skeleton.h"
 #include "lnn_log.h"
 #include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "g_enhance_sdk_func.h"
+#include <mutex>
 
 using namespace OHOS;
 
@@ -453,4 +452,47 @@ int32_t ServerIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums)
         LNN_EVENT, "server not init");
     int32_t ret = g_serverProxy->GetTrustedDevices(info, nums);
     return ret;
+}
+
+int32_t ServerIpcStartPerceptionAdv(const char *pkgName, PerceptionType type, const PerceptionAdvParam *param)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(
+        CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, SOFTBUS_SERVER_NOT_INIT, LNN_EVENT, "server not init");
+    return g_serverProxy->StartPerceptionAdv(pkgName, type, param);
+}
+
+int32_t ServerIpcSetPerceptionAdvHighFreq(const char *pkgName, PerceptionType type, const PerceptionAdvParam *param)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(
+        CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, SOFTBUS_SERVER_NOT_INIT, LNN_EVENT, "server not init");
+    return g_serverProxy->SetPerceptionAdvHighFreq(pkgName, type, param);
+}
+
+int32_t ServerIpcStopPerceptionAdv(const char *pkgName, PerceptionType type)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(
+        CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, SOFTBUS_SERVER_NOT_INIT, LNN_EVENT, "server not init");
+    return g_serverProxy->StopPerceptionAdv(pkgName, type);
+}
+
+int32_t ServerIpcStartPerceptionScan(const char *pkgName, PerceptionType type, PerceptionCycle cycle)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(
+        CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, SOFTBUS_SERVER_NOT_INIT, LNN_EVENT, "server not init");
+    return g_serverProxy->StartPerceptionScan(pkgName, type, cycle);
+}
+
+int32_t ServerIpcStopPerceptionScan(const char *pkgName, PerceptionType type)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(
+        CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, SOFTBUS_SERVER_NOT_INIT, LNN_EVENT, "server not init");
+    return g_serverProxy->StopPerceptionScan(pkgName, type);
+}
+
+int32_t ServerIpcGetPerceptionDeviceList(
+    const char *pkgName, PerceptionType type, PerceptionDeviceInfo **list, uint32_t *count)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(
+        CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, SOFTBUS_SERVER_NOT_INIT, LNN_EVENT, "server not init");
+    return g_serverProxy->GetPerceptionDeviceList(pkgName, type, list, count);
 }

@@ -290,6 +290,17 @@ void Register5thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.authMetaOpenConnWithOtherOsType = dlsym(soHandle, "AuthMetaOpenConnWithOtherOsType");
 }
 
+void Register6thPartFunc(void *soHandle)
+{
+    g_lnnEnhanceFuncList.perceptionBuildAdvData = dlsym(soHandle, "PerceptionBuildAdvData");
+    g_lnnEnhanceFuncList.perceptionBuildScanFilter = dlsym(soHandle, "PerceptionBuildScanFilter");
+    g_lnnEnhanceFuncList.perceptionGetDeviceInfoList = dlsym(soHandle, "PerceptionGetDeviceInfoList");
+    g_lnnEnhanceFuncList.perceptionSyncState = dlsym(soHandle, "PerceptionSyncState");
+    g_lnnEnhanceFuncList.perceptionSyncCycle = dlsym(soHandle, "PerceptionSyncCycle");
+    g_lnnEnhanceFuncList.perceptionEnhanceInit = dlsym(soHandle, "PerceptionEnhanceInit");
+    g_lnnEnhanceFuncList.perceptionEnhanceDeinit = dlsym(soHandle, "PerceptionEnhanceDeinit");
+}
+
 int32_t LnnRegisterEnhanceFunc(void *soHandle)
 {
     (void)Register1stPartFunc(soHandle);
@@ -297,5 +308,6 @@ int32_t LnnRegisterEnhanceFunc(void *soHandle)
     (void)Register3rdPartFunc(soHandle);
     (void)Register4thPartFunc(soHandle);
     (void)Register5thPartFunc(soHandle);
+    (void)Register6thPartFunc(soHandle);
     return SOFTBUS_OK;
 }

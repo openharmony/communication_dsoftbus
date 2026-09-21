@@ -266,6 +266,13 @@
         "DisableMetaPlugin";
         "GetMetaPluginState";
         "SetLaneControlPolicy";
+        "StartPerceptionAdv";
+        "SetPerceptionAdvHighFreq";
+        "StopPerceptionAdv";
+        "StartPerceptionScan";
+        "StopPerceptionScan";
+        "GetPerceptionDeviceList";
+        "FreePerceptionDeviceList";
     local:
         *;
 };

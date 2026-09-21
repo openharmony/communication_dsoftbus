@@ -21,6 +21,7 @@
 
 #include "ble_range.h"
 #include "data_level.h"
+#include "lnn_perception.h"
 #include "softbus_agent_communication.h"
 #include "softbus_bus_center.h"
 
@@ -91,6 +92,13 @@ int32_t LnnIpcPostConversationData(const char *deviceId, const ConversationBusin
 int32_t LnnIpcRegisterConversationListener(const ConversationBusiness *info, int32_t pid);
 int32_t LnnIpcUnregisterConversationListener(const ConversationBusiness *info, int32_t pid);
 int32_t LnnIpcGetTrustedDevices(DeviceNodeInfo **info, int32_t *nums);
+int32_t LnnIpcStartPerceptionAdv(const char *pkgName, PerceptionType type, const PerceptionAdvParam *param);
+int32_t LnnIpcSetPerceptionAdvHighFreq(const char *pkgName, PerceptionType type, const PerceptionAdvParam *param);
+int32_t LnnIpcStopPerceptionAdv(const char *pkgName, PerceptionType type);
+int32_t LnnIpcStartPerceptionScan(const char *pkgName, PerceptionType type, PerceptionCycle cycle);
+int32_t LnnIpcStopPerceptionScan(const char *pkgName, PerceptionType type);
+int32_t LnnIpcGetPerceptionDeviceList(
+    const char *pkgName, PerceptionType type, PerceptionDeviceInfo **list, uint32_t *count);
 
 #ifdef __cplusplus
 }

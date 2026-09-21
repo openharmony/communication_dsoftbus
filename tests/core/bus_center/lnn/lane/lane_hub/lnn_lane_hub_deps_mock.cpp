@@ -82,6 +82,16 @@ void LnnDeinitHeartbeat(void)
     return GetLaneHubDepsInterface()->LnnDeinitHeartbeat();
 }
 
+int32_t PerceptionManagerInit(void)
+{
+    return GetLaneHubDepsInterface()->PerceptionManagerInit();
+}
+
+void PerceptionManagerDeinit(void)
+{
+    return GetLaneHubDepsInterface()->PerceptionManagerDeinit();
+}
+
 int32_t InitControlPlanePacked(void)
 {
     return GetLaneHubDepsInterface()->InitControlPlanePacked();
