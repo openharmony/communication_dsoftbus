@@ -16,8 +16,8 @@
 
 #include "auth_log.h"
 #include "g_enhance_lnn_func.h"
-#include "lnn_heartbeat_utils_struct.h"
 #include "lnn_heartbeat_medium_mgr.h"
+#include "lnn_heartbeat_utils_struct.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_init_common.h"
@@ -1988,6 +1988,70 @@ int32_t RemoveLnnCloudEventPacked(LnnCloudMsgType event, LnnCloudRemoveCompareFu
         return SOFTBUS_NOT_IMPLEMENT;
     }
     return pfnLnnEnhanceFuncList->removeLnnCloudEvent(event, func, param);
+}
+
+int32_t PerceptionBuildAdvDataPacked(const PerceptionType *type, const PerceptionAdvParam *params,
+    uint32_t paramCnt, BroadcastPacket *packet)
+{
+    LnnEnhanceFuncList *funcList = LnnEnhanceFuncListGet();
+    if (funcList == NULL || LnnCheckFuncPointer((void *)funcList->perceptionBuildAdvData) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return funcList->perceptionBuildAdvData(type, params, paramCnt, packet);
+}
+
+int32_t PerceptionBuildScanFilterPacked(BcScanFilter **filter, uint8_t *filterNum)
+{
+    LnnEnhanceFuncList *funcList = LnnEnhanceFuncListGet();
+    if (funcList == NULL || LnnCheckFuncPointer((void *)funcList->perceptionBuildScanFilter) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return funcList->perceptionBuildScanFilter(filter, filterNum);
+}
+
+int32_t PerceptionGetDeviceInfoListPacked(PerceptionType type, PerceptionDeviceInfo **list, uint32_t *count)
+{
+    LnnEnhanceFuncList *funcList = LnnEnhanceFuncListGet();
+    if (funcList == NULL || LnnCheckFuncPointer((void *)funcList->perceptionGetDeviceInfoList) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return funcList->perceptionGetDeviceInfoList(type, list, count);
+}
+
+int32_t PerceptionSyncStatePacked(PerceptionState state)
+{
+    LnnEnhanceFuncList *funcList = LnnEnhanceFuncListGet();
+    if (funcList == NULL || LnnCheckFuncPointer((void *)funcList->perceptionSyncState) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return funcList->perceptionSyncState(state);
+}
+
+int32_t PerceptionSyncCyclePacked(PerceptionType type, uint32_t cycle)
+{
+    LnnEnhanceFuncList *funcList = LnnEnhanceFuncListGet();
+    if (funcList == NULL || LnnCheckFuncPointer((void *)funcList->perceptionSyncCycle) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return funcList->perceptionSyncCycle(type, cycle);
+}
+
+int32_t PerceptionEnhanceInitPacked(void)
+{
+    LnnEnhanceFuncList *funcList = LnnEnhanceFuncListGet();
+    if (funcList == NULL || LnnCheckFuncPointer((void *)funcList->perceptionEnhanceInit) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return funcList->perceptionEnhanceInit();
+}
+
+void PerceptionEnhanceDeinitPacked(void)
+{
+    LnnEnhanceFuncList *funcList = LnnEnhanceFuncListGet();
+    if (funcList == NULL || LnnCheckFuncPointer((void *)funcList->perceptionEnhanceDeinit) != SOFTBUS_OK) {
+        return;
+    }
+    funcList->perceptionEnhanceDeinit();
 }
 
 int32_t AuthMetaOpenConnWithOtherOsTypePacked(const AuthConnInfo *info, const char *networkId,

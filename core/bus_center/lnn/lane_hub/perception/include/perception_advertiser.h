@@ -12,31 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef PERCEPTION_ADVERTISER_H
+#define PERCEPTION_ADVERTISER_H
 
-#include "proxy_manager.h"
+#include <stdbool.h>
 
-static uint32_t StubGenerateChannelId(void)
-{
-    static uint32_t channelId = 0;
-    return ++channelId;
+#include "lnn_perception.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int32_t PerceptionAdvertiserInit(void);
+void PerceptionAdvertiserDeinit(void);
+
+int32_t PerceptionAdvStart(PerceptionType type, const PerceptionAdvParam *param);
+int32_t PerceptionAdvStop(void);
+int32_t PerceptionAdvSetHighFreq(PerceptionType type, const PerceptionAdvParam *param);
+
+void PerceptionAdvOnBtStateChanged(bool isBtOn);
+
+#ifdef __cplusplus
 }
+#endif
 
-static void StubClearProxyInfo(struct ProxyChannel *channel)
-{
-    (void)channel;
-}
-
-void ClearFarFieldProxy(const char *addr)
-{
-    (void)addr;
-}
-
-static ProxyChannelManager g_stubProxyChannelManager = {
-    .generateChannelId = StubGenerateChannelId,
-    .clearProxyInfo = StubClearProxyInfo,
-};
-
-ProxyChannelManager *GetProxyChannelManager(void)
-{
-    return &g_stubProxyChannelManager;
-}
+#endif

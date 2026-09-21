@@ -18,12 +18,13 @@
 #include "lnn_ohos_account_adapter.h"
 #include "securec.h"
 
-#include "accesstoken_kit.h"
 #include "access_control.h"
 #include "access_token.h"
+#include "accesstoken_kit.h"
 #include "br_proxy.h"
 #include "ipc_skeleton.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
+#include "lnn_bus_center_ipc.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_agent_communication.h"
@@ -82,14 +83,15 @@ static const std::string CONSTRAINT = "constraint.distributed.transmission.outgo
     } while (false)                                             \
 
 namespace OHOS {
-    namespace {
-        constexpr int32_t MSG_MAX_SIZE = 1024 * 2;
-        constexpr int32_t DMS_CALLING_UID = 5522;
-        static const char *DB_PACKAGE_NAME = "distributeddata-default";
-        static const char *DM_PACKAGE_NAME = "ohos.distributedhardware.devicemanager";
-        static const char *MSDP_PACKAGE_NAME = "ohos.msdp.spatialawareness";
-        static const char *SHARE_PACKAGE_NAME = "ohos.InterConnection.iShare";
-    }
+
+namespace {
+constexpr int32_t MSG_MAX_SIZE = 1024 * 2;
+constexpr int32_t DMS_CALLING_UID = 5522;
+static const char *DB_PACKAGE_NAME = "distributeddata-default";
+static const char *DM_PACKAGE_NAME = "ohos.distributedhardware.devicemanager";
+static const char *MSDP_PACKAGE_NAME = "ohos.msdp.spatialawareness";
+static const char *SHARE_PACKAGE_NAME = "ohos.InterConnection.iShare";
+} // namespace
 
 int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
 {
@@ -237,6 +239,12 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_POST_CONVERSATION_DATA] = &SoftBusServerStub::PostConversationDataInner;
     memberFuncMap_[SERVER_REGISTER_CONVERSATION_LISTENER] = &SoftBusServerStub::RegisterConversationListenerInner;
     memberFuncMap_[SERVER_UNREGISTER_CONVERSATION_LISTENER] = &SoftBusServerStub::UnregisterConversationListenerInner;
+    memberFuncMap_[SERVER_START_PERCEPTION_ADV] = &SoftBusServerStub::StartPerceptionAdvInner;
+    memberFuncMap_[SERVER_STOP_PERCEPTION_ADV] = &SoftBusServerStub::StopPerceptionAdvInner;
+    memberFuncMap_[SERVER_START_PERCEPTION_SCAN] = &SoftBusServerStub::StartPerceptionScanInner;
+    memberFuncMap_[SERVER_STOP_PERCEPTION_SCAN] = &SoftBusServerStub::StopPerceptionScanInner;
+    memberFuncMap_[SERVER_GET_PERCEPTION_DEVICE_LIST] = &SoftBusServerStub::GetPerceptionDeviceListInner;
+    memberFuncMap_[SERVER_SET_PERCEPTION_ADV_HIGH_FREQ] = &SoftBusServerStub::SetPerceptionAdvHighFreqInner;
 }
 
 void SoftBusServerStub::InitMemberPermissionMap()
@@ -302,6 +310,12 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_START_ACCOUNT_AUTH] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_PROCESS_ACCOUNT_AUTH] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_PROCESS_PUSH_MSG] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_START_PERCEPTION_ADV] = OHOS_PERMISSION_ACCESS_SOFTBUS_SYS_HAP;
+    memberPermissionMap_[SERVER_STOP_PERCEPTION_ADV] = OHOS_PERMISSION_ACCESS_SOFTBUS_SYS_HAP;
+    memberPermissionMap_[SERVER_SET_PERCEPTION_ADV_HIGH_FREQ] = OHOS_PERMISSION_ACCESS_SOFTBUS_SYS_HAP;
+    memberPermissionMap_[SERVER_START_PERCEPTION_SCAN] = OHOS_PERMISSION_ACCESS_SOFTBUS_SYS_HAP;
+    memberPermissionMap_[SERVER_STOP_PERCEPTION_SCAN] = OHOS_PERMISSION_ACCESS_SOFTBUS_SYS_HAP;
+    memberPermissionMap_[SERVER_GET_PERCEPTION_DEVICE_LIST] = OHOS_PERMISSION_ACCESS_SOFTBUS_SYS_HAP;
 }
 
 void SoftBusServerStub::InitMemberConstraintSet()
@@ -2906,6 +2920,198 @@ int32_t SoftBusServerStub::UnregisterConversationListenerInner(MessageParcel &da
     return SOFTBUS_OK;
 }
 
+static int32_t ReadPerceptionRequestHeader(MessageParcel &data, const char **pkgName, PerceptionType *type)
+{
+    *pkgName = data.ReadCString();
+    int32_t rawType = PERCEPTION_TYPE_BUTT;
+    if ((*pkgName == nullptr) ||
+        (strnlen(*pkgName, PKG_NAME_SIZE_MAX) > (PKG_NAME_SIZE_MAX - 1)) ||
+        (!data.ReadInt32(rawType)) ||
+        (rawType < PERCEPTION_TYPE_COLLABORATIVE_WAKE) ||
+        (rawType >= PERCEPTION_TYPE_BUTT)) {
+        COMM_LOGE(COMM_SVC, "read perception request header failed, invalid pkgName or type, rawType=%{public}d",
+            rawType);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *type = (PerceptionType)rawType;
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::StartPerceptionAdvInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t permRet = SysHapPermissionVerify(SERVER_START_PERCEPTION_ADV);
+    if (permRet != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return permRet;
+    }
+    const char *pkgName = nullptr;
+    PerceptionType type = PERCEPTION_TYPE_BUTT;
+    int32_t ret = ReadPerceptionRequestHeader(data, &pkgName, &type);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    const void *raw = data.ReadRawData(sizeof(PerceptionAdvParam));
+    PerceptionAdvParam received {};
+    if (raw == nullptr || memcpy_s(&received, sizeof(received), raw, sizeof(received)) != EOK) {
+        COMM_LOGE(COMM_SVC, "read perception adv rawData failed or memcpy fail");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (received.customDataLen > PERCEPTION_CUSTOM_DATA_MAX_LEN) {
+        COMM_LOGE(COMM_SVC, "invalid perception customDataLen=%{public}u", received.customDataLen);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t serverRet = LnnIpcStartPerceptionAdv(pkgName, type, &received);
+    if (!reply.WriteInt32(serverRet)) {
+        COMM_LOGE(COMM_SVC, "write reply failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::SetPerceptionAdvHighFreqInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t permRet = SysHapPermissionVerify(SERVER_SET_PERCEPTION_ADV_HIGH_FREQ);
+    if (permRet != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return permRet;
+    }
+    const char *pkgName = nullptr;
+    PerceptionType type = PERCEPTION_TYPE_BUTT;
+    int32_t ret = ReadPerceptionRequestHeader(data, &pkgName, &type);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    const void *raw = data.ReadRawData(sizeof(PerceptionAdvParam));
+    PerceptionAdvParam received {};
+    if (raw == nullptr || memcpy_s(&received, sizeof(received), raw, sizeof(received)) != EOK) {
+        COMM_LOGE(COMM_SVC, "read perception adv rawData failed or memcpy fail");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (received.customDataLen > PERCEPTION_CUSTOM_DATA_MAX_LEN) {
+        COMM_LOGE(COMM_SVC, "invalid perception customDataLen=%{public}u", received.customDataLen);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t serverRet = LnnIpcSetPerceptionAdvHighFreq(pkgName, type, &received);
+    if (!reply.WriteInt32(serverRet)) {
+        COMM_LOGE(COMM_SVC, "write reply failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::StopPerceptionAdvInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t permRet = SysHapPermissionVerify(SERVER_STOP_PERCEPTION_ADV);
+    if (permRet != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return permRet;
+    }
+    const char *pkgName = nullptr;
+    PerceptionType type = PERCEPTION_TYPE_BUTT;
+    int32_t ret = ReadPerceptionRequestHeader(data, &pkgName, &type);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    int32_t serverRet = LnnIpcStopPerceptionAdv(pkgName, type);
+    if (!reply.WriteInt32(serverRet)) {
+        COMM_LOGE(COMM_SVC, "write reply failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::StartPerceptionScanInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t permRet = SysHapPermissionVerify(SERVER_START_PERCEPTION_SCAN);
+    if (permRet != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return permRet;
+    }
+    const char *pkgName = nullptr;
+    PerceptionType type = PERCEPTION_TYPE_BUTT;
+    int32_t ret = ReadPerceptionRequestHeader(data, &pkgName, &type);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    int32_t rawCycle = PERCEPTION_CYCLE_LOW;
+    if (!data.ReadInt32(rawCycle) || rawCycle < PERCEPTION_CYCLE_LOW || rawCycle >= PERCEPTION_CYCLE_BUTT) {
+        COMM_LOGE(COMM_SVC, "read perception cycle failed, rawCycle=%{public}d", rawCycle);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t serverRet = LnnIpcStartPerceptionScan(pkgName, type, (PerceptionCycle)rawCycle);
+    if (!reply.WriteInt32(serverRet)) {
+        COMM_LOGE(COMM_SVC, "write reply failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::StopPerceptionScanInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t permRet = SysHapPermissionVerify(SERVER_STOP_PERCEPTION_SCAN);
+    if (permRet != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return permRet;
+    }
+    const char *pkgName = nullptr;
+    PerceptionType type = PERCEPTION_TYPE_BUTT;
+    int32_t ret = ReadPerceptionRequestHeader(data, &pkgName, &type);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    int32_t serverRet = LnnIpcStopPerceptionScan(pkgName, type);
+    if (!reply.WriteInt32(serverRet)) {
+        COMM_LOGE(COMM_SVC, "write reply failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::GetPerceptionDeviceListInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t permRet = SysHapPermissionVerify(SERVER_GET_PERCEPTION_DEVICE_LIST);
+    if (permRet != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return permRet;
+    }
+    const char *pkgName = nullptr;
+    PerceptionType type = PERCEPTION_TYPE_BUTT;
+    int32_t ret = ReadPerceptionRequestHeader(data, &pkgName, &type);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    PerceptionDeviceInfo *list = nullptr;
+    uint32_t count = 0;
+    ret = LnnIpcGetPerceptionDeviceList(pkgName, type, &list, &count);
+    if (ret == SOFTBUS_OK && count > PERCEPTION_MAX_DEVICE_NUM) {
+        COMM_LOGE(COMM_SVC, "perception device count invalid, count=%{public}u", count);
+        ret = SOFTBUS_IPC_ERR;
+        count = 0;
+    }
+    if (ret == SOFTBUS_OK) {
+        for (uint32_t i = 0; i < count; ++i) {
+            if (list[i].customDataLen > PERCEPTION_CUSTOM_DATA_MAX_LEN) {
+                COMM_LOGE(COMM_SVC, "perception device customDataLen invalid, index=%{public}u", i);
+                ret = SOFTBUS_INVALID_PARAM;
+                count = 0;
+                break;
+            }
+        }
+    }
+    if (!reply.WriteInt32(ret) || !reply.WriteUint32(count)) {
+        COMM_LOGE(COMM_SVC, "write reply failed!");
+        SoftBusFree(list);
+        return SOFTBUS_IPC_ERR;
+    }
+    if (ret == SOFTBUS_OK && count > 0 && !reply.WriteRawData(list, count * sizeof(PerceptionDeviceInfo))) {
+        COMM_LOGE(COMM_SVC, "write reply rawData failed!");
+        SoftBusFree(list);
+        return SOFTBUS_IPC_ERR;
+    }
+    SoftBusFree(list);
+    return SOFTBUS_OK;
+}
+
 static std::map<uint32_t, std::string> tagNameMap = {
     { SERVER_JOIN_LNN, SERVER_JOIN_LNN_NAME },
     { SERVER_LEAVE_LNN, SERVER_LEAVE_LNN_NAME },
@@ -2984,6 +3190,19 @@ int32_t SoftBusServerStub::BasicPermissionVerify(uint32_t code)
     if (OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(
         tokenId, OHOS_PERMISSION_DISTRIBUTED_DATASYNC) != Security::AccessToken::PERMISSION_GRANTED) {
         COMM_LOGE(COMM_SVC, "permission %{public}s denied.", OHOS_PERMISSION_DISTRIBUTED_DATASYNC);
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::SysHapPermissionVerify(uint32_t code)
+{
+    (void)code;
+    uint64_t callingFullTokenId = IPCSkeleton::GetCallingFullTokenID();
+    bool support = OHOS::system::GetBoolParameter("persist.sys.softbus.check.system.app", true);
+    if (support && !OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callingFullTokenId)) {
+        COMM_LOGE(COMM_SVC, "permission denied, is not system app, check=%{public}s",
+            support ? "true" : "false");
         return SOFTBUS_PERMISSION_DENIED;
     }
     return SOFTBUS_OK;

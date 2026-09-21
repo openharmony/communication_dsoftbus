@@ -24,6 +24,7 @@
 #include "data_level.h"
 #include "lnn_event.h"
 #include "lnn_log.h"
+#include "lnn_perception.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
@@ -810,4 +811,78 @@ int32_t RegisterCommandCb(const char *pkgName, ITrustedDeviceCb *cb)
         return ret;
     }
     return RegisterCommandCbInner(pkgName, cb);
+}
+
+static int32_t InitPerceptionClient(const char *pkgName, PerceptionType type)
+{
+    if (pkgName == NULL || type < PERCEPTION_TYPE_COLLABORATIVE_WAKE || type >= PERCEPTION_TYPE_BUTT) {
+        LNN_LOGE(LNN_EVENT, "invalid params");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return CommonInit(pkgName);
+}
+
+int32_t StartPerceptionAdv(const char *pkgName, PerceptionType type, const PerceptionAdvParam *param)
+{
+    int32_t ret = InitPerceptionClient(pkgName, type);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (param == NULL || param->customDataLen > PERCEPTION_CUSTOM_DATA_MAX_LEN) {
+        LNN_LOGE(LNN_EVENT, "invalid params");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return StartPerceptionAdvInner(pkgName, type, param);
+}
+
+int32_t SetPerceptionAdvHighFreq(const char *pkgName, PerceptionType type, const PerceptionAdvParam *param)
+{
+    int32_t ret = InitPerceptionClient(pkgName, type);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (param == NULL || param->customDataLen > PERCEPTION_CUSTOM_DATA_MAX_LEN) {
+        LNN_LOGE(LNN_EVENT, "invalid params");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return SetPerceptionAdvHighFreqInner(pkgName, type, param);
+}
+
+int32_t StopPerceptionAdv(const char *pkgName, PerceptionType type)
+{
+    int32_t ret = InitPerceptionClient(pkgName, type);
+    return (ret == SOFTBUS_OK) ? StopPerceptionAdvInner(pkgName, type) : ret;
+}
+
+int32_t StartPerceptionScan(const char *pkgName, PerceptionType type, PerceptionCycle cycle)
+{
+    int32_t ret = InitPerceptionClient(pkgName, type);
+    return (ret == SOFTBUS_OK) ? StartPerceptionScanInner(pkgName, type, cycle) : ret;
+}
+
+int32_t StopPerceptionScan(const char *pkgName, PerceptionType type)
+{
+    int32_t ret = InitPerceptionClient(pkgName, type);
+    return (ret == SOFTBUS_OK) ? StopPerceptionScanInner(pkgName, type) : ret;
+}
+
+int32_t GetPerceptionDeviceList(const char *pkgName, PerceptionType type, PerceptionDeviceInfo **list, uint32_t *count)
+{
+    int32_t ret = InitPerceptionClient(pkgName, type);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (list == NULL || count == NULL) {
+        LNN_LOGE(LNN_EVENT, "invalid params");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return GetPerceptionDeviceListInner(pkgName, type, list, count);
+}
+
+void FreePerceptionDeviceList(PerceptionDeviceInfo *list)
+{
+    if (list == NULL) {
+        return;
+    }
+    SoftBusFree(list);
 }

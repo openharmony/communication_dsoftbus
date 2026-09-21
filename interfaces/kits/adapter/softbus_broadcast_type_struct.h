@@ -85,6 +85,11 @@ extern "C"{
  */
 #define BC_LOCAL_NAME_LEN_MAX                    30
 
+/** Maximum length of custom data carried by a perception broadcast. */
+#define PERCEPTION_CUSTOM_DATA_MAX_LEN 5
+/** Fixed length of a perception device identifier. */
+#define PERCEPTION_DEVICE_ID_LEN 6
+
 /**
  * @brief Defines the broadcast protocol.
  *
@@ -123,8 +128,29 @@ typedef enum {
     SRV_TYPE_SD, // The service type is service discovery.
     SRV_TYPE_COLLABORATION, // The service type is pc collaboration.
     SRV_TYPE_RAW,
+    SRV_TYPE_PERCEPTION,
     SRV_TYPE_BUTT,
 } BaseServiceType;
+
+/** @brief Defines the perception scan state synced to the closed-source implementation. */
+typedef enum {
+    PERCEPTION_STATE_START = 1,
+    PERCEPTION_STATE_STOP,
+    PERCEPTION_STATE_BUTT,
+} PerceptionState;
+
+/**
+ * @brief Defines device information parsed from a perception scan result.
+ *
+ * @since 6.0
+ * @version 1.0
+ */
+typedef struct {
+    uint16_t deviceType;
+    uint8_t deviceId[PERCEPTION_DEVICE_ID_LEN];
+    uint8_t customData[PERCEPTION_CUSTOM_DATA_MAX_LEN];
+    uint32_t customDataLen;
+} PerceptionDeviceInfo;
 
 /**
  * @brief Defines the mapping between supported service types and their names.
@@ -166,6 +192,8 @@ static const SrvTypeMap g_srvTypeMap[] = {
     {SRV_TYPE_D2D_GROUP_TALKIE, (char *)"d2dG"},
     {SRV_TYPE_SD, (char *)"serviceDisc"},
     {SRV_TYPE_COLLABORATION, (char *)"pcCollab"},
+    {SRV_TYPE_RAW, (char *)"raw"},
+    {SRV_TYPE_PERCEPTION, (char *)"perception"},
 };
 
 /**
@@ -178,6 +206,7 @@ typedef enum {
     SOFTBUS_HEARTBEAT_TYPE = 0,
     SOFTBUS_BURST_TYPE,
     SOFTBUS_VIRTUAL_SCAN_TYPE,
+    SOFTBUS_PERCEPTION_TYPE,
     SOFTBUS_UNKNOW_TYPE,
 } LpServerType;
 

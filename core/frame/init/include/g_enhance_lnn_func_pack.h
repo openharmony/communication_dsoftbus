@@ -41,6 +41,8 @@
 #include "lnn_sync_info_manager_struct.h"
 #include "lnn_time_sync_impl_struct.h"
 #include "lnn_trans_lane_struct.h"
+#include "lnn_perception.h"
+#include "softbus_broadcast_type_struct.h"
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus
@@ -256,6 +258,14 @@ bool FarfieldParseModuleTypePacked(const uint8_t *data, uint32_t dataLen, uint32
 int32_t PostLnnCloudEventPacked(LnnCloudMsgType event, LnnCloudHandler handler,
     const void *obj, uint32_t size, uint64_t delayMs);
 int32_t RemoveLnnCloudEventPacked(LnnCloudMsgType event, LnnCloudRemoveCompareFunc func, void *param);
+int32_t PerceptionBuildAdvDataPacked(const PerceptionType *type, const PerceptionAdvParam *params,
+    uint32_t paramCnt, BroadcastPacket *packet);
+int32_t PerceptionBuildScanFilterPacked(BcScanFilter **filter, uint8_t *filterNum);
+int32_t PerceptionGetDeviceInfoListPacked(PerceptionType type, PerceptionDeviceInfo **list, uint32_t *count);
+int32_t PerceptionSyncStatePacked(PerceptionState state);
+int32_t PerceptionSyncCyclePacked(PerceptionType type, uint32_t cycle);
+int32_t PerceptionEnhanceInitPacked(void);
+void PerceptionEnhanceDeinitPacked(void);
 
 #ifdef __cplusplus
 }

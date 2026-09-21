@@ -123,7 +123,7 @@ HWTEST_F(TransLinkListenerTest, OnWifiDirectDeviceOnline001, TestSize.Level1)
     bool isSource = false;
     TransManagerInterfaceMock mock;
     int32_t ret = TransChannelInit();
-    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
     OnWifiDirectDeviceOnline(peerMac, peerIp, peerUuid, isSource);
     EXPECT_NE(SOFTBUS_OK, ret);
     TransChannelDeinit();

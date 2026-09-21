@@ -18,6 +18,7 @@
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_lane.h"
 #include "lnn_time_sync_manager.h"
+#include "perception_manager.h"
 
 #define LNN_DUMP_CONTROL_LANE_GEOUP_INFO "control_lane_group_info"
 
@@ -39,6 +40,10 @@ int32_t LnnInitLaneHub(void)
         LNN_LOGE(LNN_INIT, "init heart beat fail");
         return SOFTBUS_NO_INIT;
     }
+    if (PerceptionManagerInit() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init perception fail");
+        // fall-through
+    }
     if (LnnInitMcuPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init mcu heartbeat fail");
     }
@@ -46,8 +51,8 @@ int32_t LnnInitLaneHub(void)
         LNN_LOGE(LNN_INIT, "init control plane fail");
         return SOFTBUS_NO_INIT;
     }
-    if (SoftBusRegBusCenterVarDump((char*)LNN_DUMP_CONTROL_LANE_GEOUP_INFO,
-        &LnnDumpControlLaneGroupInfoPacked) != SOFTBUS_OK) {
+    if (SoftBusRegBusCenterVarDump((char *)LNN_DUMP_CONTROL_LANE_GEOUP_INFO, &LnnDumpControlLaneGroupInfoPacked) !=
+        SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "SoftBusRegBusCenterVarDump regist fail");
     }
     return SOFTBUS_OK;
@@ -68,5 +73,6 @@ void LnnDeinitLaneHub(void)
     LnnDeinitQosPacked();
     DeinitLane();
     LnnDeinitTimeSync();
+    PerceptionManagerDeinit();
     LnnDeinitHeartbeat();
 }

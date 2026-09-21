@@ -12,31 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef PERCEPTION_SCANNER_H
+#define PERCEPTION_SCANNER_H
 
-#include "proxy_manager.h"
+#include <stdbool.h>
 
-static uint32_t StubGenerateChannelId(void)
-{
-    static uint32_t channelId = 0;
-    return ++channelId;
+#include "lnn_perception.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int32_t PerceptionScannerInit(void);
+void PerceptionScannerDeinit(void);
+
+int32_t PerceptionScanStart(PerceptionType type, PerceptionCycle cycle);
+int32_t PerceptionScanStop(void);
+
+int32_t PerceptionScanGetDeviceList(PerceptionType type, PerceptionDeviceInfo **list, uint32_t *count);
+
+void PerceptionScanOnBtStateChanged(bool isBtOn);
+
+void PerceptionScanOnScreenStateChanged(bool isScreenOn);
+
+#ifdef __cplusplus
 }
+#endif
 
-static void StubClearProxyInfo(struct ProxyChannel *channel)
-{
-    (void)channel;
-}
-
-void ClearFarFieldProxy(const char *addr)
-{
-    (void)addr;
-}
-
-static ProxyChannelManager g_stubProxyChannelManager = {
-    .generateChannelId = StubGenerateChannelId,
-    .clearProxyInfo = StubClearProxyInfo,
-};
-
-ProxyChannelManager *GetProxyChannelManager(void)
-{
-    return &g_stubProxyChannelManager;
-}
+#endif

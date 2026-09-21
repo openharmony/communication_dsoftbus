@@ -17,6 +17,7 @@
 
 #include "ipc_skeleton.h"
 #include "lnn_log.h"
+#include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_agent_communication.h"
 #include "softbus_error_code.h"
@@ -26,6 +27,7 @@
 #define MAX_TRUST_INFO_NUM 20
 
 namespace OHOS {
+
 sptr<IRemoteObject> g_remoteProxy = nullptr;
 sptr<IRemoteObject> g_oldRemoteProxy = nullptr;
 static sptr<BusCenterServerProxy> g_serverProxy = nullptr;
@@ -1787,5 +1789,260 @@ int32_t BusCenterServerProxy::UnregisterConversationListener(const ConversationB
         return SOFTBUS_NETWORK_READINT32_FAILED;
     }
     return serverRet;
+}
+
+static bool WritePerceptionRequestHeader(
+    MessageParcel &data, const std::u16string &descriptor, const char *pkgName, PerceptionType type)
+{
+    if (!data.WriteInterfaceToken(descriptor)) {
+        LNN_LOGE(LNN_EVENT, "write interface token failed");
+        return false;
+    }
+    if (!data.WriteCString(pkgName)) {
+        LNN_LOGE(LNN_EVENT, "write pkgName failed");
+        return false;
+    }
+    if (!data.WriteInt32((int32_t)type)) {
+        LNN_LOGE(LNN_EVENT, "write type failed");
+        return false;
+    }
+    return true;
+}
+
+static int32_t ReadPerceptionReply(MessageParcel &reply)
+{
+    int32_t serverRet = SOFTBUS_IPC_ERR;
+    if (!reply.ReadInt32(serverRet)) {
+        LNN_LOGE(LNN_EVENT, "read serverRet failed");
+        return SOFTBUS_NETWORK_READINT32_FAILED;
+    }
+    return serverRet;
+}
+
+int32_t BusCenterServerProxy::StartPerceptionAdv(
+    const char *pkgName, PerceptionType type, const PerceptionAdvParam *param)
+{
+    if (pkgName == nullptr || param == nullptr || param->customDataLen > PERCEPTION_CUSTOM_DATA_MAX_LEN) {
+        LNN_LOGE(LNN_EVENT, "StartPerceptionAdv invalid param, customDataLen=%{public}u",
+            (param != nullptr) ? param->customDataLen : 0);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "StartPerceptionAdv remote is nullptr");
+        return SOFTBUS_NETWORK_REMOTE_NULL;
+    }
+    PerceptionAdvParam normalized {};
+    normalized.customDataLen = param->customDataLen;
+    if (param->customDataLen > 0 &&
+        memcpy_s(normalized.customData, sizeof(normalized.customData), param->customData,
+            param->customDataLen) != EOK) {
+        LNN_LOGE(LNN_EVENT, "StartPerceptionAdv copy customData failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    MessageParcel data;
+    if (!WritePerceptionRequestHeader(data, GetDescriptor(), pkgName, type) ||
+        !data.WriteRawData(&normalized, sizeof(normalized))) {
+        LNN_LOGE(LNN_EVENT, "StartPerceptionAdv write request parcel failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_START_PERCEPTION_ADV, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "StartPerceptionAdv send request failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return ReadPerceptionReply(reply);
+}
+
+int32_t BusCenterServerProxy::SetPerceptionAdvHighFreq(
+    const char *pkgName, PerceptionType type, const PerceptionAdvParam *param)
+{
+    if (pkgName == nullptr || param == nullptr || param->customDataLen > PERCEPTION_CUSTOM_DATA_MAX_LEN) {
+        LNN_LOGE(LNN_EVENT, "SetPerceptionAdvHighFreq invalid param, customDataLen=%{public}u",
+            (param != nullptr) ? param->customDataLen : 0);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "SetPerceptionAdvHighFreq remote is nullptr");
+        return SOFTBUS_NETWORK_REMOTE_NULL;
+    }
+    PerceptionAdvParam normalized {};
+    normalized.customDataLen = param->customDataLen;
+    if (param->customDataLen > 0) {
+        int32_t copyRet =
+            memcpy_s(normalized.customData, sizeof(normalized.customData), param->customData, param->customDataLen);
+        if (copyRet != EOK) {
+            LNN_LOGE(LNN_EVENT, "SetPerceptionAdvHighFreq copy customData failed, copyRet=%{public}d", copyRet);
+            return SOFTBUS_MEM_ERR;
+        }
+    }
+    MessageParcel data;
+    if (!WritePerceptionRequestHeader(data, GetDescriptor(), pkgName, type) ||
+        !data.WriteRawData(&normalized, sizeof(normalized))) {
+        LNN_LOGE(LNN_EVENT, "SetPerceptionAdvHighFreq write request parcel failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_SET_PERCEPTION_ADV_HIGH_FREQ, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "SetPerceptionAdvHighFreq send request failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return ReadPerceptionReply(reply);
+}
+
+int32_t BusCenterServerProxy::StopPerceptionAdv(const char *pkgName, PerceptionType type)
+{
+    if (pkgName == nullptr) {
+        LNN_LOGE(LNN_EVENT, "StopPerceptionAdv invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "StopPerceptionAdv remote is nullptr");
+        return SOFTBUS_NETWORK_REMOTE_NULL;
+    }
+    MessageParcel data;
+    if (!WritePerceptionRequestHeader(data, GetDescriptor(), pkgName, type)) {
+        LNN_LOGE(LNN_EVENT, "StopPerceptionAdv write request parcel failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_STOP_PERCEPTION_ADV, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "StopPerceptionAdv send request failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return ReadPerceptionReply(reply);
+}
+
+int32_t BusCenterServerProxy::StartPerceptionScan(const char *pkgName, PerceptionType type, PerceptionCycle cycle)
+{
+    if (pkgName == nullptr) {
+        LNN_LOGE(LNN_EVENT, "StartPerceptionScan invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "StartPerceptionScan remote is nullptr");
+        return SOFTBUS_NETWORK_REMOTE_NULL;
+    }
+    MessageParcel data;
+    if (!WritePerceptionRequestHeader(data, GetDescriptor(), pkgName, type) ||
+        !data.WriteInt32((int32_t)cycle)) {
+        LNN_LOGE(LNN_EVENT, "StartPerceptionScan write request parcel failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_START_PERCEPTION_SCAN, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "StartPerceptionScan send request failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return ReadPerceptionReply(reply);
+}
+
+int32_t BusCenterServerProxy::StopPerceptionScan(const char *pkgName, PerceptionType type)
+{
+    if (pkgName == nullptr) {
+        LNN_LOGE(LNN_EVENT, "StopPerceptionScan invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "StopPerceptionScan remote is nullptr");
+        return SOFTBUS_NETWORK_REMOTE_NULL;
+    }
+    MessageParcel data;
+    if (!WritePerceptionRequestHeader(data, GetDescriptor(), pkgName, type)) {
+        LNN_LOGE(LNN_EVENT, "StopPerceptionScan write request parcel failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_STOP_PERCEPTION_SCAN, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "StopPerceptionScan send request failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return ReadPerceptionReply(reply);
+}
+
+static int32_t ReadPerceptionDeviceList(MessageParcel &reply, PerceptionDeviceInfo **list, uint32_t *count)
+{
+    *list = nullptr;
+    *count = 0;
+    uint32_t required = 0;
+    if (!reply.ReadUint32(required)) {
+        LNN_LOGE(LNN_EVENT, "read perception device count failed");
+        return SOFTBUS_NETWORK_READINT32_FAILED;
+    }
+    if (required == 0) {
+        return SOFTBUS_OK;
+    }
+    if (required > PERCEPTION_MAX_DEVICE_NUM) {
+        LNN_LOGE(LNN_EVENT, "perception device count invalid, required=%{public}u", required);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    size_t listSize = required * sizeof(PerceptionDeviceInfo);
+    const void *raw = reply.ReadRawData(listSize);
+    if (raw == nullptr) {
+        LNN_LOGE(LNN_EVENT, "read perception device list failed, required=%{public}u", required);
+        return SOFTBUS_IPC_ERR;
+    }
+    *list = static_cast<PerceptionDeviceInfo *>(SoftBusCalloc(listSize));
+    if (*list == nullptr) {
+        LNN_LOGE(LNN_EVENT, "malloc perception device list failed, listSize=%{public}zu", listSize);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (memcpy_s(*list, listSize, raw, listSize) != EOK) {
+        LNN_LOGE(LNN_EVENT, "copy perception device list failed");
+        SoftBusFree(*list);
+        *list = nullptr;
+        return SOFTBUS_MEM_ERR;
+    }
+    *count = required;
+    return SOFTBUS_OK;
+}
+
+int32_t BusCenterServerProxy::GetPerceptionDeviceList(
+    const char *pkgName, PerceptionType type, PerceptionDeviceInfo **list, uint32_t *count)
+{
+    if (pkgName == nullptr || list == nullptr || count == nullptr) {
+        LNN_LOGE(LNN_EVENT, "GetPerceptionDeviceList invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "GetPerceptionDeviceList remote is nullptr");
+        return SOFTBUS_NETWORK_REMOTE_NULL;
+    }
+    MessageParcel data;
+    if (!WritePerceptionRequestHeader(data, GetDescriptor(), pkgName, type)) {
+        LNN_LOGE(LNN_EVENT, "GetPerceptionDeviceList write request parcel failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_GET_PERCEPTION_DEVICE_LIST, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "GetPerceptionDeviceList send request failed, ret=%{public}d", ret);
+        return ret;
+    }
+    int32_t serverRet = SOFTBUS_IPC_ERR;
+    if (!reply.ReadInt32(serverRet)) {
+        LNN_LOGE(LNN_EVENT, "read serverRet failed");
+        return SOFTBUS_NETWORK_READINT32_FAILED;
+    }
+    if (serverRet != SOFTBUS_OK) {
+        return serverRet;
+    }
+    return ReadPerceptionDeviceList(reply, list, count);
 }
 } // namespace OHOS

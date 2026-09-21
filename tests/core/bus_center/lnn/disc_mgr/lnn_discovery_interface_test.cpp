@@ -221,14 +221,14 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_STOP_DISC_DEVICE_TEST_001, TestSize.Leve
 
     EXPECT_CALL(discMock, DiscStopDiscovery).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest, 0);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(discMock, DiscStopDiscovery).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
     isInnerRequest = true;
     EXPECT_CALL(discMock, DiscStopAdvertise).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest, 0);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(discMock, DiscStopAdvertise).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnStopDiscDevice(pkgName, subscribeId, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -339,7 +339,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_COAP_DISCOVERY_TEST_001, TestSize.
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_CALL(discMock, DiscStopAdvertise).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnStopCoapDiscovery();
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_DISCOVER_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(discMock, DiscStopAdvertise).WillOnce(Return(SOFTBUS_OK));
     ret = LnnStopCoapDiscovery();
     EXPECT_EQ(ret, SOFTBUS_OK);

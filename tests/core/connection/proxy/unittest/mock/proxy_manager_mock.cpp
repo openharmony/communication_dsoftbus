@@ -65,14 +65,14 @@ void InitProxyChannelManagerWrapper(void)
     return mocker->InitProxyChannelManagerWrapper();
 }
 
-bool IsPairedDevice(const char *addr, bool isRealMac, bool *isSupportHfp)
+bool IsPairedDevice(const char *addr, bool isRealMac, bool *isSupportHfp, bool *isAclConnected)
 {
     auto mocker =  ProxyChannelMock::GetMock();
     if (mocker == nullptr) {
         CONN_LOGE(CONN_PROXY, "mock is nullptr");
         return false;
     }
-    return mocker->IsPairedDevice(addr, isRealMac, isSupportHfp);
+    return mocker->IsPairedDevice(addr, isRealMac, isSupportHfp, isAclConnected);
 }
 
 int32_t GetRealMac(char *realAddr, uint32_t realAddrLen, const char *hashAddr)
@@ -171,10 +171,16 @@ void ProxyChannelMock::TestBtSocketConnectionCallback(
     }
 }
 
-bool ProxyChannelMock::ActionOfIsPairedDevice(const char *addr,  bool isRealMac, bool *isSupportHfp)
+bool ProxyChannelMock::ActionOfIsPairedDevice(const char *addr,  bool isRealMac, bool *isSupportHfp,
+    bool *isAclConnected)
 {
+    (void)addr;
+    (void)isRealMac;
     if (isSupportHfp != nullptr) {
         *isSupportHfp = true;
+    }
+    if (isAclConnected != nullptr) {
+        *isAclConnected = true;
     }
     return true;
 }

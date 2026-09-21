@@ -1208,25 +1208,40 @@ int32_t UnRegisterBroadcaster(int32_t bcId)
     return SOFTBUS_OK;
 }
 
+typedef struct {
+    BaseServiceType srvType;
+    int32_t channel;
+} SrvTypeChannelMap;
+
+static const SrvTypeChannelMap SRV_TYPE_CHANNEL_MAP[] = {
+    { SRV_TYPE_LP_BURST,         CHANEL_LP             },
+    { SRV_TYPE_LP_HB,            CHANEL_LP             },
+    { SRV_TYPE_CONN,             CHANEL_STEADY         },
+    { SRV_TYPE_TRANS_MSG,        CHANEL_STEADY         },
+    { SRV_TYPE_AUTH_CONN,        CHANEL_STEADY         },
+    { SRV_TYPE_APPROACH,         CHANEL_STEADY         },
+    { SRV_TYPE_OH_APPROACH,      CHANEL_STEADY         },
+    { SRV_TYPE_FAST_OFFLINE,     CHANEL_STEADY         },
+    { SRV_TYPE_RAW,              CHANEL_STEADY         },
+    { SRV_TYPE_SHARE,            CHANEL_SHARE          },
+    { SRV_TYPE_TOUCH,            CHANEL_SHARE          },
+    { SRV_TYPE_HB,               CHANEL_UNSTEADY       },
+    { SRV_TYPE_DIS,              CHANEL_UNSTEADY       },
+    { SRV_TYPE_OOP,              CHANEL_UNSTEADY       },
+    { SRV_TYPE_SD,               CHANEL_UNSTEADY       },
+    { SRV_TYPE_COLLABORATION,    CHANEL_UNSTEADY       },
+    { SRV_TYPE_PERCEPTION,       CHANEL_UNSTEADY       },
+    { SRV_TYPE_D2D_PAGING,       CHANEL_SLE_D2D_PAGING },
+    { SRV_TYPE_D2D_GROUP_TALKIE, CHANEL_SLE_D2D_TALKIE },
+    { SRV_TYPE_VLINK,            CHANEL_VLINK          },
+};
+
 static int32_t GetSrvTypeIndex(BaseServiceType srvType)
 {
-    if (srvType == SRV_TYPE_LP_BURST || srvType == SRV_TYPE_LP_HB) {
-        return CHANEL_LP;
-    } else if (srvType == SRV_TYPE_CONN || srvType == SRV_TYPE_TRANS_MSG || srvType == SRV_TYPE_AUTH_CONN ||
-        srvType == SRV_TYPE_APPROACH || srvType == SRV_TYPE_OH_APPROACH || srvType == SRV_TYPE_FAST_OFFLINE ||
-        srvType == SRV_TYPE_RAW) {
-        return CHANEL_STEADY;
-    } else if (srvType == SRV_TYPE_SHARE || srvType == SRV_TYPE_TOUCH) {
-        return CHANEL_SHARE;
-    } else if (srvType == SRV_TYPE_HB || srvType == SRV_TYPE_DIS || srvType == SRV_TYPE_OOP ||
-        srvType == SRV_TYPE_SD || srvType == SRV_TYPE_COLLABORATION) {
-        return CHANEL_UNSTEADY;
-    } else if (srvType == SRV_TYPE_D2D_PAGING) {
-        return CHANEL_SLE_D2D_PAGING;
-    } else if (srvType == SRV_TYPE_D2D_GROUP_TALKIE) {
-        return CHANEL_SLE_D2D_TALKIE;
-    } else if (srvType == SRV_TYPE_VLINK) {
-        return CHANEL_VLINK;
+    for (size_t i = 0; i < sizeof(SRV_TYPE_CHANNEL_MAP) / sizeof(SRV_TYPE_CHANNEL_MAP[0]); ++i) {
+        if (SRV_TYPE_CHANNEL_MAP[i].srvType == srvType) {
+            return SRV_TYPE_CHANNEL_MAP[i].channel;
+        }
     }
     return CHANEL_UNKNOW;
 }
@@ -2376,6 +2391,17 @@ int32_t SetBroadcastingParam(int32_t bcId, const BroadcastParam *param)
     return PerformSetBroadcastingParam(bcId, &softbusBcParam);
 }
 
+static void LogStopSrvType(int32_t bcId)
+{
+    if (g_bcManager[bcId].srvType == SRV_TYPE_HB || g_bcManager[bcId].srvType == SRV_TYPE_LP_HB) {
+        DISC_LOGD(DISC_BROADCAST, "stop srvType=%{public}s, bcId=%{public}d",
+            GetSrvType(g_bcManager[bcId].srvType), bcId);
+    } else {
+        DISC_LOGI(DISC_BROADCAST, "stop srvType=%{public}s, bcId=%{public}d",
+            GetSrvType(g_bcManager[bcId].srvType), bcId);
+    }
+}
+
 int32_t StopBroadcasting(int32_t bcId)
 {
     int32_t ret = SoftBusMutexLock(&g_bcLock);
@@ -2386,20 +2412,17 @@ int32_t StopBroadcasting(int32_t bcId)
         return SOFTBUS_BC_MGR_INVALID_BC_ID;
     }
     BroadcastProtocol protocol = g_bcManager[bcId].protocol;
-
     if (!CheckProtocolIsValid(protocol) || CheckInterface(protocol, false) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BROADCAST, "interface check failed, bcId=%{public}d", bcId);
         SoftBusMutexUnlock(&g_bcLock);
         return SOFTBUS_INVALID_PARAM;
     }
-
     int64_t time = MgrGetSysTime();
     if (time - g_bcManager[bcId].time < BC_WAIT_TIME_MICROSEC) {
         int64_t diffTime = g_bcManager[bcId].time + BC_WAIT_TIME_MICROSEC - time;
         DISC_LOGW(DISC_BROADCAST, "wait %{public}d us", (int32_t)diffTime);
         usleep(diffTime);
     }
-
     if (!g_bcManager[bcId].isStarted) {
         DISC_LOGW(DISC_BROADCAST, "bcId is not start, bcId=%{public}d", bcId);
         SoftBusMutexUnlock(&g_bcLock);
@@ -2410,8 +2433,7 @@ int32_t StopBroadcasting(int32_t bcId)
         SoftBusMutexUnlock(&g_bcLock);
         return SOFTBUS_BC_MGR_INVALID_BC_ID;
     }
-
-    DISC_LOGI(DISC_BROADCAST, "stop srvType=%{public}s, bcId=%{public}d", GetSrvType(g_bcManager[bcId].srvType), bcId);
+    LogStopSrvType(bcId);
     BroadcastCallback callback = *(g_bcManager[bcId].bcCallback);
     SoftBusMutexUnlock(&g_bcLock);
     ret = g_interface[protocol]->StopBroadcasting(g_bcManager[bcId].adapterBcId);

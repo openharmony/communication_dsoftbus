@@ -104,6 +104,24 @@ typedef struct {
 } DiscSubscribeMsg;
 
 typedef struct {
+    char pkgName[PKG_NAME_SIZE_MAX];
+    PerceptionType type;
+    PerceptionAdvParam param;
+    bool active;
+} PerceptionAdvRecord;
+
+typedef struct {
+    char pkgName[PKG_NAME_SIZE_MAX];
+    PerceptionType type;
+    PerceptionCycle cycle;
+    bool active;
+} PerceptionScanRecord;
+
+static SoftBusMutex g_perceptionRecLock;
+static PerceptionAdvRecord g_perceptionAdvRecord;
+static PerceptionScanRecord g_perceptionScanRecord;
+
+typedef struct {
     ConversationBusiness info;
     ConversationListener listener;
     ListNode node;
@@ -688,6 +706,17 @@ static int32_t DiscoveryMsgListInit()
         (void)SoftBusMutexUnlock(&g_isInitedLock);
         return SOFTBUS_MALLOC_ERR;
     }
+    if (SoftBusMutexInit(&g_perceptionRecLock, NULL) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "init perception rec lock failed");
+        DestroySoftBusList(g_publishMsgList);
+        DestroySoftBusList(g_discoveryMsgList);
+        g_publishMsgList = NULL;
+        g_discoveryMsgList = NULL;
+        (void)SoftBusMutexUnlock(&g_isInitedLock);
+        return SOFTBUS_LOCK_ERR;
+    }
+    g_perceptionAdvRecord.active = false;
+    g_perceptionScanRecord.active = false;
     g_isInited = true;
     (void)SoftBusMutexUnlock(&g_isInitedLock);
     static uint32_t callCount = 0;
@@ -706,6 +735,9 @@ static int32_t DiscoveryMsgListDeInit()
     DestroySoftBusList(g_discoveryMsgList);
     g_publishMsgList = NULL;
     g_discoveryMsgList = NULL;
+    g_perceptionAdvRecord.active = false;
+    g_perceptionScanRecord.active = false;
+    (void)SoftBusMutexDestroy(&g_perceptionRecLock);
     g_isInited = false;
 
     LNN_LOGI(LNN_STATE, "disc list deinit success");
@@ -2073,6 +2105,54 @@ int32_t DiscRecoverySubscribe()
     return ret;
 }
 
+int32_t PerceptionRecoveryAdv(void)
+{
+    if (!g_isInited) {
+        LNN_LOGI(LNN_STATE, "no need recovery perception adv");
+        return SOFTBUS_OK;
+    }
+    LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_perceptionRecLock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, LNN_STATE, "lock failed");
+    int32_t ret = SOFTBUS_OK;
+    if (g_perceptionAdvRecord.active) {
+        ret = ServerIpcStartPerceptionAdv(g_perceptionAdvRecord.pkgName,
+            g_perceptionAdvRecord.type, &g_perceptionAdvRecord.param);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "recovery perception adv error, pkgName=%{public}s, ret=%{public}d",
+                g_perceptionAdvRecord.pkgName, ret);
+        } else {
+            LNN_LOGI(LNN_STATE, "recovery perception adv success, pkgName=%{public}s",
+                g_perceptionAdvRecord.pkgName);
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_perceptionRecLock);
+    return ret;
+}
+
+int32_t PerceptionRecoveryScan(void)
+{
+    if (!g_isInited) {
+        LNN_LOGI(LNN_STATE, "no need recovery perception scan");
+        return SOFTBUS_OK;
+    }
+    LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_perceptionRecLock) == SOFTBUS_OK,
+        SOFTBUS_LOCK_ERR, LNN_STATE, "lock failed");
+    int32_t ret = SOFTBUS_OK;
+    if (g_perceptionScanRecord.active) {
+        ret = ServerIpcStartPerceptionScan(g_perceptionScanRecord.pkgName,
+            g_perceptionScanRecord.type, g_perceptionScanRecord.cycle);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "recovery perception scan error, pkgName=%{public}s, ret=%{public}d",
+                g_perceptionScanRecord.pkgName, ret);
+        } else {
+            LNN_LOGI(LNN_STATE, "recovery perception scan success, pkgName=%{public}s",
+                g_perceptionScanRecord.pkgName);
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_perceptionRecLock);
+    return ret;
+}
+
 int32_t LnnConversationRecvMsg(const ConversationBusiness *info, const char *networkId,
     const char *data, uint32_t length)
 {
@@ -2329,4 +2409,99 @@ int32_t ClientOnCommandInner(int32_t code, const char *value, uint32_t inLen,
     result = cb.onCommand(code, value, inLen, res, resLen);
     LNN_LOGI(LNN_STATE, "res , res=%{public}s", res);
     return result;
+}
+
+int32_t StartPerceptionAdvInner(const char *pkgName, PerceptionType type, const PerceptionAdvParam *param)
+{
+    int32_t ret = ServerIpcStartPerceptionAdv(pkgName, type, param);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (SoftBusMutexLock(&g_perceptionRecLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "perception adv rec lock failed");
+        return SOFTBUS_OK;
+    }
+    if (strcpy_s(g_perceptionAdvRecord.pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
+        LNN_LOGE(LNN_STATE, "perception adv rec copy pkgName failed");
+    }
+    g_perceptionAdvRecord.type = type;
+    if (param != NULL) {
+        g_perceptionAdvRecord.param = *param;
+    }
+    g_perceptionAdvRecord.active = true;
+    (void)SoftBusMutexUnlock(&g_perceptionRecLock);
+    return SOFTBUS_OK;
+}
+
+int32_t SetPerceptionAdvHighFreqInner(const char *pkgName, PerceptionType type, const PerceptionAdvParam *param)
+{
+    int32_t ret = ServerIpcSetPerceptionAdvHighFreq(pkgName, type, param);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (SoftBusMutexLock(&g_perceptionRecLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "perception adv rec lock failed");
+        return SOFTBUS_OK;
+    }
+    if (g_perceptionAdvRecord.active && param != NULL) {
+        g_perceptionAdvRecord.param = *param;
+    }
+    (void)SoftBusMutexUnlock(&g_perceptionRecLock);
+    return SOFTBUS_OK;
+}
+
+int32_t StopPerceptionAdvInner(const char *pkgName, PerceptionType type)
+{
+    int32_t ret = ServerIpcStopPerceptionAdv(pkgName, type);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (SoftBusMutexLock(&g_perceptionRecLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "perception adv rec lock failed");
+        return SOFTBUS_OK;
+    }
+    g_perceptionAdvRecord.active = false;
+    (void)SoftBusMutexUnlock(&g_perceptionRecLock);
+    return SOFTBUS_OK;
+}
+
+int32_t StartPerceptionScanInner(const char *pkgName, PerceptionType type, PerceptionCycle cycle)
+{
+    int32_t ret = ServerIpcStartPerceptionScan(pkgName, type, cycle);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (SoftBusMutexLock(&g_perceptionRecLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "perception scan rec lock failed");
+        return SOFTBUS_OK;
+    }
+    if (strcpy_s(g_perceptionScanRecord.pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
+        LNN_LOGE(LNN_STATE, "perception scan rec copy pkgName failed");
+    }
+    g_perceptionScanRecord.type = type;
+    g_perceptionScanRecord.cycle = cycle;
+    g_perceptionScanRecord.active = true;
+    (void)SoftBusMutexUnlock(&g_perceptionRecLock);
+    return SOFTBUS_OK;
+}
+
+int32_t StopPerceptionScanInner(const char *pkgName, PerceptionType type)
+{
+    int32_t ret = ServerIpcStopPerceptionScan(pkgName, type);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (SoftBusMutexLock(&g_perceptionRecLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "perception scan rec lock failed");
+        return SOFTBUS_OK;
+    }
+    g_perceptionScanRecord.active = false;
+    (void)SoftBusMutexUnlock(&g_perceptionRecLock);
+    return SOFTBUS_OK;
+}
+
+int32_t GetPerceptionDeviceListInner(
+    const char *pkgName, PerceptionType type, PerceptionDeviceInfo **list, uint32_t *count)
+{
+    return ServerIpcGetPerceptionDeviceList(pkgName, type, list, count);
 }

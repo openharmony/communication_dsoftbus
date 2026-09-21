@@ -12,31 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef PERCEPTION_CONST_H
+#define PERCEPTION_CONST_H
 
-#include "proxy_manager.h"
+#define PERCEPTION_NORMAL_INTERVAL       432  // 270ms
+#define PERCEPTION_HIGH_INTERVAL         32   // 20ms
+#define PERCEPTION_HIGH_DURATION_MS         (10 * 1000)
+#define PERCEPTION_SCAN_POST_START_DELAY_MS 3000
 
-static uint32_t StubGenerateChannelId(void)
-{
-    static uint32_t channelId = 0;
-    return ++channelId;
-}
+#define PERCEPTION_INVALID_BC_ID       (-1)
+#define PERCEPTION_INVALID_LISTENER_ID (-1)
 
-static void StubClearProxyInfo(struct ProxyChannel *channel)
-{
-    (void)channel;
-}
+#define PERCEPTION_CYCLE_LOW_SEC     30
+#define PERCEPTION_CYCLE_MEDIUM_SEC  75
+#define PERCEPTION_CYCLE_HIGH_SEC    150
 
-void ClearFarFieldProxy(const char *addr)
-{
-    (void)addr;
-}
-
-static ProxyChannelManager g_stubProxyChannelManager = {
-    .generateChannelId = StubGenerateChannelId,
-    .clearProxyInfo = StubClearProxyInfo,
-};
-
-ProxyChannelManager *GetProxyChannelManager(void)
-{
-    return &g_stubProxyChannelManager;
-}
+#endif
