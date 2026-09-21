@@ -861,13 +861,13 @@ void ClientCheckWaitTimeOut(const ClientSessionServer *serverNode, SessionInfo *
         TRANS_LOGE(TRANS_SDK, "invalid param.");
         return;
     }
-    if (sessionNode->enableStatus == ENABLE_STATUS_SUCCESS && !IsRawAuthSession(serverNode->sessionName)) {
+    if ((sessionNode->enableStatus == ENABLE_STATUS_SUCCESS && !IsRawAuthSession(serverNode->sessionName)) ||
+        sessionNode->lifecycle.maxWaitTime == 0) {
         return;
     }
 
     sessionNode->lifecycle.waitTime += TIMER_TIMEOUT;
-    if (sessionNode->lifecycle.maxWaitTime == 0 ||
-        sessionNode->lifecycle.waitTime <= sessionNode->lifecycle.maxWaitTime) {
+    if (sessionNode->lifecycle.waitTime <= sessionNode->lifecycle.maxWaitTime) {
         TRANS_LOGD(TRANS_SDK, "no wait timeout, socket=%{public}d", sessionNode->sessionId);
         return;
     }
