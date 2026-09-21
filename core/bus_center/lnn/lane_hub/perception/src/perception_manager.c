@@ -76,7 +76,7 @@ static int32_t CheckLocalScanCapability(void)
         LNN_LOGE(LNN_STATE, "get local device type fail");
         return SOFTBUS_FUNC_NOT_SUPPORT;
     }
-    if (localDevTypeId != TYPE_PHONE_ID && localDevTypeId != TYPE_PAD_ID && localDevTypeId != TYPE_PC_ID) {
+    if (localDevTypeId != TYPE_PHONE_ID && localDevTypeId != TYPE_PAD_ID && localDevTypeId != TYPE_2IN1_ID) {
         LNN_LOGE(LNN_STATE, "perception scan not supported on device type=%{public}d", localDevTypeId);
         return SOFTBUS_FUNC_NOT_SUPPORT;
     }
