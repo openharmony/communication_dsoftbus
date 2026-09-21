@@ -1508,6 +1508,11 @@ HWTEST_F(BrProxyManagerTest, BrProxyManagerTest038, TestSize.Level1)
 HWTEST_F(BrProxyManagerTest, BrProxyManagerTest039, TestSize.Level1)
 {
     CONN_LOGI(CONN_PROXY, "BrProxyManagerTest039 in");
+    // Clean up any connections left by previous tests
+    ProxyChannelMock::InjectBtStateChanged(0, SOFTBUS_BR_STATE_TURN_OFF);
+    SoftBusSleepMs(1000);
+    ResetGlobalVariables();
+
     CleanupProxyChannelRequestInfo();
     ConstructProxyConnectionListConnecting();
     EXPECT_EQ(IsListEmpty(&GetBrProxyChannelManager()->proxyConnectionList->list), false);
@@ -1837,12 +1842,12 @@ HWTEST_F(BrProxyManagerTest, BrProxyManagerTest054, TestSize.Level1)
     CONN_LOGI(CONN_PROXY, "BrProxyManagerTest054 out");
 }
 
-/*
- * @tc.name: BrProxyManagerTest055
- * @tc.desc: test updateDevInfoReqIdUnsafe updates reconnect device requestId
- * @tc.type: FUNC
- * @tc.require:
- */
+ /*
+  * @tc.name: BrProxyManagerTest055
+  * @tc.desc: test updateDevInfoReqIdUnsafe updates reconnect device and proxyChannelRequestInfo requestId
+  * @tc.type: FUNC
+  * @tc.require:
+  */
 HWTEST_F(BrProxyManagerTest, BrProxyManagerTest055, TestSize.Level1)
 {
     CONN_LOGI(CONN_PROXY, "BrProxyManagerTest055 in");
@@ -1857,6 +1862,10 @@ HWTEST_F(BrProxyManagerTest, BrProxyManagerTest055, TestSize.Level1)
     ASSERT_NE(g_channelId, 0);
     ASSERT_TRUE(HasReconnectDevice());
 
+    // set proxyChannelRequestInfo with matching brMac to exercise the new connectingChannel update path
+    CleanupProxyChannelRequestInfo();
+    ConstructProxyConnectInfo("11:22:33:44:55:66", 100);
+
     constexpr uint32_t NEW_REQ_ID = 8888;
     GetBrProxyChannelManager()->updateDevInfoReqIdUnsafe("11:22:33:44:55:66", NEW_REQ_ID);
     SoftBusSleepMs(500);
@@ -1866,7 +1875,11 @@ HWTEST_F(BrProxyManagerTest, BrProxyManagerTest055, TestSize.Level1)
         gotReqId = it->requestId;
     }
     EXPECT_EQ(gotReqId, NEW_REQ_ID);
+    // proxyChannelRequestInfo requestId should also be updated when brMac matches
+    ASSERT_NE(GetBrProxyChannelManager()->proxyChannelRequestInfo, nullptr);
+    EXPECT_EQ(GetBrProxyChannelManager()->proxyChannelRequestInfo->requestId, NEW_REQ_ID);
 
+    CleanupProxyChannelRequestInfo();
     ProxyChannel proxyChannel = { .channelId = g_channelId };
     g_channel->close(&proxyChannel, true);
     SoftBusSleepMs(1000);

@@ -1372,6 +1372,10 @@ void UpdateDevInfoReqIdUnsafe(const char *brMac, uint32_t newReqId)
     ProxyConnectInfo *connectInfo = GetReconnectDeviceInfoByAddrUnsafe(brMac);
     CONN_CHECK_AND_RETURN_LOGE(connectInfo != NULL, CONN_PROXY, "not exist same addr");
     connectInfo->requestId = newReqId;
+    ProxyConnectInfo *connectingChannel = GetBrProxyChannelManager()->proxyChannelRequestInfo;
+    if (connectingChannel != NULL && StrCmpIgnoreCase(connectingChannel->brMac, brMac) == 0) {
+        connectingChannel->requestId = newReqId;
+    }
 }
 
 void ClearDevInfoUnsafe(struct ProxyChannel *channel)
