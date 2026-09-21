@@ -918,3 +918,13 @@ void BusCenterServerDeathCallback(const char *pkgName)
     StopTimeSyncReq(pkgName);
     SdMgrDeathCallbackPacked(pkgName);
 }
+
+int32_t LnnIpcNotifyCommandToDm(const char *pkgName, int32_t code, const char *value, uint32_t inLen)
+{
+    (void)pkgName;
+    (void)code;
+    (void)value;
+    (void)inLen;
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}

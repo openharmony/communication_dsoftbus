@@ -1527,3 +1527,11 @@ bool IsExistUkInAclProfile(const char *localUdid, const char *peerUdid)
     }
     return false;
 }
+
+int32_t LnnNotifyCommandToDmAuthPassed(const char *peerUdid, int32_t peerUserId, const char *credId)
+{
+    (void)peerUdid;
+    (void)peerUserId;
+    (void)credId;
+    return SOFTBUS_NOT_IMPLEMENT;
+}

@@ -1046,6 +1046,14 @@ int32_t CreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *con
  * @version 1.0
  */
 void DestroyGroupOwner(const char *pkgName);
+
+typedef struct {
+    int32_t (*onCommand)(int32_t code, const char *value, uint32_t inLen,
+        char *res, uint32_t resLen);
+} ITrustedDeviceCb;
+
+int32_t SetCommand(int32_t code, const char *value, uint32_t inLen);
+int32_t RegisterCommandCb(const char *pkgName, ITrustedDeviceCb *cb);
 #ifdef __cplusplus
 }
 #endif

@@ -67,4 +67,8 @@ void ServerIpcDestroyGroupOwner(const char *pkgName);
 #endif /* __cplusplus */
 #endif /* __cplusplus */
 
+
+int32_t ServerIpcSetCommand(int32_t code, const char *value, uint32_t inLen);
+int32_t ServerIpcRegisterCommandCb(const char *pkgName);
+
 #endif // BUS_CENTER_SERVER_PROXY_H

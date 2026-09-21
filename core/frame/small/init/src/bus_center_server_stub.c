@@ -26,6 +26,7 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_permission.h"
+#include "softbus_server_ipc_interface_code.h"
 
 static int32_t CheckPermission(const char *pkgName, int32_t uid)
 {
@@ -727,4 +728,46 @@ int32_t ServerUnregRangeCbForMsdp(IpcIo *req, IpcIo *reply)
     (void)req;
     (void)reply;
     return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerSetCommand(IpcIo *req, IpcIo *reply)
+{
+    int32_t code = 0;
+    size_t len = 0;
+    if (!ReadInt32(req, &code)) {
+        LNN_LOGE(LNN_STATE, "read code failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *value = (const char *)ReadString(req, &len);
+    if (value == NULL || len == 0) {
+        LNN_LOGE(LNN_STATE, "read value failed, len=%{public}zu", len);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t inLen = (uint32_t)len;
+    int32_t callingUid = GetCallingUid();
+    int32_t ret = LnnIpcSetCommand(code, value, inLen, (uint32_t)callingUid);
+    if (!WriteInt32(reply, ret)) {
+        return SOFTBUS_NETWORK_WRITEINT32_FAILED;
+    }
+    return ret;
+}
+ 
+int32_t ServerRegisterCommandCb(IpcIo *req, IpcIo *reply)
+{
+    size_t length;
+    const char *pkgName = (const char *)ReadString(req, &length);
+    if (pkgName == NULL || length >= PKG_NAME_SIZE_MAX) {
+        LNN_LOGE(LNN_STATE, "read pkgName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcmp(LNN_DM_PKG_NAME, pkgName) != 0) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t callingUid = GetCallingUid();
+    if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "no permission");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    int32_t ret = LnnIpcRegisterCommandCb(pkgName, (uint32_t)callingUid);
+    return ret;
 }

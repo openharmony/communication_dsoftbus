@@ -1774,3 +1774,62 @@ int32_t DiscRecoverySubscribe()
     (void)SoftBusMutexUnlock(&(g_discoveryMsgList->lock));
     return ret;
 }
+
+static ITrustedDeviceCb g_commandCb;
+ 
+int32_t SetCommandInner(int32_t code, const char *value, uint32_t inLen)
+{
+    if (value == NULL || inLen == 0) {
+        LNN_LOGE(LNN_STATE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        return SOFTBUS_NO_INIT;
+    }
+    return ServerIpcSetCommand(code, value, inLen);
+}
+ 
+int32_t RegisterCommandCbInner(const char *pkgName, ITrustedDeviceCb *cb)
+{
+    if (pkgName == NULL || cb == NULL || cb->onCommand == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "buscenter client not init");
+        return SOFTBUS_NO_INIT;
+    }
+    int32_t ret = SoftBusMutexLock(&g_busCenterClient.lock);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    g_commandCb.onCommand = cb->onCommand;
+    (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
+    LNN_LOGI(LNN_STATE, "register command cb succ");
+    return ServerIpcRegisterCommandCb(pkgName);
+}
+ 
+int32_t ClientOnCommandInner(int32_t code, const char *value, uint32_t inLen,
+    char *res, uint32_t resLen)
+{
+    if (value == NULL || inLen == 0) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = SoftBusMutexLock(&g_busCenterClient.lock);
+    if (ret != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    ITrustedDeviceCb cb = g_commandCb;
+    (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
+    if (cb.onCommand == NULL) {
+        LNN_LOGW(LNN_STATE, "command cb not registered");
+        return SOFTBUS_NOT_FIND;
+    }
+    LNN_LOGI(LNN_STATE, "invoke onCommand, code=%{public}d", code);
+    int32_t result;
+    result = cb.onCommand(code, value, inLen, res, resLen);
+    LNN_LOGI(LNN_STATE, "res , res=%{public}s", res);
+    return result;
+}

@@ -109,4 +109,10 @@ int32_t DiscRecoverySubscribe(void);
 #ifdef __cplusplus
 }
 #endif
+
+int32_t SetCommandInner(int32_t code, const char *value, uint32_t inLen);
+int32_t RegisterCommandCbInner(const char *pkgName, ITrustedDeviceCb *cb);
+int32_t ClientOnCommandInner(int32_t code, const char *value, uint32_t inLen,
+    char *res, uint32_t resLen);
+
 #endif

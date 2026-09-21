@@ -15,6 +15,18 @@
 
 #include "auth_deviceprofile.h"
 
+#include <cstring>
+
+#include "bus_center_manager.h"
+#include "cJSON.h"
+#include "lnn_bus_center_ipc.h"
+#include "lnn_local_net_ledger.h"
+#include "lnn_log.h"
+#include "lnn_ohos_account_adapter.h"
+#include "softbus_error_code.h"
+#include "softbus_json_utils.h"
+
+extern "C" {
 bool IsPotentialTrustedDeviceDp(const char *deviceIdHash, bool isOnlyPointToPoint)
 {
     (void)deviceIdHash;
@@ -151,3 +163,80 @@ int32_t GetAccessUkIdByGroupShare(const AuthACLInfo *acl, int32_t *ukId, uint64_
     (void)time;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+static char *PackCommandAclMsg(const char *peerUdid, int32_t peerUserId, const char *credId)
+{
+    int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
+    const NodeInfo *localNode = LnnGetLocalNodeInfo();
+    const char *localUdid = (localNode != nullptr) ? localNode->deviceInfo.deviceUdid : "";
+    const char *localName = (localNode != nullptr) ? localNode->deviceInfo.deviceName : "";
+    cJSON *json = cJSON_CreateObject();
+    if (json == nullptr) {
+        LNN_LOGE(LNN_STATE, "create json object fail");
+        return nullptr;
+    }
+    (void)AddNumberToJsonObject(json, ACL_KEY_BIND_TYPE, ACL_BIND_TYPE_P2P);
+    (void)AddNumberToJsonObject(json, ACL_KEY_AUTH_TYPE, ACL_AUTH_TYPE_ACROSS_ACCOUNT);
+    (void)AddNumberToJsonObject(json, ACL_KEY_BIND_LEVEL, ACL_BIND_LEVEL_APP);
+    (void)AddStringToJsonObject(json, ACL_KEY_TRUST_DEVICE_ID, peerUdid);
+    cJSON *accesser = cJSON_CreateObject();
+    if (accesser != nullptr) {
+        (void)AddStringToJsonObject(accesser, ACL_KEY_DEVICE_ID, localUdid);
+        (void)AddNumberToJsonObject(accesser, ACL_KEY_USER_ID, localUserId);
+        (void)AddStringToJsonObject(accesser, ACL_KEY_ACCOUNT_ID, "-1");
+        (void)AddNumberToJsonObject(accesser, ACL_KEY_TOKEN_ID, 0);
+        (void)AddStringToJsonObject(accesser, ACL_KEY_BUNDLE_NAME, "softbus_auth");
+        (void)AddStringToJsonObject(accesser, ACL_KEY_DEVICE_NAME, localName);
+        (void)AddStringToJsonObject(accesser, ACL_KEY_CREDENTIAL_ID, credId);
+        cJSON_AddItemToObject(json, ACL_KEY_ACCESSER, accesser);
+    }
+    cJSON *accessee = cJSON_CreateObject();
+    if (accessee != nullptr) {
+        (void)AddStringToJsonObject(accessee, ACL_KEY_DEVICE_ID, peerUdid);
+        (void)AddNumberToJsonObject(accessee, ACL_KEY_USER_ID, peerUserId);
+        (void)AddStringToJsonObject(accessee, ACL_KEY_ACCOUNT_ID, "-1");
+        (void)AddNumberToJsonObject(accessee, ACL_KEY_TOKEN_ID, 0);
+        (void)AddStringToJsonObject(accessee, ACL_KEY_BUNDLE_NAME, "-1");
+        (void)AddStringToJsonObject(accessee, ACL_KEY_DEVICE_NAME, "-1");
+        (void)AddStringToJsonObject(accessee, ACL_KEY_CREDENTIAL_ID, "-1");
+        cJSON_AddItemToObject(json, ACL_KEY_ACCESSEE, accessee);
+    }
+    char *value = cJSON_PrintUnformatted(json);
+    cJSON_Delete(json);
+    if (value == nullptr) {
+        LNN_LOGE(LNN_STATE, "print json to string fail");
+    }
+    return value;
+}
+
+#ifdef __LITEOS_M__
+int32_t LnnNotifyCommandToDmAuthPassed(const char *peerUdid, int32_t peerUserId, const char *credId)
+{
+    (void)peerUdid;
+    (void)peerUserId;
+    (void)credId;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+#else
+int32_t LnnNotifyCommandToDmAuthPassed(const char *peerUdid, int32_t peerUserId, const char *credId)
+{
+    const char *credIdSafe = (credId != nullptr && credId[0] != '\0') ? credId : "-1";
+    if (peerUdid == nullptr || peerUdid[0] == '\0') {
+        LNN_LOGE(LNN_STATE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!LnnIsCommandCbRegistered()) {
+        LNN_LOGW(LNN_STATE, "command cb not registered, skip notify");
+        return SOFTBUS_OK;
+    }
+    char *value = PackCommandAclMsg(peerUdid, peerUserId, credIdSafe);
+    if (value == nullptr) {
+        return SOFTBUS_CREATE_JSON_ERR;
+    }
+    int32_t ret = LnnIpcNotifyCommandToDm(LnnGetCommandPkgName(), 0, value, (uint32_t)strlen(value) + 1);
+    LNN_LOGI(LNN_STATE, "LnnIpcNotifyCommandToDm ret=%{public}d", ret);
+    cJSON_free(value);
+    return ret;
+}
+#endif
+} // extern "C"
