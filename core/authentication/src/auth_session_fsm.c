@@ -2395,17 +2395,24 @@ int32_t AuthSessionGetUserId(int64_t authSeq)
 
 int32_t AuthSessionGetSourceUserId(int64_t authSeq)
 {
+    if (!RequireAuthLock()) {
+        return DEFAULT_USERID;
+    }
+    AuthFsm *authFsm = GetAuthFsmByAuthSeq(authSeq);
+    if (authFsm == NULL) {
+        AUTH_LOGE(AUTH_FSM, "auth fsm not found. authSeq=%{public}" PRId64 "", authSeq);
+        ReleaseAuthLock();
+        return DEFAULT_USERID;
+    }
     int32_t sourceUserId = 0;
-    AuthSessionInfo info = { 0 };
-    if (GetSessionInfoFromAuthFsm(authSeq, &info) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "get auth fsm session info fail");
+    if (authFsm->info.credNegoState == CRED_NEGO_STATE_COMPATIBLE) {
+        ReleaseAuthLock();
         return DEFAULT_USERID;
     }
-    if (info.credNegoState == CRED_NEGO_STATE_COMPATIBLE) {
-        return DEFAULT_USERID;
-    }
-    if (GetJsonObjectNumberItem(info.credTypeInfo, SOURCE_USERID, &sourceUserId)) {
+    if (GetJsonObjectNumberItem(authFsm->info.credTypeInfo, SOURCE_USERID, &sourceUserId)) {
+        ReleaseAuthLock();
         return sourceUserId;
     }
+    ReleaseAuthLock();
     return DEFAULT_USERID;
 }

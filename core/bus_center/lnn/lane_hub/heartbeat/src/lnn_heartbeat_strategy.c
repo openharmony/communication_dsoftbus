@@ -1050,7 +1050,7 @@ int32_t LnnGetMediumParamBySpecificType(LnnHeartbeatMediumParam *param, LnnHeart
         LNN_LOGE(LNN_HEART_BEAT, "HB get medium param get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (memset_s(param, sizeof(LnnHeartbeatMediumParam), 0, sizeof(LnnHeartbeatMediumParam) != EOK)) {
+    if (memset_s(param, sizeof(LnnHeartbeatMediumParam), 0, sizeof(LnnHeartbeatMediumParam)) != EOK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB get medium param memset_s err");
         return SOFTBUS_MEM_ERR;
     }
@@ -1153,6 +1153,7 @@ int32_t LnnStartNewHbStrategyFsm(void)
 #endif
     if (LnnStartHeartbeatFsm(hbFsm) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB start strategy fsm start fsm fail");
+        (void)LnnStopHeartbeatFsm(hbFsm);
         return SOFTBUS_NETWORK_FSM_START_FAIL;
     }
     g_hbFsm = hbFsm;

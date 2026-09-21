@@ -181,7 +181,7 @@ void OnReceiveSleMacChangedMsg(LnnSyncInfoType type, const char *networkId, cons
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_LEDGER, "OnReceiveSleMacChangedMsg networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
-    char sleMacSync [MAC_LEN];
+    char sleMacSync [MAC_LEN] = { 0 };
     int32_t sleCapSync = 0;
     cJSON *json = cJSON_Parse((char *)msg);
     if (json == NULL) {

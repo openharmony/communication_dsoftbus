@@ -1687,10 +1687,11 @@ int32_t UpdateNodeFromPcRestrictMap(const char *udidHash)
         return SOFTBUS_NOT_FIND;
     }
     *tempCount = ++(*tempCount);
+    uint32_t printTempCount = *tempCount;
     (void)SoftBusMutexUnlock(&g_lnnDfxPcMutex);
     char *anonyUdid = NULL;
     Anonymize(udidHash, &anonyUdid);
-    LNN_LOGI(LNN_BUILDER, "update %{public}s succ count=%{public}u", AnonymizeWrapper(anonyUdid), *tempCount);
+    LNN_LOGI(LNN_BUILDER, "update %{public}s succ count=%{public}u", AnonymizeWrapper(anonyUdid), printTempCount);
     AnonymizeFree(anonyUdid);
     return SOFTBUS_OK;
 }

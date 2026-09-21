@@ -254,7 +254,8 @@ int32_t SoftBusAesCfbEncrypt(
         encryptData.data = NULL;
         return SOFTBUS_ENCRYPT_ERR;
     }
-
+    (void)memset_s(random, sizeof(random), 0, sizeof(random));
+    (void)memset_s(result, sizeof(result), 0, sizeof(result));
     outData->data = encryptData.data;
     outData->len = encryptData.len;
     return SOFTBUS_OK;

@@ -349,6 +349,7 @@ int32_t SoftBusRsaDecrypt(
     }
     if (HksDecrypt(&g_rsaKeyAlias, paramSet, &encryptedBlob, &decryptedBlob) != HKS_SUCCESS) {
         COMM_LOGE(COMM_UTILS, "HksDecrypt failed.");
+        (void)memset_s(decryptedBlob.data, decryptedBlob.size, 0, decryptedBlob.size);
         HksFreeParamSet(&paramSet);
         SoftBusFree(decryptedBlob.data);
         return SOFTBUS_DECRYPT_ERR;
