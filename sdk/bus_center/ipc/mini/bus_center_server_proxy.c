@@ -311,3 +311,4 @@ int32_t ServerIpcGetPerceptionDeviceList(
     if (count != NULL) {
         *count = 0;
     }
+}
