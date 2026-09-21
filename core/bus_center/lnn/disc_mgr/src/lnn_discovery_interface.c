@@ -70,14 +70,14 @@ int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInner
         if ((ret = DiscUnPublishService(pkgName, publishId, callingPid)) != SOFTBUS_OK) {
             DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_PUBLISH, pkgName, ret);
             LNN_LOGD(LNN_BUILDER, "DiscUnPublishService failed\n");
-            return SOFTBUS_DISCOVER_COAP_STOP_PUBLISH_FAIL;
+            return ret;
         }
         return SOFTBUS_OK;
     }
     if ((ret = DiscUnpublish(MODULE_LNN, publishId, callingPid)) != SOFTBUS_OK) {
         DfxRecordLnnDiscServiceEnd(DISC_SERVER_STOP_PUBLISH, LNN_DEFAULT_PKG_NAME, ret);
         LNN_LOGE(LNN_BUILDER, "DiscUnpublish fail!\n");
-        return SOFTBUS_DISCOVER_COAP_STOP_PUBLISH_FAIL;
+        return ret;
     }
     return SOFTBUS_OK;
 }

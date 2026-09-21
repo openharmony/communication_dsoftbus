@@ -152,14 +152,14 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_UNPUBLISH_SERVICE_TEST_001, TestSize.Lev
 
     EXPECT_CALL(discMock, DiscUnPublishService).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnUnPublishService(pkgName, publishId, isInnerRequest, 0);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_PUBLISH_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(discMock, DiscUnPublishService).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnUnPublishService(pkgName, publishId, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
     isInnerRequest = true;
     EXPECT_CALL(discMock, DiscUnpublish).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnUnPublishService(pkgName, publishId, isInnerRequest, 0);
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_PUBLISH_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(discMock, DiscUnpublish).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnUnPublishService(pkgName, publishId, isInnerRequest, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -364,7 +364,7 @@ HWTEST_F(LNNDiscoveryInterfaceTest, LNN_START_COAP_PUBLISH_TEST_001, TestSize.Le
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_CALL(discMock, DiscUnpublish).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnStopCoapPublish();
-    EXPECT_EQ(ret, SOFTBUS_DISCOVER_COAP_STOP_PUBLISH_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     EXPECT_CALL(discMock, DiscUnpublish).WillOnce(Return(SOFTBUS_OK));
     ret = LnnStopCoapPublish();
     EXPECT_EQ(ret, SOFTBUS_OK);
