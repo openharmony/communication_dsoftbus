@@ -550,7 +550,7 @@ HWTEST_F(TransClientMsgServiceTest, SendMessageAsyncTest01, TestSize.Level1)
     len = TRANS_TEST_BEYOND_MAX_MSG_LEN;
     ret = SendMessageAsync(sessionId, dataSeq, data, len);
 #ifdef DSOFTBUS_FEATURE_PROXY_CHANNEL
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
 #else
     EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
 #endif

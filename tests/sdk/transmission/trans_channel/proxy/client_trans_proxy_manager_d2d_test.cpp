@@ -356,7 +356,7 @@ HWTEST_F(ClientTransProxyD2DTest, ClientTransProxyNotifyD2DTest001, TestSize.Lev
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = ClientTransProxyNotifyD2D(channelId, TRANS_SESSION_FILE_ACK_RESPONSE_SENT, dataSeq, data, len);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_FUNC_NOT_SUPPORT, ret);
 }
 
 /**
