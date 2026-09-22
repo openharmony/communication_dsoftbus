@@ -228,7 +228,7 @@ ohos_unittest("TransClientSessionCallbackTest") {
   }
   module_out_path = module_output_path
   defines = []
-  if (dsoftbus_feature_trans_file) {
+  if (dsoftbus_feature_trans_proxy_file || dsoftbus_feature_trans_udp_file) {
     defines += [ "DSOFTBUS_FEATURE_TRANS_FILE" ]
   }
   sources = [ "client_trans_session_callback_test.cpp" ]
@@ -349,7 +349,7 @@ ohos_unittest("TransClientSessionCallbackExTest") {
 ohos_unittest("TransClientMsgServiceTest") {
   module_out_path = module_output_path
   defines = []
-  if (dsoftbus_feature_trans_file) {
+  if (dsoftbus_feature_trans_proxy_file || dsoftbus_feature_trans_udp_file) {
     defines += [ "DSOFTBUS_FEATURE_TRANS_FILE" ]
   }
   sources = [ "client_trans_message_service_test.cpp" ]
@@ -463,7 +463,7 @@ ohos_unittest("TransClientSessionTest") {
   }
   module_out_path = module_output_path
   defines = []
-  if (dsoftbus_feature_trans_file) {
+  if (dsoftbus_feature_trans_proxy_file || dsoftbus_feature_trans_udp_file) {
     defines += [ "DSOFTBUS_FEATURE_TRANS_FILE" ]
   }
   sources = [ "client_trans_session_test.cpp" ]

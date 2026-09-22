@@ -18,7 +18,7 @@ import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
-if (dsoftbus_feature_trans_file) {
+if (dsoftbus_feature_trans_proxy_file) {
 ohos_fuzztest("ClientTransProxyFileManagerFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
 
@@ -61,7 +61,7 @@ ohos_fuzztest("ClientTransProxyFileManagerFuzzTest") {
 group("fuzztest") {
   testonly = true
   deps = []
-  if (dsoftbus_feature_trans_file) {
+  if (dsoftbus_feature_trans_proxy_file) {
     deps += [
       # deps file
       ":ClientTransProxyFileManagerFuzzTest",
