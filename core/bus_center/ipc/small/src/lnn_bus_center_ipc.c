@@ -29,6 +29,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "softbus_server_ipc_interface_code.h"
 #include "softbus_utils.h"
 
 typedef struct {
@@ -509,11 +510,12 @@ void BusCenterServerDeathCallback(const char *pkgName)
 
 int32_t LnnIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
 {
-    (void)pkgName;
-    (void)nameData;
-    (void)len;
-    LNN_LOGI(LNN_EVENT, "not implement");
-    return SOFTBUS_OK;
+    if (pkgName == NULL || nameData == NULL || len == 0 || len >= MAX_SOFT_BUS_IPC_LEN) {
+        LNN_LOGE(LNN_EVENT, "lnnIpc invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LnnDisSetDisplayName(pkgName, nameData, len);
+    return ret;
 }
 
 int32_t LnnIpcCreateGroupOwner(const char *pkgName, int32_t callingPid, const struct GroupOwnerConfig *config,

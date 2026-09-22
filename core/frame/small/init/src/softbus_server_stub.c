@@ -218,6 +218,7 @@ const ServerInvokeCmd g_serverInvokeCmdTbl[] = {
     { SERVER_PRIVILEGE_CLOSE_CHANNEL, ServerPrivilegeCloseChannel },
     { SERVER_SET_COMMAND, ServerSetCommand },
     { SERVER_REGISTER_COMMAND_CB, ServerRegisterCommandCb },
+    { SERVER_SET_DISPLAY_NAME, ServerSetDisplayName },
 };
 
 static int32_t Invoke(IServerProxy *iProxy, int funcId, void *origin, IpcIo *req, IpcIo *reply)

@@ -316,6 +316,33 @@ int32_t ServerSetDataLevel(IpcIo *req, IpcIo *reply)
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
+int32_t ServerSetDisplayName(IpcIo *req, IpcIo *reply)
+{
+    size_t length;
+    const char *pkgName = (const char *)ReadString(req, &length);
+    if (pkgName == NULL || length >= PKG_NAME_SIZE_MAX) {
+        LNN_LOGE(LNN_STATE, "read pkgName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcmp(LNN_DM_PKG_NAME, pkgName) != 0) {
+        LNN_LOGE(LNN_STATE, "DM check fail, pkgName=%{public}s", pkgName);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t callingUid = GetCallingUid();
+    if (CheckPermission(pkgName, callingUid) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "no permission, uid=%{public}d", callingUid);
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    const char *nameData = (const char *)ReadString(req, &length);
+    if (nameData == NULL || length == 0 || length >= MAX_SOFT_BUS_IPC_LEN) {
+        LNN_LOGE(LNN_STATE, "read nameData failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LnnIpcSetDisplayName(pkgName, nameData, (uint32_t)length);
+    LNN_LOGI(LNN_STATE, "LnnIpcSetDisplayName ret=%{public}d", ret);
+    return ret;
+}
+
 int32_t ServerStartTimeSync(IpcIo *req, IpcIo *reply)
 {
     LNN_LOGD(LNN_STATE, "ipc server pop");

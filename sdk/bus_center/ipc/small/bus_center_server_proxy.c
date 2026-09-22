@@ -860,10 +860,28 @@ int32_t ServerIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, u
 
 int32_t ServerIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
 {
-    (void)pkgName;
-    (void)nameData;
-    (void)len;
-    return SOFTBUS_FUNC_NOT_SUPPORT;
+    if (pkgName == NULL || nameData == NULL || len == 0 || len >= MAX_SOFT_BUS_IPC_LEN) {
+        LNN_LOGW(LNN_EVENT, "sdk invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_serverProxy == NULL) {
+        LNN_LOGE(LNN_EVENT, "sdk g_serverProxy is nullptr");
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+
+    uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
+    IpcIo request = {0};
+    IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
+    WriteString(&request, pkgName);
+    WriteString(&request, nameData);
+    /* asynchronous invocation */
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_SET_DISPLAY_NAME, &request, NULL, NULL);
+    LNN_LOGI(LNN_EVENT, "sdk invoke ret=%{public}d", ans);
+    if (ans != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "SetDisplayName invoke failed=%{public}d", ans);
+        return SOFTBUS_NETWORK_PROXY_INVOKE_FAILED;
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t ServerIpcCreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
