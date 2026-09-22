@@ -38,6 +38,7 @@ int32_t ServerUnregDataLevelChangeCb(IpcIo *req, IpcIo *reply);
 int32_t ServerSetDataLevel(IpcIo *req, IpcIo *reply);
 int32_t ServerStartTimeSync(IpcIo *req, IpcIo *reply);
 int32_t ServerStopTimeSync(IpcIo *req, IpcIo *reply);
+int32_t ServerSetDisplayName(IpcIo *req, IpcIo *reply);
 int32_t ServerPublishLNN(IpcIo *req, IpcIo *reply);
 int32_t ServerStopPublishLNN(IpcIo *req, IpcIo *reply);
 int32_t ServerRefreshLNN(IpcIo *req, IpcIo *reply);
