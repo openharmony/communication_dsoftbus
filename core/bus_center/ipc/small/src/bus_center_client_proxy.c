@@ -17,6 +17,7 @@
 
 #include <securec.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "ipc_skeleton.h"
 #include "lnn_log.h"
@@ -341,6 +342,46 @@ int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void 
     if (ans != SOFTBUS_OK) {
         LNN_LOGE(LNN_EVENT, "SendRequest failed, ans=%{public}d", ans);
         return SOFTBUS_NETWORK_SEND_REQUEST_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ClientOnCommand(const char *pkgName, int32_t code, const char *value)
+{
+    if (pkgName == NULL || value == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strlen(value) + 1 > MAX_SOFT_BUS_IPC_LEN_EX) {
+        LNN_LOGE(LNN_EVENT, "command value too large, len=%{public}u", (uint32_t)strlen(value));
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SvcIdentity svc;
+    if (GetSvcIdentityByPkgName(pkgName, &svc) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_EVENT, "command subscriber not found");
+        return SOFTBUS_NOT_FIND;
+    }
+    IpcIo io;
+    uint8_t tmpData[MAX_SOFT_BUS_IPC_LEN_EX];
+    IpcIoInit(&io, tmpData, MAX_SOFT_BUS_IPC_LEN_EX, 0);
+    if (!WriteInt32(&io, code)) {
+        LNN_LOGE(LNN_EVENT, "write code fail");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!WriteString(&io, value)) {
+        LNN_LOGE(LNN_EVENT, "write value fail, overflow");
+
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint8_t replyData[MAX_SOFT_BUS_IPC_LEN_EX] = {0};
+    IpcIo reply = {0};
+    IpcIoInit(&reply, replyData, MAX_SOFT_BUS_IPC_LEN_EX, 0);
+    MessageOption option;
+    MessageOptionInit(&option);
+    option.flags = TF_OP_SYNC;
+    int32_t ans = SendRequest(svc, CLIENT_ON_COMMAND, &io, &reply, option, NULL);
+    if (ans != SOFTBUS_OK) {
+        LNN_LOGW(LNN_EVENT, "send command failed, ans=%{public}d", ans);
+        return ans;
     }
     return SOFTBUS_OK;
 }

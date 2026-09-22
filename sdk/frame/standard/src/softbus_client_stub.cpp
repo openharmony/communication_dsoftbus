@@ -1130,4 +1130,18 @@ int32_t SoftBusClientStub::OnDataReceived(uint32_t handle, const uint8_t *data, 
     DataReceived(handle, data, len);
     return SOFTBUS_OK;
 }
+ 
+int32_t SoftBusClientStub::OnCommandInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t code = 0;
+    if (!data.ReadInt32(code)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *value = data.ReadCString();
+    if (value == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return ClientOnCommandInner(code, value, static_cast<uint32_t>(strlen(value)), nullptr, 0);
+}
+
 } // namespace OHOS

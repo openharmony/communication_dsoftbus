@@ -727,3 +727,30 @@ void DestroyGroupOwner(const char *pkgName)
     }
     (void)DestroyGroupOwnerInner(pkgName);
 }
+
+int32_t SetCommand(int32_t code, const char *value, uint32_t inLen)
+{
+    if (value == NULL || inLen == 0) {
+        LNN_LOGE(LNN_STATE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return SetCommandInner(code, value, inLen);
+}
+ 
+int32_t RegisterCommandCb(const char *pkgName, ITrustedDeviceCb *cb)
+{
+    if (pkgName == NULL || cb == NULL || cb->onCommand == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcmp(DM_PKG_NAME, pkgName) != 0) {
+        LNN_LOGE(LNN_STATE, "only device manager is allowed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = CommonInit(pkgName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "common init fail, ret=%{public}d", ret);
+        return ret;
+    }
+    return RegisterCommandCbInner(pkgName, cb);
+}

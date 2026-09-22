@@ -31,6 +31,7 @@ typedef enum {
     ACCOUNT_RELATED = 1, /**< ACCOUNT_RELATED form identity_service_define */
     ACCOUNT_UNRELATED = 2, /**< ACCOUNT_UNRELATED form identity_service_define */
     ACCOUNT_SHARED = 3, /**< ACCOUNT_SHARED form identity_service_define */
+    ACCOUNT_RELATED_APP = 4, /**< app-level same-account */
     ACCOUNT_BUTT,
 } SoftbusCredType;
 
@@ -50,7 +51,8 @@ typedef struct {
 int32_t IdServiceRegCredMgr(void);
 void IdServiceUnRegCredMgr(void);
 bool IdServiceIsPotentialTrustedDevice(const char *shortUdidHash, const char *shortAccountIdHash, bool isSameAccount);
-
+char *IdServiceGetCredIdByCredType(int32_t localUserId, int32_t peerUserId, int32_t credType,
+    const char *udidHash);
 int32_t IdServiceQueryCredential(int32_t userId, const char *udidHash, const char *accountidHash,
     bool isSameAccount, char **credList);
 int32_t AuthIdServiceQueryCredential(int32_t peerUserId, const char *udidHash, const char *accountidHash,

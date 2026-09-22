@@ -230,6 +230,7 @@ if (defined(ohos_lite)) {
     ]
     include_dirs = bus_center_sdk_test_inc
     include_dirs += [
+      "$dsoftbus_root_path/core/bus_center/ipc/include",
       "$dsoftbus_root_path/core/authentication/include",
       "$dsoftbus_root_path/core/frame/init/include",
       "unittest/common/",

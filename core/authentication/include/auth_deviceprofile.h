@@ -32,6 +32,24 @@ extern "C" {
 #endif
 #endif
 
+#define ACL_BIND_TYPE_P2P            256 /* DM_POINT_TO_POINT_TYPE */
+#define ACL_AUTH_TYPE_ACROSS_ACCOUNT 2   /* DmAuthForm::ACROSS_ACCOUNT */
+#define ACL_BIND_LEVEL_APP           1
+
+#define ACL_KEY_BIND_TYPE       "bindType"
+#define ACL_KEY_AUTH_TYPE       "authenticationType"
+#define ACL_KEY_BIND_LEVEL      "bindLevel"
+#define ACL_KEY_TRUST_DEVICE_ID "trustDeviceId"
+#define ACL_KEY_ACCESSER        "accesser"
+#define ACL_KEY_ACCESSEE        "accessee"
+#define ACL_KEY_DEVICE_ID       "deviceId"
+#define ACL_KEY_USER_ID         "userId"
+#define ACL_KEY_ACCOUNT_ID      "accountId"
+#define ACL_KEY_TOKEN_ID        "tokenId"
+#define ACL_KEY_BUNDLE_NAME     "bundleName"
+#define ACL_KEY_DEVICE_NAME     "deviceName"
+#define ACL_KEY_CREDENTIAL_ID   "credentialId"
+
 typedef enum {
     UPDATE_ACL_SUCC = 0,
     UPDATE_ACL_NOT_MATCH,
@@ -81,6 +99,7 @@ void UpdateAssetSessionKeyByAcl(
     AuthACLInfo *info, uint8_t *sessionKey, uint32_t sessionKeyLen, int32_t *sessionKeyId, bool isSameAccount);
 bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid, int32_t peerUserId);
 bool IsExistUkInAclProfile(const char *localUdid, const char *peerUdid);
+int32_t LnnNotifyCommandToDmAuthPassed(const char *peerUdid, int32_t peerUserId, const char *credId);
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -45,6 +45,7 @@ struct SoftBusIpcClientCmd {
     int32_t (*func)(IpcIo *data, IpcIo *reply);
 };
 
+static int32_t ClientOnCommandStub(IpcIo *data, IpcIo *reply);
 static struct SoftBusIpcClientCmd g_softBusIpcClientCmdTbl[] = {
     { CLIENT_ON_JOIN_RESULT, ClientOnJoinLNNResult },
     { CLIENT_ON_JOIN_METANODE_RESULT, ClientOnJoinMetaNodeResult },
@@ -62,6 +63,7 @@ static struct SoftBusIpcClientCmd g_softBusIpcClientCmdTbl[] = {
     { CLIENT_ON_CHANNEL_MSGRECEIVED, ClientOnChannelMsgreceived },
     { CLIENT_SET_CHANNEL_INFO, ClientSetChannelInfo },
     { CLIENT_ON_CHANNEL_BIND, ClientOnChannelBind },
+    { CLIENT_ON_COMMAND, ClientOnCommandStub },
     { CLIENT_CHECK_COLLAB_RELATION, ClientCheckCollabRelation },
 };
 
@@ -261,4 +263,28 @@ int ClientRegisterService(const char *pkgName)
 
     COMM_LOGI(COMM_SDK, "ClientRegisterService success");
     return SOFTBUS_OK;
+}
+
+static int32_t ClientOnCommandStub(IpcIo *data, IpcIo *reply)
+{
+    if (data == NULL || reply == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t code = 0;
+    if (!ReadInt32(data, &code)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    size_t len = 0;
+    const char *value = (const char *)ReadString(data, &len);
+    if (value == NULL || len == 0) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char res[256] = {0};
+    int32_t ret = ClientOnCommandInner(code, value, (uint32_t)len, res, sizeof(res));
+    COMM_LOGI(COMM_SDK, "client on command, code=%{public}d, ret=%{public}d, res=%{public}s",
+        code, ret, res);
+    if (!WriteString(reply, res)) {
+        COMM_LOGE(COMM_SDK, "write res failed");
+    }
+    return ret;
 }
