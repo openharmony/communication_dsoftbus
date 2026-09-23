@@ -55,6 +55,7 @@ typedef enum {
 typedef struct {
     char brMac[BT_MAC_LEN];
     char uuid[UUID_STRING_LEN];
+    int32_t appIndex;
 } P2PDeviceInfo;
 
 typedef void (*RecvMsgCallback)(const P2PDeviceInfo *device, const uint8_t *msgBody, uint32_t len);
