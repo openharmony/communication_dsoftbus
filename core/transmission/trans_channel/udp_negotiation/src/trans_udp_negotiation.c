@@ -17,10 +17,18 @@
 
 #include "securec.h"
 
+#include "softbus_adapter_crypto.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
+#include "softbus_adapter_timer.h"
+#include "softbus_def.h"
+#include "softbus_error_code.h"
+#include "softbus_utils.h"
+#include "trans_event.h"
+#include "trans_log.h"
+
 #include "access_control.h"
 #include "auth_interface.h"
-#include "bus_center_event.h"
-#include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "g_enhance_auth_func_pack.h"
 #include "g_enhance_lnn_func_pack.h"
@@ -30,25 +38,15 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_access_token_adapter.h"
-#include "softbus_adapter_crypto.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_adapter_thread.h"
-#include "softbus_adapter_timer.h"
 #include "softbus_conn_interface.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
-#include "softbus_proxychannel_manager.h"
 #include "softbus_scenario_manager.h"
-#include "softbus_utils.h"
 #include "trans_bind_request_manager.h"
 #include "trans_channel_common.h"
 #include "trans_channel_manager.h"
-#include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
-#include "trans_log.h"
+#include "trans_multipath_manager.h"
 #include "trans_session_manager.h"
-#include "trans_split_serviceid.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation_exchange.h"
 #include "trans_uk_manager.h"
@@ -176,11 +174,10 @@ static int32_t SetChannelInfoBySide(ChannelInfo *info, bool isServerSide, const 
 static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
 {
     TRANS_LOGI(TRANS_CTRL, "enter, isServerSide: %{public}d", isServerSide);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(g_channelCb != NULL, SOFTBUS_TRANS_INIT_FAILED,
-        TRANS_CTRL, "g_channelCb is null.");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(g_channelCb != NULL, SOFTBUS_TRANS_INIT_FAILED, TRANS_CTRL, "g_channelCb is null.");
     int32_t ret;
-    ChannelInfo info = {0};
-    char networkId[NETWORK_ID_BUF_LEN] = {0};
+    ChannelInfo info = { 0 };
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     info.sessionId = appInfo->myData.sessionId;
     info.myHandleId = appInfo->myHandleId;
     info.peerHandleId = appInfo->peerHandleId;
@@ -229,18 +226,18 @@ static int32_t NotifyUdpChannelOpened(const AppInfo *appInfo, bool isServerSide)
     info.cancelEncryption = GetCapabilityBit(appInfo->udpChannelCapability, UDP_CHANNEL_CANCEL_ENCRYPTION);
     info.linkedChannelId = appInfo->linkedChannelId;
     TransGetLaneIdByChannelId(appInfo->myData.channelId, &info.laneId);
-    ret = g_channelCb->GetPkgNameBySessionName(appInfo->myData.sessionName,
-        (char *)appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
+    ret = g_channelCb->GetPkgNameBySessionName(
+        appInfo->myData.sessionName, (char *)appInfo->myData.pkgName, PKG_NAME_SIZE_MAX);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get pkg name fail.");
         return ret;
     }
 
-    if (!info.isServer && info.enableMultipath && CheckNeedReallocSecondLane(info.channelId)) {
-        TransOpenChannelSecond(info.channelId, info.laneId);
+    if (!info.isServer && info.enableMultipath && TransMultipathNeedReallocSecondLane(info.channelId)) {
+        TransMultipathOpenSecondChannel(info.channelId, info.laneId);
     }
-    return g_channelCb->OnChannelOpened(appInfo->myData.pkgName, appInfo->myData.pid,
-        appInfo->myData.sessionName, &info);
+    return g_channelCb->OnChannelOpened(
+        appInfo->myData.pkgName, appInfo->myData.pid, appInfo->myData.sessionName, &info);
 }
 
 int32_t NotifyUdpChannelClosed(const AppInfo *info, int32_t messageType)

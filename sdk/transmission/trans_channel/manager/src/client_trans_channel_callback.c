@@ -17,20 +17,22 @@
 
 #include <securec.h>
 
+#include "softbus_adapter_mem.h"
+#include "softbus_error_code.h"
+#include "softbus_utils.h"
+#include "trans_log.h"
+
 #include "client_trans_auth_manager.h"
+#include "client_trans_multipath_manager.h"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_statistics.h"
-#include "client_trans_tcp_direct_manager.h"
 #include "client_trans_tcp_direct_callback.h"
+#include "client_trans_tcp_direct_manager.h"
 #include "client_trans_udp_manager.h"
 #include "session.h"
-#include "softbus_adapter_mem.h"
 #include "softbus_conn_interface_struct.h"
-#include "softbus_error_code.h"
-#include "softbus_utils.h"
-#include "trans_log.h"
 #include "trans_server_proxy.h"
 
 #define BITS 8
@@ -187,7 +189,7 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
         }
     } else if (channel->isMultiNeg) {
         TransSetUdpChannelSessionId(channel->channelId, channel->sessionId);
-        (void)UpdateMultiPathSessionInfo(channel->sessionId, channel);
+        (void)TransMultipathUpdateReserveChannel(channel->sessionId, channel);
     }
     if (ret == SOFTBUS_OK && !channel->isServer && (channel->connectType == CONNECT_BR ||
         channel->connectType == CONNECT_BLE || channel->connectType == CONNECT_P2P ||

@@ -17,34 +17,34 @@
 
 #include <securec.h>
 
+#include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
+#include "softbus_app_info.h"
+#include "softbus_error_code.h"
+#include "trans_event.h"
+#include "trans_log.h"
+
 #include "access_control.h"
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "g_enhance_auth_func_pack.h"
 #include "g_enhance_lnn_func_pack.h"
-#include "g_enhance_trans_func.h"
 #include "g_enhance_trans_func_pack.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "lnn_distributed_net_ledger.h"
 #include "permission_entry.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_adapter_thread.h"
-#include "softbus_app_info.h"
-#include "softbus_error_code.h"
 #include "softbus_init_common.h"
 #include "softbus_proxychannel_manager.h"
-#include "softbus_proxychannel_message.h"
 #include "softbus_proxychannel_network.h"
 #include "softbus_utils.h"
 #include "trans_channel_common.h"
 #include "trans_channel_manager.h"
 #include "trans_client_proxy.h"
-#include "trans_event.h"
 #include "trans_ipc_adapter.h"
 #include "trans_lane_manager.h"
-#include "trans_log.h"
+#include "trans_multipath_manager.h"
 #include "trans_network_statistics.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
@@ -824,8 +824,7 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
         RecordFailOpenSessionKpi(appInfo, connInnerInfo, appInfo->timeStart);
         goto EXIT_ERR;
     }
-    TransUpdateSocketChannelInfoBySession(
-        param->sessionName, param->sessionId, transInfo.channelId, transInfo.channelType);
+    TransMultipathUpdateChannel(param->sessionName, param->sessionId, transInfo.channelId, transInfo.channelType);
     ret = ClientIpcSetChannelInfo(
         appInfo->myData.pkgName, param->sessionName, param->sessionId, &transInfo, appInfo->myData.pid);
     if (ret != SOFTBUS_OK) {
@@ -1658,8 +1657,7 @@ int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint
     LaneRequestOption requestOption;
     (void)memset_s(&requestOption, sizeof(LaneRequestOption), 0, sizeof(LaneRequestOption));
     ret = GetRequestOptionBySessionParam(param, &requestOption);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, TRANS_SVC, "get request option failed ret=%{public}d", ret);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SVC, "get request option failed ret=%{public}d", ret);
     NetWorkingChannelInfo info = {
         .channelId = INVALID_CHANNEL_ID,
         .isNetWorkingChannel = false,
@@ -1669,15 +1667,14 @@ int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint
     extra.linkType = connInfo->type;
     BuildTransEventExtra(&extra, param, *laneHandle, requestOption.requestInfo.trans.transType, ret);
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_SELECT_LANE, extra);
-    TransUpdateSocketChannelLaneInfoBySession(
-        param->sessionName, param->sessionId, *laneHandle, param->isQosLane, param->isAsync);
+    TransMultipathUpdateLane(param->sessionName, param->sessionId, *laneHandle, param->isQosLane, param->isAsync);
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, ret, TRANS_SVC, "get lane info by option failed, ret=%{public}d", ret);
     return SOFTBUS_OK;
 }
 
-int32_t TransAsyncGetLaneInfoByQos(const SessionParam *param, const LaneAllocInfo *allocInfo,
-    uint32_t *laneHandle, const AppInfo *appInfo)
+int32_t TransAsyncGetLaneInfoByQos(
+    const SessionParam *param, const LaneAllocInfo *allocInfo, uint32_t *laneHandle, const AppInfo *appInfo)
 {
     if (param == NULL || allocInfo == NULL || laneHandle == NULL || appInfo == NULL) {
         TRANS_LOGE(TRANS_SVC, "async get lane info param error.");
@@ -1688,8 +1685,7 @@ int32_t TransAsyncGetLaneInfoByQos(const SessionParam *param, const LaneAllocInf
     TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager()->lnnGetLaneHandle != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR,
         TRANS_SVC, "lnnGetLaneHandle is null");
     *laneHandle = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_TRANS);
-    TransUpdateSocketChannelLaneInfoBySession(
-        param->sessionName, param->sessionId, *laneHandle, param->isQosLane, param->isAsync);
+    TransMultipathUpdateLane(param->sessionName, param->sessionId, *laneHandle, param->isQosLane, param->isAsync);
     int32_t ret = TransAddAsyncLaneReqFromPendingList(*laneHandle, param, appInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(
@@ -1703,8 +1699,8 @@ int32_t TransAsyncGetLaneInfoByQos(const SessionParam *param, const LaneAllocInf
     allocListener.onLaneFreeSuccess = TransOnLaneFreeSuccess;
     allocListener.onLaneFreeFail = TransOnLaneFreeFail;
     allocListener.onLaneQosEvent = TransOnLaneQosEvent;
-    TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager()->lnnAllocLane != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR,
-        TRANS_SVC, "lnnAllocLane is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        GetLaneManager()->lnnAllocLane != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR, TRANS_SVC, "lnnAllocLane is null");
     ret = GetLaneManager()->lnnAllocLane(*laneHandle, allocInfo, &allocListener);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "trans request lane failed, ret=%{public}d", ret);
@@ -1757,8 +1753,7 @@ int32_t TransAsyncGetReserveLaneInfoByQos(const SessionParam *param, const LaneA
     TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager()->lnnGetLaneHandle != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR,
         TRANS_SVC, "lnnGetLaneHandle is null");
     *laneHandle = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_TRANS);
-    TransUpdateSocketChannelLaneInfoBySession(
-        param->sessionName, param->sessionId, *laneHandle, param->isQosLane, param->isAsync);
+    TransMultipathUpdateLane(param->sessionName, param->sessionId, *laneHandle, param->isQosLane, param->isAsync);
     int32_t ret = TransAddAsyncLaneReqFromPendingList(*laneHandle, param, info);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(
@@ -1788,8 +1783,7 @@ int32_t TransAsyncGetReserveLaneInfoByQos(const SessionParam *param, const LaneA
         TRANS_LOGE(TRANS_SVC, "trigger begin");
         DcTriggerVirtualLinkPacked(param->peerDeviceId);
     }
-    ret = TransDelStateReserve(param, laneHandle);
-    return ret;
+    return TransDelStateReserve(param, laneHandle);
 }
 
 static int32_t GetAllocInfoExtBySessionParam(const SessionParam *param, LaneAllocInfoExt *allocInfo)
@@ -1829,8 +1823,7 @@ int32_t TransAsyncGetLaneInfoByExt(const SessionParam *param, uint32_t *laneHand
     TRANS_CHECK_AND_RETURN_RET_LOGE(GetLaneManager()->lnnGetLaneHandle != NULL, SOFTBUS_TRANS_GET_LANE_INFO_ERR,
         TRANS_SVC, "lnnGetLaneHandle is null");
     *laneHandle = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_TRANS);
-    TransUpdateSocketChannelLaneInfoBySession(
-        param->sessionName, param->sessionId, *laneHandle, param->isQosLane, param->isAsync);
+    TransMultipathUpdateLane(param->sessionName, param->sessionId, *laneHandle, param->isQosLane, param->isAsync);
     ret = TransAddAsyncLaneReqFromPendingList(*laneHandle, param, appInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(

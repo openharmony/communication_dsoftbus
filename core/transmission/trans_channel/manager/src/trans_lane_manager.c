@@ -24,9 +24,11 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
+#include "trans_log.h"
+
 #include "trans_channel_manager.h"
 #include "trans_lane_pending_ctl.h"
-#include "trans_log.h"
+#include "trans_multipath_manager.h"
 #include "trans_session_manager.h"
 
 #define CMD_CONCURRENT_SESSION_LIST "concurrent_sessionlist"
@@ -572,8 +574,7 @@ static int32_t CheckParamIsValid(const char *sessionName, int32_t sessionId)
     return SOFTBUS_OK;
 }
 
-int32_t TransUpdateSocketChannelInfoBySession(
-    const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType)
+int32_t TransMultipathUpdateChannel(const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType)
 {
     int32_t ret = CheckParamIsValid(sessionName, sessionId);
     if (ret != SOFTBUS_OK) {
@@ -605,7 +606,7 @@ int32_t TransUpdateSocketChannelInfoBySession(
     return SOFTBUS_NOT_FIND;
 }
 
-int32_t TransUpdateSocketChannelLaneInfoBySession(
+int32_t TransMultipathUpdateLane(
     const char *sessionName, int32_t sessionId, uint32_t laneHandle, bool isQosLane, bool isAsync)
 {
     int32_t ret = CheckParamIsValid(sessionName, sessionId);
@@ -1134,14 +1135,13 @@ static ReallocInfo *CreateReallocNode(const SocketWithChannelInfo *socketItem)
     return reallocNode;
 }
 
-static SocketWithChannelInfo *GetMultiPathSocketByChannelId(int32_t channelId)
+SocketWithChannelInfo *TransMultipathGetSocketByChannelId(int32_t channelId)
 {
-    //need get lock before
+    // need get lock before
     SocketWithChannelInfo *socketItem = NULL;
     LIST_FOR_EACH_ENTRY(socketItem, &(g_socketChannelList->list), SocketWithChannelInfo, node) {
         if (socketItem->enableMultipath && socketItem->channelId == channelId) {
-            TRANS_LOGI(
-                TRANS_SVC, "multipath sessionId=%{public}d, laneHandle=%{public}d, laneHandleReserve=%{public}d",
+            TRANS_LOGI(TRANS_SVC, "multipath sessionId=%{public}d, laneHandle=%{public}d, laneHandleReserve=%{public}d",
                 socketItem->sessionId, socketItem->laneHandle, socketItem->laneHandleReserve);
             return socketItem;
         }
@@ -1149,7 +1149,7 @@ static SocketWithChannelInfo *GetMultiPathSocketByChannelId(int32_t channelId)
     return NULL;
 }
 
-void TransGetMultipathReallocList(ListNode *multipathReallocList)
+void TransMultipathGetReallocList(ListNode *multipathReallocList)
 {
     if (multipathReallocList == NULL) {
         TRANS_LOGE(TRANS_SVC, "multipathReallocList is null");
@@ -1180,7 +1180,7 @@ void TransGetMultipathReallocList(ListNode *multipathReallocList)
     (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
 }
 
-bool CheckNeedReallocSecondLane(int32_t channelId)
+bool TransMultipathNeedReallocSecondLane(int32_t channelId)
 {
     if (g_socketChannelList == NULL) {
         TRANS_LOGE(TRANS_INIT, "socket info manager hasn't init.");
@@ -1190,8 +1190,8 @@ bool CheckNeedReallocSecondLane(int32_t channelId)
         TRANS_LOGE(TRANS_SVC, "lock failed");
         return false;
     }
-    SocketWithChannelInfo *SocketItem = GetMultiPathSocketByChannelId(channelId);
-    if (SocketItem != NULL && SocketItem->laneHandleReserve == INVALID_LANE_REQ_ID) {
+    SocketWithChannelInfo *socketItem = TransMultipathGetSocketByChannelId(channelId);
+    if (socketItem != NULL && socketItem->laneHandleReserve == INVALID_LANE_REQ_ID) {
         (void)SoftBusMutexUnlock(&(g_socketChannelList->lock));
         return true;
     }
@@ -1350,7 +1350,7 @@ int32_t TransGetSessionParamByChannelId(int32_t channelId, SessionParam *param)
         TRANS_LOGE(TRANS_SVC, "lock failed");
         return SOFTBUS_LOCK_ERR;
     }
-    SocketWithChannelInfo *socketItem = GetMultiPathSocketByChannelId(channelId);
+    SocketWithChannelInfo *socketItem = TransMultipathGetSocketByChannelId(channelId);
     if (socketItem != NULL) {
         param->flowInfo.flowSize = socketItem->param.flowInfo.flowSize;
         param->flowInfo.sessionType = socketItem->param.flowInfo.sessionType;

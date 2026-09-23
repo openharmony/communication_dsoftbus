@@ -23,19 +23,8 @@
 #include <unistd.h>
 
 #include "anonymizer.h"
-#include "client_qos_manager.h"
-#include "client_trans_channel_manager.h"
-#include "client_trans_file_listener.h"
-#include "client_trans_session_adapter.h"
-#include "client_trans_session_manager.h"
-#include "client_trans_socket_manager.h"
-#include "dfs_session.h"
-#include "inner_session.h"
-#include "session_ipc_adapter.h"
-#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
-#include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
@@ -43,8 +32,20 @@
 #include "softbus_trans_def.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
+
+#include "client_qos_manager.h"
+#include "client_trans_channel_manager.h"
+#include "client_trans_file_listener.h"
+#include "client_trans_multipath_manager.h"
+#include "client_trans_session_adapter.h"
+#include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
+#include "dfs_session.h"
+#include "inner_session.h"
+#include "session_ipc_adapter.h"
+#include "softbus_access_token_adapter.h"
+#include "softbus_client_frame_manager.h"
 #include "trans_server_proxy.h"
-#include "trans_split_serviceid.h"
 
 typedef int32_t (*SessionOptionRead)(int32_t channelId, int32_t type, void *value, uint32_t valueSize);
 typedef int32_t (*SessionOptionWrite)(int32_t channelId, int32_t type, void *value, uint32_t valueSize);
@@ -1105,44 +1106,6 @@ static int32_t GetMaxIdleTimeout(const QosTV *qos, uint32_t qosCount, uint32_t *
     return SOFTBUS_OK;
 }
 
-int32_t SetMultipathEnable(int32_t socket, const QosTV *qos, uint32_t qosCount)
-{
-#define TRANS_DEFAULT_MIN_BW 0
-#define LOW_BW               (384 * 1024)
-    int32_t minBW = 0;
-    bool enableMultipath = false;
-    int32_t dataType = 0;
-    int32_t ret = GetQosValue(qos, qosCount, QOS_TYPE_MIN_BW, &minBW, TRANS_DEFAULT_MIN_BW);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get minBW failed, ret=%{public}d", ret);
-        return ret;
-    }
-
-    if (minBW < 0) {
-        TRANS_LOGE(TRANS_SDK, "invalid BW, minBW=%{public}d", minBW);
-        return SOFTBUS_INVALID_PARAM;
-    }
-    ret = ClientGetenableMultipathBySocket(socket, &enableMultipath);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get enableMultipath failed, socket=%{public}d failed, ret=%{public}d", socket, ret);
-        return ret;
-    }
-
-    ret = ClientGetDataTypeBySocket(socket, &dataType);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get dataType, socket=%{public}d failed, ret=%{public}d", socket, ret);
-        return ret;
-    }
-    if (enableMultipath) {
-        TRANS_LOGI(TRANS_SDK, "set enableMultipath, socket=%{public}d", socket);
-    }
-    if (enableMultipath && (minBW <= LOW_BW || dataType != TYPE_FILE)) {
-        TRANS_LOGE(TRANS_SDK, "not multipath ability, minBW=%{public}d, dataType=%{public}d", minBW, dataType);
-        ClientSetEnableMultipathBySocket(socket, false);
-    }
-    return SOFTBUS_OK;
-}
-
 static int32_t CheckSessionCancelState(int32_t socket)
 {
     SocketLifecycleData lifecycle;
@@ -1219,10 +1182,9 @@ int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const I
     ret = SetSessionIsAsyncById(socket, isAsync);
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, ret, TRANS_SDK, "set session is async failed, ret=%{public}d", ret);
-    
-    ret = SetMultipathEnable(socket, qos, qosCount);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, TRANS_SDK, "set multipath is failed, ret=%{public}d", ret);
+
+    ret = TransMultipathCheckAndEnable(socket, qos, qosCount);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "set multipath failed, ret=%{public}d", ret);
 
     TransInfo transInfo;
     ret = ClientIpcOpenSession(socket, qos, qosCount, &transInfo, isAsync);
@@ -1322,9 +1284,9 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
         int32_t channelIdReserve = INVALID_CHANNEL_ID;
         int32_t channelTypeReserve = CHANNEL_TYPE_BUTT;
         int32_t routeTypeReserve = -1;
-        if (ClientGetReserveChannelBySessionId(socket, &channelIdReserve, &channelTypeReserve, &routeTypeReserve) ==
+        if (TransMultipathGetReserveChannel(socket, &channelIdReserve, &channelTypeReserve, &routeTypeReserve) ==
             SOFTBUS_OK && channelIdReserve != INVALID_CHANNEL_ID) {
-            (void)ClientClearReserveChannelBySessionId(socket);
+            (void)TransMultipathClearReserveChannel(socket);
             (void)ClientTransCloseReserveChannel(channelIdReserve, channelTypeReserve, routeTypeReserve, false);
         }
         int32_t channelId = INVALID_CHANNEL_ID;

@@ -55,14 +55,7 @@ int32_t TransAddSocketChannelInfo(
 int32_t TransAddSocketChannelInfoMultipath(
     const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType, CoreSessionState state);
 
-int32_t TransUpdateSocketChannelInfo(
-    const char *sessionName, int32_t sessionId, bool isUserReserve);
-
-int32_t TransUpdateSocketChannelInfoBySession(
-    const char *sessionName, int32_t sessionId, int32_t channelId, int32_t channelType);
-
-int32_t TransUpdateSocketChannelLaneInfoBySession(
-    const char *sessionName, int32_t sessionId, uint32_t laneHandle, bool isQosLane, bool isAsync);
+int32_t TransUpdateSocketChannelInfo(const char *sessionName, int32_t sessionId, bool isUserReserve);
 
 int32_t TransDeleteSocketChannelInfoBySession(const char *sessionName, int32_t sessionId);
 
@@ -87,13 +80,9 @@ int32_t TransGetConnectTypeByChannelId(int32_t channelId, ConnectType *connectTy
 
 int32_t TransGetTransLaneInfoByLaneHandle(uint32_t laneHandle, TransLaneInfo *laneInfo);
 
-void TransGetMultipathReallocList(ListNode *multipathReallocList);
-
 int32_t TransGetSocketChannelStateReserveBySession(const char *sessionName, int32_t sessionId, CoreSessionState *state);
 
 int32_t TransSetSocketChannelStateReserveBySession(const char *sessionName, int32_t sessionId, CoreSessionState state);
-
-bool CheckNeedReallocSecondLane(int32_t channelId);
 
 int32_t TransAddSessionParamBySessionId(const char *sessionName, int32_t sessionId, const SessionParam *param);
 

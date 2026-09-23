@@ -97,7 +97,6 @@ void TransCheckChannelOpenRemoveFromLooper(int32_t channelId);
 
 void TransHandleReallocLnn(void);
 
-int32_t TransOpenChannelSecond(int32_t channelId, uint64_t laneId);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

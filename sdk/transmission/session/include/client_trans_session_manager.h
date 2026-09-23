@@ -31,6 +31,12 @@ typedef enum {
     CHANNEL_USE_CHOOSE_OTHER,
 } ChannelUseChooseState;
 
+int32_t LockClientSessionServerList(void);
+void UnlockClientSessionServerList(void);
+int32_t GetSessionById(int32_t sessionId, ClientSessionServer **server, SessionInfo **session);
+
+int32_t GetServerBySessionName(const char *sessionName, ClientSessionServer **server);
+
 int32_t ClientAddNewSession(const char *sessionName, SessionInfo *session);
 
 /**
@@ -230,36 +236,19 @@ int32_t ClientGetSessionTypeBySocket(int32_t socket, int32_t *sessionType);
 
 int32_t ClientSetFLTos(int32_t socket, TransFlowInfo *flowInfo);
 
-void HandleMultiPathOnEvent(int32_t channelId, uint8_t changeType, int32_t linkType, int32_t reason);
-
 int32_t ClientSetMultipath(int32_t socket, bool optValue);
 
 int32_t ClientGetMultipath(int32_t socket, void *optValue);
 
 int32_t ClientSetMultipathPolicy(int32_t socket, const void *optValue);
 
-int32_t ClientGetenableMultipathBySocket(int32_t socket, bool *enableMultipath);
-
-int32_t ClientGetDataTypeBySocket(int32_t socket, int* dataType);
-
-int32_t ClientSetEnableMultipathBySocket(int32_t socket, bool enableMultipath);
-
-int32_t SetMultipathEnable(int32_t socket, const QosTV *qos, uint32_t qosCount);
+int32_t ClientGetDataTypeBySocket(int32_t socket, int *dataType);
 
 int32_t ClientSetStatusClosingReserveBySocket(int32_t socket, bool isClosingReserve);
 
 int32_t CheckChannelIsReserveByChannelId(int32_t sessionId, int32_t channelId, int32_t *useType);
 
 void PrintExtraInfo(SessionInfo *session);
-
-bool IsMultiPathSession(const char *sessionName, int32_t *multiPathSessionId);
-
-int32_t UpdateMultiPathSessionInfo(int32_t multiPathSessionId, const ChannelInfo *channel);
-
-int32_t ClientGetReserveChannelBySessionId(
-    int32_t sessionId, int32_t *channelId, int32_t *channelType, int32_t *routeType);
-
-int32_t ClientClearReserveChannelBySessionId(int32_t sessionId);
 
 int32_t SaveAddrInfo(int32_t channelId, struct sockaddr_storage *addr, socklen_t addrLen);
 

@@ -18,13 +18,6 @@
 #include <securec.h>
 
 #include "anonymizer.h"
-#include "client_bus_center_manager.h"
-#include "client_trans_channel_manager.h"
-#include "client_trans_file_listener.h"
-#include "client_trans_proxy_file_manager.h"
-#include "client_trans_tcp_direct_manager.h"
-#include "client_trans_udp_manager.h"
-#include "g_enhance_sdk_func.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_app_info.h"
@@ -33,8 +26,15 @@
 #include "softbus_socket.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
+
+#include "client_trans_channel_manager.h"
+#include "client_trans_file_listener.h"
+#include "client_trans_multipath_manager.h"
+#include "client_trans_proxy_file_manager.h"
+#include "client_trans_tcp_direct_manager.h"
+#include "client_trans_udp_manager.h"
+#include "g_enhance_sdk_func.h"
 #include "trans_server_proxy.h"
-#include "trans_split_serviceid.h"
 
 #define NETWORK_ID_LEN       7
 #define GET_ROUTE_TYPE(type) ((uint32_t)(type)&0xff)
@@ -398,43 +398,6 @@ static bool CheckDMHandleAgingSession(const char *sessionName, const SessionInfo
     return false;
 }
 
-static bool ClientTransNeedDelReserve(SessionInfo *sessionNode, int32_t routeType, bool *onlyReserveLinkDown)
-{
-    if (sessionNode == NULL || routeType == INVALID_ROUTE_TYPE || onlyReserveLinkDown == NULL) {
-        TRANS_LOGW(TRANS_SDK, "Invalid param");
-        return false;
-    }
-    if (!sessionNode->enableMultipath) {
-        return false;
-    }
-    if ((sessionNode->routeType == routeType && sessionNode->routeTypeReserve != INVALID_ROUTE_TYPE) ||
-        sessionNode->routeTypeReserve == routeType) {
-        TRANS_LOGI(TRANS_SDK, "sessionId=%{public}d, type1=%{public}d, type2=%{public}d, linkDownType=%{public}d",
-            sessionNode->sessionId, sessionNode->routeType, sessionNode->routeTypeReserve, routeType);
-        *onlyReserveLinkDown = sessionNode->routeType == routeType ? false : true;
-        return true;
-    }
-    return false;
-}
-
-static void ClientTransDelReserveLinkDown(
-    SessionInfo *sessionNode, const ClientSessionServer *server, ListNode *destroyList, bool onlyReserveLinkDown)
-{
-    if (sessionNode == NULL || destroyList == NULL) {
-        TRANS_LOGW(TRANS_SDK, "Invalid param");
-        return;
-    }
-    LinkDownType linkDownType = onlyReserveLinkDown ? MULTIPATH_ONLY_SECOND_CHANNEL : MULTIPATH_BOTH_CHANNEL;
-    DestroySessionInfo *destroyNode = CreateDestroySessionNode(sessionNode, server, linkDownType);
-    sessionNode->channelIdReserve = INVALID_CHANNEL_ID;
-    sessionNode->channelTypeReserve = CHANNEL_TYPE_UNDEFINED;
-    sessionNode->routeTypeReserve = -1;
-    if (destroyNode != NULL) {
-        ListAdd(destroyList, &(destroyNode->node));
-    }
-    return;
-}
-
 // determine connection type based on IP, delete session when connection type and parameter connType are consistent
 static bool ClientTransCheckNeedDel(const char *name, SessionInfo *sessionNode, int32_t routeType, int32_t connType)
 {
@@ -531,8 +494,8 @@ void DestroyClientSessionByNetworkId(
             continue;
         }
         bool onlyReserveLinkDown = true;
-        if (ClientTransNeedDelReserve(sessionNode, routeType, &onlyReserveLinkDown)) {
-            (void)ClientTransDelReserveLinkDown(sessionNode, server, destroyList, onlyReserveLinkDown);
+        if (TransMultipathNeedDelReserve(sessionNode, routeType, &onlyReserveLinkDown)) {
+            (void)TransMultipathDelReserveLinkDown(sessionNode, server, destroyList, onlyReserveLinkDown);
             if (sessionNode->routeType != routeType) {
                 TRANS_LOGI(TRANS_SDK, "multi path reserve channel link down.");
                 continue;

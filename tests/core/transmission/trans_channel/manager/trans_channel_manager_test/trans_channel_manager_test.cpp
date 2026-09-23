@@ -380,7 +380,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannelSecond001, TestSize.Level1)
     int32_t channelId = INVALID_CHANNEL_ID;
     uint64_t laneId = INVALID_LANE_ID;
     int32_t ret = SOFTBUS_OK;
-    ret = TransOpenChannelSecond(channelId, laneId);
+    ret = TransMultipathOpenSecondChannel(channelId, laneId);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -395,7 +395,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannelSecond002, TestSize.Level1)
     int32_t channelId = 1;
     int32_t laneId = TEST_LANE_ID;
     int32_t ret = SOFTBUS_OK;
-    ret = TransOpenChannelSecond(channelId, laneId);
+    ret = TransMultipathOpenSecondChannel(channelId, laneId);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
@@ -430,7 +430,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannelSecond003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     EXPECT_CALL(mock, TransCommonGetAppInfo).WillOnce(Return(SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH));
-    ret = TransOpenChannelSecond(channelId, laneId);
+    ret = TransMultipathOpenSecondChannel(channelId, laneId);
     EXPECT_NE(SOFTBUS_OK, ret);
     TransSocketLaneMgrDeinit();
 }
@@ -466,7 +466,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannelSecond004, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     EXPECT_CALL(mock, TransCommonGetAppInfo).WillOnce(Return(SOFTBUS_OK));
-    ret = TransOpenChannelSecond(channelId, laneId);
+    ret = TransMultipathOpenSecondChannel(channelId, laneId);
     EXPECT_NE(SOFTBUS_OK, ret);
     TransSocketLaneMgrDeinit();
 }

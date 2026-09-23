@@ -19,6 +19,7 @@
 #include "softbus_adapter_mem.h"
 #include "trans_channel_common.c"
 #include "trans_lane_common_test_mock.h"
+#include "trans_multipath_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -640,11 +641,11 @@ HWTEST_F(TransLaneCommonTest, CancelWaitLaneState001, TestSize.Level1)
     ret = TransAddSocketChannelInfo(TEST_SESSION_NAME, TEST_NEW_SESSION_ID, channelId, channelType, state);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ret = TransUpdateSocketChannelLaneInfoBySession(TEST_SESSION_NAME, TEST_SESSION_ID, laneHandle, isQosLane, isAsync);
+    ret = TransMultipathUpdateLane(TEST_SESSION_NAME, TEST_SESSION_ID, laneHandle, isQosLane, isAsync);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     isAsync = false;
-    ret = TransUpdateSocketChannelLaneInfoBySession(
+    ret = TransMultipathUpdateLane(
         TEST_SESSION_NAME, TEST_NEW_SESSION_ID, laneHandle, isQosLane, isAsync);
     EXPECT_EQ(ret, SOFTBUS_OK);
 

@@ -17,6 +17,7 @@
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "client_trans_multipath_manager.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "device_auth.h"
@@ -987,26 +988,6 @@ HWTEST_F(TransClientSessionManagerTest, ClientSetStatusClosingReserveBySocketInv
 }
 
 /*
- * @tc.name: ClientSetEnableMultipathBySocketInvalidParamTest001
- * @tc.desc: test ClientSetEnableMultipathBySocket returns SOFTBUS_TRANS_INVALID_SESSION_ID
- *           for invalid and zero socket ids
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransClientSessionManagerTest, ClientSetEnableMultipathBySocketInvalidParamTest001, TestSize.Level1)
-{
-    int32_t ret = TransClientInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = ClientSetEnableMultipathBySocket(-1, true);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
-    ret = ClientSetEnableMultipathBySocket(0, true);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
-    ret = ClientSetEnableMultipathBySocket(-1, false);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
-    TransClientDeinit();
-}
-
-/*
  * @tc.name: GetSupportTlvAndNeedAckByIdInvalidParamTest001
  * @tc.desc: test GetSupportTlvAndNeedAckById returns SOFTBUS_INVALID_PARAM when output parameters are nullptr
  * @tc.type: FUNC
@@ -1458,28 +1439,6 @@ HWTEST_F(TransClientSessionManagerTest, ClientSetMultipathInvalidParamTest001, T
 }
 
 /*
- * @tc.name: ClientGetenableMultipathBySocketInvalidParamTest001
- * @tc.desc: test ClientGetenableMultipathBySocket returns SOFTBUS_TRANS_INVALID_SESSION_ID
- *           for invalid and zero socket ids
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransClientSessionManagerTest, ClientGetenableMultipathBySocketInvalidParamTest001, TestSize.Level1)
-{
-    int32_t ret = TransClientInit();
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    int32_t socket = -1;
-    bool enableMultipath = false;
-    ret = ClientGetenableMultipathBySocket(socket, &enableMultipath);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
-    ret = ClientGetenableMultipathBySocket(0, &enableMultipath);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
-    ret = ClientGetenableMultipathBySocket(socket, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    TransClientDeinit();
-}
-
-/*
  * @tc.name: ClientGetDataTypeBySocketInvalidParamTest001
  * @tc.desc: test ClientGetDataTypeBySocket returns SOFTBUS_TRANS_INVALID_SESSION_ID for invalid socket id
  *           with null and valid output
@@ -1537,22 +1496,6 @@ HWTEST_F(TransClientSessionManagerTest, ClientGetSessionIdByChannelIdReserveNoIn
     ret = ClientGetSessionIdByChannelIdReserve(TRANS_TEST_CHANNEL_ID,
         CHANNEL_TYPE_TCP_DIRECT, &sessionId, isClosingReserve);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
-}
-
-/*
- * @tc.name: UpdateMultiPathSessionInfoInvalidParamTest001
- * @tc.desc: test UpdateMultiPathSessionInfo returns SOFTBUS_INVALID_PARAM for null output
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransClientSessionManagerTest, UpdateMultiPathSessionInfoInvalidParamTest001, TestSize.Level1)
-{
-    int32_t sessionId = INVALID_SESSION_ID;
-    int32_t ret = UpdateMultiPathSessionInfo(sessionId, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    sessionId = TRANS_TEST_SESSION_ID;
-    ret = UpdateMultiPathSessionInfo(sessionId, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -1926,49 +1869,6 @@ HWTEST_F(TransClientSessionManagerTest, ClientSetMultipathPolicyInvalidParamTest
     ret = ClientSetMultipathPolicy(TRANS_TEST_INVALID_CHANNEL_ID, g_pkgName);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = ClientSetMultipathPolicy(TRANS_TEST_INVALID_CHANNEL_ID, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-}
-
-/*
- * @tc.name: ClientGetReserveChannelBySessionIdInvalidParamTest001
- * @tc.desc: test ClientGetReserveChannelBySessionId returns SOFTBUS_INVALID_PARAM
- *           when sessionId is invalid or any output pointer is nullptr
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransClientSessionManagerTest, ClientGetReserveChannelBySessionIdInvalidParamTest001, TestSize.Level1)
-{
-    int32_t channelId = 0;
-    int32_t channelType = 0;
-    int32_t routeType = 0;
-    int32_t ret = ClientGetReserveChannelBySessionId(
-        TRANS_TEST_INVALID_SESSION_ID, &channelId, &channelType, &routeType);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = ClientGetReserveChannelBySessionId(
-        TRANS_TEST_SESSION_ID, nullptr, &channelType, &routeType);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = ClientGetReserveChannelBySessionId(
-        TRANS_TEST_SESSION_ID, &channelId, nullptr, &routeType);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = ClientGetReserveChannelBySessionId(
-        TRANS_TEST_SESSION_ID, &channelId, &channelType, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-}
-
-/*
- * @tc.name: ClientClearReserveChannelBySessionIdInvalidParamTest001
- * @tc.desc: test ClientClearReserveChannelBySessionId returns SOFTBUS_INVALID_PARAM
- *           when sessionId is invalid (equals INVALID_SESSION_ID)
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransClientSessionManagerTest, ClientClearReserveChannelBySessionIdInvalidParamTest001, TestSize.Level1)
-{
-    int32_t ret = ClientClearReserveChannelBySessionId(TRANS_TEST_INVALID_SESSION_ID);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = ClientClearReserveChannelBySessionId(TRANS_TEST_INVALID_CHANNEL_ID);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = ClientClearReserveChannelBySessionId(INVALID_SESSION_ID);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
