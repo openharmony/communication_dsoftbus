@@ -1001,14 +1001,12 @@ HWTEST_F(AuthOtherTest, AUTH_GET_LATEST_AUTHSEQ_LIST_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthOtherTest, SYNC_DEVINFO_STATE_PROCESS_TEST_001, TestSize.Level1)
 {
-    FsmStateMachine *fsm = (FsmStateMachine *)SoftBusCalloc(sizeof(FsmStateMachine));
-    ASSERT_TRUE(fsm != nullptr);
+    AuthFsm *authFsm = (AuthFsm *)SoftBusCalloc(sizeof(AuthFsm));
+    ASSERT_TRUE(authFsm != nullptr);
+    FsmStateMachine *testFsm = &authFsm->fsm;
     int32_t msgType = 1;
-    bool ret = SyncDevInfoStateProcess(fsm, msgType, nullptr);
+    bool ret = SyncDevInfoStateProcess(testFsm, msgType, nullptr);
     EXPECT_TRUE(ret == false);
-    SoftBusFree(fsm);
-    FsmStateMachine *testFsm = (FsmStateMachine *)SoftBusCalloc(sizeof(FsmStateMachine));
-    ASSERT_TRUE(testFsm != nullptr);
     testFsm->flag = 1;
 
     ret = SyncDevInfoStateProcess(testFsm, msgType, nullptr);
@@ -1031,7 +1029,7 @@ HWTEST_F(AuthOtherTest, SYNC_DEVINFO_STATE_PROCESS_TEST_001, TestSize.Level1)
     msgType = FSM_MSG_AUTH_FINISH;
     ret = SyncDevInfoStateProcess(testFsm, msgType, nullptr);
     EXPECT_TRUE(ret == false);
-    SoftBusFree(testFsm);
+    SoftBusFree(authFsm);
 }
 
 /*
