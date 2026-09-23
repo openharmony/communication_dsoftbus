@@ -18,7 +18,7 @@ if (dsoftbus_feature_trans_proxy_channel) {
     "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_proxy_manager.c",
     "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_pending.c",
   ]
-  if (dsoftbus_feature_trans_file && dsoftbus_feature_trans_proxy_file) {
+  if (dsoftbus_feature_trans_proxy_file) {
     trans_proxy_channel_sdk_src += [
       "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_proxy_file_common.c",
       "$dsoftbus_sdk_path/transmission/trans_channel/proxy/src/client_trans_proxy_file_manager.c",

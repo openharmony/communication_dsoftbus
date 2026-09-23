@@ -23,7 +23,7 @@ softbus_proxy_channel_manager_ut_defines = []
 if (dsoftbus_feature_trans_proxy_channel) {
   softbus_proxy_channel_manager_ut_defines += [ "DSOFTBUS_FEATURE_PROXY_CHANNEL" ]
 }
-if (dsoftbus_feature_trans_file) {
+if (dsoftbus_feature_trans_proxy_file || dsoftbus_feature_trans_udp_file) {
   softbus_proxy_channel_manager_ut_defines += [ "DSOFTBUS_FEATURE_TRANS_FILE" ]
 }
 

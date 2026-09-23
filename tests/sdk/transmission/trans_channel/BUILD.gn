@@ -448,7 +448,7 @@ if (defined(ohos_lite)) {
     }
     module_out_path = module_output_path
     defines = []
-    if (dsoftbus_feature_trans_file) {
+    if (dsoftbus_feature_trans_proxy_file || dsoftbus_feature_trans_udp_file) {
       defines += [ "DSOFTBUS_FEATURE_TRANS_FILE" ]
     }
     sources = [ "manager/client_trans_channel_manager_test.cpp" ]
@@ -628,7 +628,7 @@ if (defined(ohos_lite)) {
       "udp/distributed_stream:distributed_stream_test",
       "udp/file:unittest",
     ]
-    if (dsoftbus_feature_trans_proxy_channel && dsoftbus_feature_trans_file) {
+    if (dsoftbus_feature_trans_proxy_channel && dsoftbus_feature_trans_proxy_file) {
       deps += [ ":ClientTransProxyFileManagerTest" ]
     }
     if (dsoftbus_feature_trans_proxy_channel) {

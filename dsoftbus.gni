@@ -218,7 +218,7 @@ if (dsoftbus_feature_trans_mintp) {
   defines += [ "DSOFTBUS_FEATURE_TRANS_MINTP" ]
 }
 
-if (dsoftbus_feature_trans_file) {
+if (dsoftbus_feature_trans_proxy_file || dsoftbus_feature_trans_udp_file) {
   defines += [ "DSOFTBUS_FEATURE_TRANS_FILE" ]
 }
 
