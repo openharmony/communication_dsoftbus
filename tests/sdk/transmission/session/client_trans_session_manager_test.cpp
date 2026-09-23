@@ -17,6 +17,7 @@
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "client_trans_multipath_manager.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "device_auth.h"
@@ -2044,21 +2045,6 @@ HWTEST_F(TransClientSessionManagerTest, CheckChannelIsReserveByChannelIdInvalidP
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = CheckChannelIsReserveByChannelId(TRANS_TEST_SESSION_ID, TRANS_TEST_CHANNEL_ID, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-}
-
-/*
- * @tc.name: IsMultiPathSessionInvalidParamTest001
- * @tc.desc: test IsMultiPathSession returns false for null sessionName or null multipathSessionId pointer
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransClientSessionManagerTest, IsMultiPathSessionInvalidParamTest001, TestSize.Level1)
-{
-    int32_t multipathSessionId = 0;
-    bool ret = IsMultiPathSession(nullptr, &multipathSessionId);
-    EXPECT_FALSE(ret);
-    ret = IsMultiPathSession(g_sessionName, nullptr);
-    EXPECT_FALSE(ret);
 }
 
 /*

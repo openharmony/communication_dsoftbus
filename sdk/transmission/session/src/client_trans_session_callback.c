@@ -19,16 +19,18 @@
 #include <unistd.h>
 
 #include "anonymizer.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_def.h"
+#include "softbus_error_code.h"
+#include "trans_log.h"
+
+#include "client_trans_multipath_manager.h"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_udp_manager.h"
 #include "g_enhance_sdk_func.h"
 #include "softbus_access_token_adapter.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
-#include "trans_log.h"
 #include "trans_split_serviceid.h"
 
 #define RETRY_GET_INFO_TIMES_MS 300
@@ -575,9 +577,9 @@ int32_t TransOnSessionOpened(
     int32_t sessionId = INVALID_SESSION_ID;
     if (channel->isServer) {
         int32_t multiPathSessionId = INVALID_SESSION_ID;
-        bool isMultiPathSession = IsMultiPathSession(sessionName, &multiPathSessionId);
+        bool isMultiPathSession = TransMultipathIsSessionActive(sessionName, &multiPathSessionId);
         if (isMultiPathSession) {
-            int32_t ret = UpdateMultiPathSessionInfo(multiPathSessionId, channel);
+            int32_t ret = TransMultipathUpdateReserveChannel(multiPathSessionId, channel);
             if (ret != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_SDK, "fill mp session info failed, ret=%{public}d", ret);
                 return ret;

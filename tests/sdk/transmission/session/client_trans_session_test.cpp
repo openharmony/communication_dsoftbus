@@ -1999,55 +1999,6 @@ HWTEST_F(TransClientSessionTest, GetChannelTypeBySessionIdTest001, TestSize.Leve
 }
 
 /*
- * @tc.name: ClientTransNeedDelReserveTest001
- * @tc.desc: test ClientTransNeedDelReserve given null and invalid params returns false
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransClientSessionTest, ClientTransNeedDelReserveTest001, TestSize.Level1)
-{
-    int32_t routeType = WIFI_USB;
-    bool onlyReserveLinkDown = false;
-    SessionInfo sessionNode;
-    (void)memset_s(&sessionNode, sizeof(SessionInfo), 0, sizeof(SessionInfo));
-    sessionNode.enableMultipath = false;
-
-    bool ret = ClientTransNeedDelReserve(nullptr, routeType, &onlyReserveLinkDown);
-    EXPECT_EQ(ret, false);
-    ret = ClientTransNeedDelReserve(&sessionNode, INVALID_ROUTE_TYPE, &onlyReserveLinkDown);
-    EXPECT_EQ(ret, false);
-    ret = ClientTransNeedDelReserve(&sessionNode, routeType, nullptr);
-    EXPECT_EQ(ret, false);
-    ret = ClientTransNeedDelReserve(&sessionNode, routeType, &onlyReserveLinkDown);
-    EXPECT_EQ(ret, false);
-}
-
-/*
- * @tc.name: ClientTransNeedDelReserveTest002
- * @tc.desc: test ClientTransNeedDelReserve given valid conditions returns true
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransClientSessionTest, ClientTransNeedDelReserveTest002, TestSize.Level1)
-{
-    int32_t routeType = WIFI_USB;
-    bool onlyReserveLinkDown = false;
-    SessionInfo sessionNode;
-    (void)memset_s(&sessionNode, sizeof(SessionInfo), 0, sizeof(SessionInfo));
-    sessionNode.enableMultipath = true;
-    sessionNode.routeType = routeType;
-    sessionNode.routeTypeReserve = ROUTE_TYPE_ALL;
-    bool ret = ClientTransNeedDelReserve(&sessionNode, routeType, &onlyReserveLinkDown);
-    EXPECT_EQ(ret, true);
-    EXPECT_EQ(onlyReserveLinkDown, false);
-    sessionNode.routeType = ROUTE_TYPE_ALL;
-    sessionNode.routeTypeReserve = routeType;
-    ret = ClientTransNeedDelReserve(&sessionNode, routeType, &onlyReserveLinkDown);
-    EXPECT_EQ(ret, true);
-    EXPECT_EQ(onlyReserveLinkDown, true);
-}
-
-/*
  * @tc.name: PrintCollabInfoTest001
  * @tc.desc: test PrintCollabInfo and PrintAnonymizedString given null and valid params
  * @tc.type: FUNC

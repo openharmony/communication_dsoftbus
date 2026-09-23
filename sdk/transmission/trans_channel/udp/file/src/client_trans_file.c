@@ -17,6 +17,7 @@
 
 #include <securec.h>
 #include "client_trans_file_listener.h"
+#include "client_trans_multipath_manager.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_statistics.h"
 #include "file_adapter.h"
@@ -369,7 +370,7 @@ static void FileSendListenerEx(UdpChannel *udpChannel, DFileMsgType msgType, con
         LinkMediumType linkMediumType = ConvertDFileLinkToLinkMedium(msgData->pathNumChange.linkType);
         enum SoftBusMPErrNo reason = ConvertOnEventReason(
             msgData->pathNumChange.changeType, msgData->pathNumChange.linkType);
-        HandleMultiPathOnEvent(udpChannel->channelId, msgData->pathNumChange.changeType, linkMediumType, reason);
+        TransMultipathOnEvent(udpChannel->channelId, msgData->pathNumChange.changeType, linkMediumType, reason);
         return;
     }
     (void)g_udpChannelMgrCb->OnIdleTimeoutReset(sessionId);
@@ -551,7 +552,7 @@ static void FileReceiveListener(int32_t dfileId, DFileMsgType msgType, const DFi
         LinkMediumType linkMediumType = ConvertDFileLinkToLinkMedium(msgData->pathNumChange.linkType);
         enum SoftBusMPErrNo reason = ConvertOnEventReason(
             msgData->pathNumChange.changeType, msgData->pathNumChange.linkType);
-        HandleMultiPathOnEvent(udpChannel.channelId, msgData->pathNumChange.changeType, linkMediumType, reason);
+        TransMultipathOnEvent(udpChannel.channelId, msgData->pathNumChange.changeType, linkMediumType, reason);
         return;
     }
     int32_t sessionId = -1;

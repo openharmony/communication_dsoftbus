@@ -329,10 +329,10 @@ HWTEST_F(TransLaneManagerTest, TransSocketChannelInfoTest001, TestSize.Level1)
     EXPECT_EQ(state, CORE_SESSION_STATE_INIT);
     int32_t channelId = 1;
     int32_t channelType = CHANNEL_TYPE_TCP_DIRECT;
-    ret = TransUpdateSocketChannelInfoBySession(sessionName, sessionId, channelId, channelType);
+    ret = TransMultipathUpdateChannel(sessionName, sessionId, channelId, channelType);
     EXPECT_EQ(SOFTBUS_OK, ret);
     uint32_t lanHandele = 1;
-    ret = TransUpdateSocketChannelLaneInfoBySession(sessionName, sessionId, lanHandele, false, true);
+    ret = TransMultipathUpdateLane(sessionName, sessionId, lanHandele, false, true);
     EXPECT_EQ(SOFTBUS_OK, ret);
     lanHandele = INVALID_CHANNEL_ID;
     ret = TransGetSocketChannelLaneInfoBySession(sessionName, sessionId, &lanHandele, nullptr, nullptr);
@@ -816,22 +816,22 @@ HWTEST_F(TransLaneManagerTest, TransGetMultipathReallocList001, TestSize.Level1)
 {
     ListNode multipathReallocList;
     ListInit(&multipathReallocList);
-    TransGetMultipathReallocList(nullptr);
+    TransMultipathGetReallocList(nullptr);
 
-    TransGetMultipathReallocList(&multipathReallocList);
+    TransMultipathGetReallocList(&multipathReallocList);
     EXPECT_EQ(true, IsListEmpty(&multipathReallocList));
 
     int32_t ret = TransSocketLaneMgrInit();
     ASSERT_EQ(SOFTBUS_OK, ret);
-    TransGetMultipathReallocList(&multipathReallocList);
+    TransMultipathGetReallocList(&multipathReallocList);
     EXPECT_EQ(true, IsListEmpty(&multipathReallocList));
 
     ret = TransAddSocketChannelInfoMultipath(
         "testSessionName", 1, INVALID_CHANNEL_ID, CHANNEL_TYPE_BUTT, CORE_SESSION_STATE_INIT);
     ASSERT_EQ(SOFTBUS_OK, ret);
-    ret = TransUpdateSocketChannelLaneInfoBySession("testSessionName", 1, 123456789, true, true);
+    ret = TransMultipathUpdateLane("testSessionName", 1, 123456789, true, true);
     ASSERT_EQ(SOFTBUS_OK, ret);
-    TransGetMultipathReallocList(&multipathReallocList);
+    TransMultipathGetReallocList(&multipathReallocList);
     EXPECT_EQ(false, IsListEmpty(&multipathReallocList));
 
     ReallocInfo *reallocNode = NULL;
@@ -853,12 +853,12 @@ HWTEST_F(TransLaneManagerTest, TransGetMultipathReallocList001, TestSize.Level1)
 HWTEST_F(TransLaneManagerTest, CheckNeedReallocSecondLane001, TestSize.Level1)
 {
     int32_t channelId = 1024;
-    int ret = CheckNeedReallocSecondLane(channelId);
+    int ret = TransMultipathNeedReallocSecondLane(channelId);
     EXPECT_EQ(false, ret);
 
     ret = TransSocketLaneMgrInit();
     ASSERT_EQ(SOFTBUS_OK, ret);
-    ret = CheckNeedReallocSecondLane(channelId);
+    ret = TransMultipathNeedReallocSecondLane(channelId);
     EXPECT_EQ(false, ret);
 
     char sessionName[SESSION_NAME_SIZE_MAX] = "testSessionName";
@@ -867,9 +867,9 @@ HWTEST_F(TransLaneManagerTest, CheckNeedReallocSecondLane001, TestSize.Level1)
     ret = TransAddSocketChannelInfoMultipath(
         sessionName, sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_BUTT, CORE_SESSION_STATE_INIT);
     ASSERT_EQ(SOFTBUS_OK, ret);
-    ret = TransUpdateSocketChannelInfoBySession(sessionName, sessionId, channelId, channelType);
+    ret = TransMultipathUpdateChannel(sessionName, sessionId, channelId, channelType);
     ASSERT_EQ(SOFTBUS_OK, ret);
-    ret = CheckNeedReallocSecondLane(channelId);
+    ret = TransMultipathNeedReallocSecondLane(channelId);
     EXPECT_EQ(true, ret);
 
     TransSocketLaneMgrDeinit();
@@ -955,9 +955,9 @@ HWTEST_F(TransLaneManagerTest, TransUpdateSocketChannelInfoBySession001, TestSiz
         sessionName, sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_BUTT, CORE_SESSION_STATE_INIT);
     ASSERT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransUpdateSocketChannelInfoBySession(sessionName, sessionId, channelId, channelType);
+    ret = TransMultipathUpdateChannel(sessionName, sessionId, channelId, channelType);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransUpdateSocketChannelInfoBySession(sessionName, sessionId, channelId + 1, channelType);
+    ret = TransMultipathUpdateChannel(sessionName, sessionId, channelId + 1, channelType);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransSetSocketChannelStateByChannel(channelId + 1, channelType, CORE_SESSION_STATE_CHANNEL_OPENED);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -981,9 +981,9 @@ HWTEST_F(TransLaneManagerTest, TransUpdateSocketChannelLaneInfoBySession001, Tes
         sessionName, sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_BUTT, CORE_SESSION_STATE_INIT);
     ASSERT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransUpdateSocketChannelLaneInfoBySession(sessionName, sessionId, laneHandle, true, true);
+    ret = TransMultipathUpdateLane(sessionName, sessionId, laneHandle, true, true);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransUpdateSocketChannelLaneInfoBySession(sessionName, sessionId, laneHandle + 1, true, true);
+    ret = TransMultipathUpdateLane(sessionName, sessionId, laneHandle + 1, true, true);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransSocketLaneMgrDeinit();
 }
@@ -1006,9 +1006,9 @@ HWTEST_F(TransLaneManagerTest, TransDeleteSocketChannelInfoByChannel001, TestSiz
         sessionName, sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_BUTT, CORE_SESSION_STATE_INIT);
     ASSERT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransUpdateSocketChannelInfoBySession(sessionName, sessionId, channelId, channelType);
+    ret = TransMultipathUpdateChannel(sessionName, sessionId, channelId, channelType);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransUpdateSocketChannelInfoBySession(sessionName, sessionId, channelId + 1, channelType);
+    ret = TransMultipathUpdateChannel(sessionName, sessionId, channelId + 1, channelType);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransDeleteSocketChannelInfoByChannel(channelId + 1, channelType);
     EXPECT_EQ(SOFTBUS_OK, ret);

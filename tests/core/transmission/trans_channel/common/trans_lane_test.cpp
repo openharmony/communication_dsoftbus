@@ -1527,12 +1527,12 @@ HWTEST_F(TransLaneTest, TransAddSocketChannelInfoTest001, TestSize.Level1)
  */
 HWTEST_F(TransLaneTest, TransUpdateSocketChannelInfoBySessionTest001, TestSize.Level1)
 {
-    int32_t ret = TransUpdateSocketChannelInfoBySession(nullptr, 2, 1024, CHANNEL_TYPE_TCP_DIRECT);
+    int32_t ret = TransMultipathUpdateChannel(nullptr, 2, 1024, CHANNEL_TYPE_TCP_DIRECT);
     EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_NAME);
     if (g_socketChannelList != nullptr) {
         TransSocketLaneMgrDeinit();
     }
-    ret = TransUpdateSocketChannelInfoBySession(g_sessionName, 15, 1024, CHANNEL_TYPE_TCP_DIRECT);
+    ret = TransMultipathUpdateChannel(g_sessionName, 15, 1024, CHANNEL_TYPE_TCP_DIRECT);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
     EXPECT_NE(ret, SOFTBUS_OK);
 }

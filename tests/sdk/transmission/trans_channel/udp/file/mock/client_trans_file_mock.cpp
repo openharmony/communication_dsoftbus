@@ -220,11 +220,11 @@ int32_t NSTACKX_DFileSendFilesWithRemotePath(int32_t sessionId, const char *file
 }
 
 // Session wrappers
-void HandleMultiPathOnEvent(int32_t channelId, uint8_t changeType,
-    LinkMediumType linkMediumType, enum SoftBusMPErrNo reason)
+void TransMultipathOnEvent(int32_t channelId, uint8_t changeType, int32_t linkType, int32_t reason)
 {
     if (GetClientTransFileInterface() != nullptr) {
-        GetClientTransFileInterface()->HandleMultiPathOnEvent(channelId, changeType, linkMediumType, reason);
+        GetClientTransFileInterface()->HandleMultiPathOnEvent(
+            channelId, changeType, (LinkMediumType)linkType, (enum SoftBusMPErrNo)reason);
     }
 }
 
