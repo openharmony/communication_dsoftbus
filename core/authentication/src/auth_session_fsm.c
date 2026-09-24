@@ -51,6 +51,7 @@
 #define HICHAIN_RETURN_NOT_TRUSTED (-425919748)
 #define PTK_32_BIT_LEN 16
 #define DEFAULT_USERID 0
+#define AUTH_FSM_MAX_NUM 500
 
 typedef enum {
     FSM_MSG_RECV_DEVICE_ID,
@@ -313,11 +314,17 @@ int32_t AuthFsmInit(AuthFsm *authFsm, AuthFsmParam *authFsmParam, const AuthConn
 static AuthFsm *CreateAuthFsm(AuthFsmParam *authFsmParam, const AuthConnInfo *connInfo)
 {
     AuthFsm *item = NULL;
+    uint32_t fsmNum = 0;
     LIST_FOR_EACH_ENTRY(item, &g_authFsmList, AuthFsm, node) {
         if (item->authSeq == authFsmParam->authSeq) {
             AUTH_LOGE(AUTH_FSM, "authSeq already exists. authSeq=%{public}" PRId64 "", authFsmParam->authSeq);
             return NULL;
         }
+        fsmNum++;
+    }
+    if (fsmNum >= AUTH_FSM_MAX_NUM) {
+        AUTH_LOGE(AUTH_FSM, "auth fsm num exceeds limit=%{public}u", AUTH_FSM_MAX_NUM);
+        return NULL;
     }
     AuthFsm *authFsm = (AuthFsm *)SoftBusCalloc(sizeof(AuthFsm));
     if (authFsm == NULL) {
