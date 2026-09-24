@@ -76,6 +76,7 @@ typedef struct {
     char uuid[UUID_STRING_LEN];
     char srcMac[BT_MAC_MAX_LEN];
     uint32_t requestId;
+    int32_t appIndex;
 } OpenFarFieldContext;
 
 static void FarFieldConnectTimeoutTask(int32_t callId, void *arg);
@@ -158,11 +159,6 @@ static const StateHandler *GetStateHandler(FarFieldProxyState state)
             .onEnter = ConnectingOnEnter,
             .onExit = ConnectingOnExit,
             .name = "Connecting"
-        },
-        [P2P_RECONNECTING] = {
-            .onEnter = ConnectingOnEnter,
-            .onExit = ConnectingOnExit,
-            .name = "Reconnecting"
         },
         [P2P_CONNECTED] = {
             .onEnter = ConnectedOnEnter,
@@ -349,13 +345,6 @@ static int32_t ConnectingOnEnter(FarFieldDeviceConnection *conn, FarFieldProxySt
         CONN_LOGE(CONN_PROXY, "Failed to open P2P, ret=%{public}d", ret);
         SetConnectionState(conn, P2P_DISCONNECTED);
     }
-
-    if (ret == SOFTBUS_OK) {
-        ret = SetupConnectionTimeout(conn);
-        if (ret != SOFTBUS_OK) {
-            CONN_LOGW(CONN_PROXY, "Failed to setup connection timeout, ret=%{public}d", ret);
-        }
-    }
     return ret;
 }
 
@@ -507,10 +496,10 @@ static void CancelConnectionTimeout(FarFieldDeviceConnection *conn)
         return;
     }
     ConnAsyncCancel(&g_farFieldManager.async, conn->timeoutCallId, NULL);
-    conn->timeoutCallId = 0;
+    conn->timeoutCallId = -1;
 }
 
-static FarFieldDeviceConnection *CreateAndSaveConnection(OpenFarFieldContext *ctx)
+static FarFieldDeviceConnection *CreateFarFieldConnection(OpenFarFieldContext *ctx)
 {
     FarFieldDeviceConnection *conn = (FarFieldDeviceConnection *)SoftBusRcGetCommon(
         &g_farFieldManager.connectionList, FarFieldBrMacMatcher, ctx->brMac);
@@ -535,8 +524,9 @@ static FarFieldDeviceConnection *CreateAndSaveConnection(OpenFarFieldContext *ct
         FreeDeviceConnection(conn);
         return NULL;
     }
+    conn->device.appIndex = ctx->appIndex;
     conn->channelId = GetProxyChannelManager()->generateChannelId();
-    conn->timeoutCallId = 0;
+    conn->timeoutCallId = -1;
     conn->state = P2P_AVAILABLE_STATE;
     ret = ConstructProxyChannel(conn, ctx->requestId);
     if (ret != SOFTBUS_OK) {
@@ -548,20 +538,29 @@ static FarFieldDeviceConnection *CreateAndSaveConnection(OpenFarFieldContext *ct
     char anonymizeAddr[BT_MAC_LEN] = {0};
     ConvertAnonymizeMacAddress(anonymizeAddr, BT_MAC_LEN, conn->device.brMac, BT_MAC_LEN);
     CONN_LOGI(CONN_PROXY, "Device connection created for %{public}s", anonymizeAddr);
-    ret = FarFieldAdapterInit();
+    return conn;
+}
+
+static int32_t SaveFarFieldConnection(FarFieldDeviceConnection *conn)
+{
+    FarFieldDeviceConnection *existing = (FarFieldDeviceConnection *)SoftBusRcGetCommon(
+        &g_farFieldManager.connectionList, FarFieldBrMacMatcher, conn->device.brMac);
+    if (existing != NULL) {
+        existing->Dereference((SoftBusRcObject **)&existing);
+        return SOFTBUS_OK;
+    }
+    int32_t ret = FarFieldAdapterInit();
     if (ret != SOFTBUS_OK && ret != FAR_FIELD_ADAPTER_ALREADY_INITIALIZED) {
         CONN_LOGE(CONN_PROXY, "Failed to init adapter, ret=%{public}d", ret);
-        FreeDeviceConnection(conn);
-        return NULL;
+        return ret;
     }
     ret = SoftBusRcSave(&g_farFieldManager.connectionList, (SoftBusRcObject *)conn);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "Failed to save connection to list, ret=%{public}d", ret);
         FarFieldAdapterDeinit();
-        FreeDeviceConnection(conn);
-        return NULL;
+        return ret;
     }
-    return conn;
+    return SOFTBUS_OK;
 }
 
 static int32_t ConstructProxyChannel(FarFieldDeviceConnection *conn, uint32_t requestId)
@@ -656,7 +655,7 @@ static void FarFieldProxyClose(struct ProxyChannel *channel, bool isClearReconne
         CONN_LOGW(CONN_PROXY, "Failed to close P2P, ret=%{public}d", ret);
     }
     if (isClearReconnectEvent) {
-        GetBrProxyChannelManager()->clearDevInfoUnsafe(&conn->channel);
+        GetBrProxyChannelManager()->clearReconnectDevinfo(&conn->channel);
     }
 
     CleanupConnectionResources(conn);
@@ -754,6 +753,9 @@ static FarFieldCallbackSt g_farFieldCallback = {
 
 static int32_t SetupConnectionTimeout(FarFieldDeviceConnection *conn)
 {
+    if (conn->timeoutCallId >= 0) {
+        CancelConnectionTimeout(conn);
+    }
     char *timeoutArg = (char *)SoftBusCalloc(BT_MAC_LEN);
     if (timeoutArg == NULL) {
         CONN_LOGE(CONN_PROXY, "Failed to allocate timeout arg");
@@ -797,8 +799,8 @@ static bool AttemptReuseConnection(OpenFarFieldContext *ctx)
     if (state == P2P_REFRESHING) {
         conn->channel.requestId = ctx->requestId;
         CONN_LOGE(CONN_PROXY, "state=%{public}d transfer connecting, reqId=%{public}u", state, conn->channel.requestId);
-        SetConnectionState(conn, P2P_CONNECTING);
-        return true;
+        SetConnectionState(conn, P2P_AVAILABLE_STATE);
+        return false;
     }
     return false;
 }
@@ -818,17 +820,30 @@ static void OpenFarFieldChannelTask(int32_t callId, void *arg)
         SoftBusFree(ctx);
         return;
     }
-    FarFieldDeviceConnection *conn = CreateAndSaveConnection(ctx);
+    FarFieldDeviceConnection *conn = CreateFarFieldConnection(ctx);
     if (conn == NULL) {
         CONN_LOGE(CONN_PROXY, "Failed to create connection");
         NotifyOpenFail(ctx->requestId, SOFTBUS_MALLOC_ERR, ctx->brMac);
         SoftBusFree(ctx);
         return;
     }
+    int32_t ret = SetupConnectionTimeout(conn);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGW(CONN_PROXY, "Failed to setup connection timeout, ret=%{public}d", ret);
+    }
+    ret = SaveFarFieldConnection(conn);
+    if (ret != SOFTBUS_OK) {
+        NotifyOpenFail(ctx->requestId, ret, ctx->brMac);
+        CancelConnectionTimeout(conn);
+        FreeDeviceConnection(conn);
+        SoftBusFree(ctx);
+        return;
+    }
     SoftBusFree(ctx);
-    int32_t ret = StateMachineProcess(conn, STATE_EVENT_DIRECTLY_CONNECT, 0);
+    ret = StateMachineProcess(conn, STATE_EVENT_DIRECTLY_CONNECT, 0);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "start open farField channel err=%{public}d", ret);
+        CancelConnectionTimeout(conn);
         NotifyOpenFail(conn->channel.requestId, ret, conn->device.brMac);
         conn->Dereference((SoftBusRcObject **)&conn);
         return;
@@ -910,6 +925,7 @@ int32_t OpenFarFieldProxyChannel(FarFieldProxyParam *param)
         return SOFTBUS_MEM_ERR;
     }
     ctx->requestId = param->requestId;
+    ctx->appIndex = param->device.appIndex;
     int32_t ret = ConnAsyncCall(&g_farFieldManager.async, OpenFarFieldChannelTask, ctx, 0);
     if (ret < 0) {
         CONN_LOGE(CONN_PROXY, "Failed to call async, ret=%{public}d", ret);

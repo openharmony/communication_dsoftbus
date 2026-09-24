@@ -70,6 +70,7 @@ enum BrProxyLooperMsgType {
     MSG_PROXY_UNPAIRED,
     MSG_DATA_RECEIVED,
     MSG_RECONNECT_DEVICE,
+    MSG_ADD_RECONNECT_DEVICE_INFO,
 };
 
 typedef struct {
@@ -783,7 +784,7 @@ static void DestroyProxyConnectInfo(ProxyConnectInfo **connectInfo)
     *connectInfo = NULL;
 }
 
-int32_t OpenBrProxyChannel(ProxyChannelParam *param, bool isRealMac, bool isSupportFarField,
+static int32_t OpenBrProxyChannel(ProxyChannelParam *param, bool isRealMac, bool isSupportFarField,
     const OpenProxyChannelCallback *callback)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, CONN_PROXY, "param is NULL");
@@ -812,6 +813,27 @@ int32_t OpenBrProxyChannel(ProxyChannelParam *param, bool isRealMac, bool isSupp
         return ret;
     }
     return SOFTBUS_OK;
+}
+
+static void AddBrReconnectDeviceInfo(ProxyChannelParam *param, bool isRealMac, bool isSupportFarField)
+{
+    CONN_CHECK_AND_RETURN_LOGE(param != NULL, CONN_PROXY, "param is NULL");
+    char anomizeAddress[BT_MAC_MAX_LEN] = { 0 };
+    char anomizeUuid[UUID_STRING_LEN] = { 0 };
+    ConvertAnonymizeSensitiveString(anomizeAddress, BT_MAC_MAX_LEN, param->brMac);
+    ConvertAnonymizeSensitiveString(anomizeUuid, UUID_STRING_LEN, param->uuid);
+    CONN_LOGI(CONN_PROXY, "reqId=%{public}u, brMac=%{public}s, uuid=%{public}s",
+        param->requestId, anomizeAddress, anomizeUuid);
+
+    OpenProxyChannelCallback dummyCallback = { 0 };
+    ProxyConnectInfo *connectInfo = NULL;
+    int32_t ret = CreateProxyConnectInfo(param, &dummyCallback, &connectInfo, isRealMac, isSupportFarField);
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_PROXY, "createProxyConnectInfo fail, ret=%{public}d", ret);
+    ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, MSG_ADD_RECONNECT_DEVICE_INFO, 0, 0, connectInfo, 0);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_PROXY, "send msg fail, error=%{public}d", ret);
+        DestroyProxyConnectInfo(&connectInfo);
+    }
 }
 
 static void ProxyChannelDataReceivedHandler(ProxyChannelDataContext *context)
@@ -1295,6 +1317,12 @@ static void HandleReconnectDeviceMsg(SoftBusMessage *msg)
     ReconnectDeviceHandler(connectInfo);
 }
 
+static void HandleAddReconnectDeviceInfoMsg(SoftBusMessage *msg)
+{
+    CONN_CHECK_AND_RETURN_LOGW(msg->obj != NULL, CONN_PROXY, "msg->obj is NULL");
+    AddReconnectDeviceInfoUnsafe((ProxyConnectInfo *)msg->obj);
+}
+
 static MsgHandlerCommand g_proxyCommands[] = {
     {MSG_OPEN_PROXY_CHANNEL, HandleOpenProxyChannelMsg},
     {MSG_OPEN_PROXY_CHANNEL_TIMEOUT, HandleOpenProxyChannelTimeoutMsg},
@@ -1308,6 +1336,7 @@ static MsgHandlerCommand g_proxyCommands[] = {
     {MSG_PROXY_UNPAIRED, HandleProxyUnpairedMsg},
     {MSG_DATA_RECEIVED, HandleDataReceivedMsg},
     {MSG_RECONNECT_DEVICE, HandleReconnectDeviceMsg},
+    {MSG_ADD_RECONNECT_DEVICE_INFO, HandleAddReconnectDeviceInfoMsg},
 };
 
 static void ProxyChannelMsgHandler(SoftBusMessage *msg)
@@ -1366,7 +1395,7 @@ static int ProxyChannelLooperEventFunc(const SoftBusMessage *msg, void *args)
     return COMPARE_SUCCESS;
 }
 
-void UpdateDevInfoReqIdUnsafe(const char *brMac, uint32_t newReqId)
+static void UpdateDevInfoReqIdUnsafe(const char *brMac, uint32_t newReqId)
 {
     CONN_CHECK_AND_RETURN_LOGW(brMac != NULL, CONN_PROXY, "brMac is NULL");
     ProxyConnectInfo *connectInfo = GetReconnectDeviceInfoByAddrUnsafe(brMac);
@@ -1378,7 +1407,7 @@ void UpdateDevInfoReqIdUnsafe(const char *brMac, uint32_t newReqId)
     }
 }
 
-void ClearDevInfoUnsafe(struct ProxyChannel *channel)
+static void ClearReconnectDevinfo(struct ProxyChannel *channel)
 {
     CONN_CHECK_AND_RETURN_LOGW(channel != NULL, CONN_PROXY, "channel is NULL");
     AttemptPostChannelCloseEvent(channel, true);
@@ -1386,12 +1415,13 @@ void ClearDevInfoUnsafe(struct ProxyChannel *channel)
 
 static BrProxyChannelManager g_proxyChannelManager = {
     .openBrProxyChannel = OpenBrProxyChannel,
+    .addReconnectDeviceInfo = AddBrReconnectDeviceInfo,
     .registerBrProxyListener = RegisterProxyChannelListener,
 
     .getConnectionById = GetProxyChannelByChannelId,
     .getProxyChannelByAddr = GetProxyChannelByAddr,
     .updateDevInfoReqIdUnsafe = UpdateDevInfoReqIdUnsafe,
-    .clearDevInfoUnsafe = ClearDevInfoUnsafe,
+    .clearReconnectDevinfo = ClearReconnectDevinfo,
     .proxyChannelRequestInfo = NULL,
     .proxyConnectionList = NULL,
 };

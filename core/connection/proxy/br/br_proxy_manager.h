@@ -72,6 +72,7 @@ typedef struct {
 typedef struct {
     int32_t (*openBrProxyChannel)(ProxyChannelParam *param, bool isRealMac, bool isSupportFarField,
         const OpenProxyChannelCallback *callback);
+    void (*addReconnectDeviceInfo)(ProxyChannelParam *param, bool isRealMac, bool isSupportFarField);
     int32_t (*registerBrProxyListener)(BrProxyListener *listener);
     //void (*AttemptReconnectDevice)(char *brAddr);
     // inner
@@ -79,7 +80,7 @@ typedef struct {
     struct ProxyConnection *(*getConnectionById)(uint32_t channelId);
     struct ProxyConnection *(*getProxyChannelByAddr)(char *addr);
     void (*updateDevInfoReqIdUnsafe)(const char *brMac, uint32_t newReqId);
-    void (*clearDevInfoUnsafe)(struct ProxyChannel *channel);
+    void (*clearReconnectDevinfo)(struct ProxyChannel *channel);
     // current process request info
     ProxyConnectInfo *proxyChannelRequestInfo;
     ListNode reconnectDeviceInfos;

@@ -1244,11 +1244,17 @@ static void OnOpenFail(uint32_t requestId, int32_t reason, const char *brMac)
     BrProxyInfo proxyInfo;
     (void)memset_s(&proxyInfo, sizeof(BrProxyInfo), 0, sizeof(BrProxyInfo));
     ret = GetBrProxy(info.proxyInfo.brMac, info.proxyInfo.uuid, info.requestId, &proxyInfo);
-    if (ret == SOFTBUS_OK && proxyInfo.isEnable) {
+    if (ret == SOFTBUS_OK && (proxyInfo.isEnable || reason == SOFTBUS_FAR_FIELD_OPEN_FAIL)) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] the connecet requestId=%{public}d is virtual connect", requestId);
         (void)SetCurrentConnect(info.proxyInfo.brMac, info.proxyInfo.uuid, requestId, true);
         ClientIpcBrProxyOpened(info.callingPid, info.channelId,
             (const char *)info.proxyInfo.brMac, (const char *)info.proxyInfo.uuid, SOFTBUS_OK);
+        TransBrProxyStorageInfo storageInfo;
+        (void)memset_s(&storageInfo, sizeof(TransBrProxyStorageInfo), 0, sizeof(TransBrProxyStorageInfo));
+        if (reason == SOFTBUS_FAR_FIELD_OPEN_FAIL && !TransBrProxyStorageRead(TransBrProxyStorageGetInstance(),
+            &storageInfo)) {
+            StorageInfo(&proxyInfo);
+        }
         return;
     }
     if (proxyInfo.isRecovery) {

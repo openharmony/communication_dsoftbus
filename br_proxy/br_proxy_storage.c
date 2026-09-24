@@ -180,6 +180,7 @@ void TransBrProxyStorageClear(TransBrProxyStorage *instance)
         return;
     }
     (void)SoftBusRemoveFile(instance->filepath);
+    instance->loaded = false;
 
     SoftBusMutexUnlock(&instance->mutex);
     TRANS_LOGW(TRANS_SVC, TAG "clear storage success and delete file");
