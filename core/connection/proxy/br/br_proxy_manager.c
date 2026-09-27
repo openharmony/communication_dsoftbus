@@ -154,6 +154,8 @@ int32_t ProxyChannelSend(struct ProxyChannel *channel, const uint8_t *data, uint
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(channel != NULL, SOFTBUS_INVALID_PARAM, CONN_PROXY, "channel is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, CONN_PROXY, "data is null");
+    CONN_CHECK_AND_RETURN_RET_LOGE(dataLen > 0 && dataLen <= MAX_MSG_DATA_LEN, SOFTBUS_INVALID_PARAM,
+        CONN_PROXY, "dataLen is invalid");
     struct ProxyConnection *proxyConnection = GetProxyChannelByChannelId(channel->channelId);
     CONN_CHECK_AND_RETURN_RET_LOGE(proxyConnection != NULL, SOFTBUS_NOT_FIND, CONN_PROXY,
         "get proxyConnection fail, channelId=%{public}u", channel->channelId);
@@ -857,6 +859,7 @@ static void ProxyChannelDataReceivedHandler(ProxyChannelDataContext *context)
 
 static void OnProxyChannelDataReceived(uint32_t channelId, uint8_t *data, uint32_t dataLen)
 {
+    CONN_CHECK_AND_RETURN_LOGE(dataLen > 0 && dataLen <= MAX_MSG_DATA_LEN, CONN_PROXY, "Invalid params");
     ProxyChannelDataContext *context = (ProxyChannelDataContext *)SoftBusCalloc(sizeof(ProxyChannelDataContext));
     CONN_CHECK_AND_RETURN_LOGE(context != NULL, CONN_PROXY, "context is null");
     context->data = (uint8_t *)SoftBusCalloc(sizeof(uint8_t) * dataLen);
@@ -1407,7 +1410,7 @@ static void UpdateDevInfoReqIdUnsafe(const char *brMac, uint32_t newReqId)
     }
 }
 
-static void ClearReconnectDevinfo(struct ProxyChannel *channel)
+static void ClearReconnectDevInfo(struct ProxyChannel *channel)
 {
     CONN_CHECK_AND_RETURN_LOGW(channel != NULL, CONN_PROXY, "channel is NULL");
     AttemptPostChannelCloseEvent(channel, true);
@@ -1421,7 +1424,7 @@ static BrProxyChannelManager g_proxyChannelManager = {
     .getConnectionById = GetProxyChannelByChannelId,
     .getProxyChannelByAddr = GetProxyChannelByAddr,
     .updateDevInfoReqIdUnsafe = UpdateDevInfoReqIdUnsafe,
-    .clearReconnectDevinfo = ClearReconnectDevinfo,
+    .clearReconnectDevInfo = ClearReconnectDevInfo,
     .proxyChannelRequestInfo = NULL,
     .proxyConnectionList = NULL,
 };
