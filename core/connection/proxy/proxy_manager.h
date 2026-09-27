@@ -29,6 +29,7 @@ extern "C" {
 #define UUID_STRING_LEN 38
 // the length of the latter half of the hexString representing the sha256 hash value of mac address
 #define BT_MAC_MAX_LEN 33
+#define MAX_MSG_DATA_LEN (1024 * 4)
 #define PROXY_BR_CONNECT_WAIT_CALLBACK_TIMEOUT_MAX_MILLIS 500
 
 typedef struct {

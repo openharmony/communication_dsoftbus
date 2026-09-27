@@ -80,7 +80,7 @@ typedef struct {
     struct ProxyConnection *(*getConnectionById)(uint32_t channelId);
     struct ProxyConnection *(*getProxyChannelByAddr)(char *addr);
     void (*updateDevInfoReqIdUnsafe)(const char *brMac, uint32_t newReqId);
-    void (*clearReconnectDevinfo)(struct ProxyChannel *channel);
+    void (*clearReconnectDevInfo)(struct ProxyChannel *channel);
     // current process request info
     ProxyConnectInfo *proxyChannelRequestInfo;
     ListNode reconnectDeviceInfos;

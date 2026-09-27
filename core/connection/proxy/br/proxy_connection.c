@@ -20,6 +20,7 @@
 #include "conn_event.h"
 #include "conn_event_form.h"
 #include "conn_log.h"
+#include "proxy_manager.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_common.h"
@@ -39,8 +40,7 @@ ProxyEventListener g_eventListener = { 0 };
 
 static int32_t LegacyBrLoopRead(struct ProxyConnection *connection)
 {
-#define BUFFER_SIZE (1024 * 2)
-    uint8_t *buffer = (uint8_t *)SoftBusCalloc(BUFFER_SIZE);
+    uint8_t *buffer = (uint8_t *)SoftBusCalloc(MAX_MSG_DATA_LEN);
     CONN_CHECK_AND_RETURN_RET_LOGE(buffer != NULL, SOFTBUS_MALLOC_ERR, CONN_PROXY, "create buffer fail");
     uint32_t channelId = connection->channelId;
     int32_t ret = SOFTBUS_OK;
@@ -57,7 +57,7 @@ static int32_t LegacyBrLoopRead(struct ProxyConnection *connection)
             ret = SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED;
             break;
         }
-        int32_t recvLen = g_sppDriver->Read(socketHandle, buffer, BUFFER_SIZE);
+        int32_t recvLen = g_sppDriver->Read(socketHandle, buffer, MAX_MSG_DATA_LEN);
         if (recvLen == BR_READ_SOCKET_CLOSED) {
             CONN_LOGW(CONN_PROXY,
                 "br connection read return, connection closed, channelId=%{public}u, socketHandle=%{public}d",
