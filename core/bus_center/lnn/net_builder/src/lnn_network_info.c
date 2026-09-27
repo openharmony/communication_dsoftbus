@@ -247,7 +247,7 @@ static void DoSendCapability(NodeInfo nodeInfo, NodeBasicInfo netInfo, uint8_t *
         }
         char *anonyNetworkId = NULL;
         Anonymize(netInfo.networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_BUILDER,
+        LNN_LOGI(LNN_BUILDER,
             "sync cap info ret=%{public}d, peerNetworkId=%{public}s, type=%{public}u.",
             ret, AnonymizeWrapper(anonyNetworkId), type);
         AnonymizeFree(anonyNetworkId);
@@ -268,7 +268,7 @@ static void SendSleCapabilityToRemote(NodeInfo *nodeInfo, NodeBasicInfo netInfo,
     }
     char *anonyNetworkId = NULL;
     Anonymize(netInfo.networkId, &anonyNetworkId);
-    LNN_LOGE(LNN_BUILDER,
+    LNN_LOGI(LNN_BUILDER,
         "sync cap info ret=%{public}d, peerNetworkId=%{public}s.",
         ret, AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);

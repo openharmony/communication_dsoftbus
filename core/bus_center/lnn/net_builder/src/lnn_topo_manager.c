@@ -686,6 +686,7 @@ int32_t LnnGetAllRelation(LnnRelation **relation, uint32_t *relationNum)
     (void)SoftBusMutexUnlock(&g_topoTable.lock);
     if (rc != SOFTBUS_OK) {
         SoftBusFree(*relation);
+        *relation = NULL;
     }
     return rc;
 }

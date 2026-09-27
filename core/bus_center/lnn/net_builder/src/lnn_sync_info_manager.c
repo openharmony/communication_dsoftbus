@@ -800,7 +800,7 @@ static void OnWifiDirectSyncMsgRecv(AuthHandle authHandle, const AuthTransData *
     LnnSyncInfoMsgHandler handler;
     char networkId[NETWORK_ID_BUF_LEN] = {0};
 
-    if (data == NULL) {
+    if (data == NULL || data->data == NULL) {
         LNN_LOGE(LNN_BUILDER, "recv null data, authId=%{public}" PRId64, authHandle.authId);
         return;
     }

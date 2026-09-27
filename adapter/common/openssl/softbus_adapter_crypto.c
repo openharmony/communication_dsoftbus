@@ -719,11 +719,13 @@ int32_t SoftBusCalcHKDF(const uint8_t *inData, uint32_t inLen, uint8_t *outData,
     int32_t ret = EVP_PKEY_derive_init(pctx);
     if (ret <= 0) {
         COMM_LOGE(COMM_ADAPTER, "EVP_PKEY_derive_init fail.");
+        EVP_PKEY_CTX_free(pctx);
         return SOFTBUS_CALC_HKDF_FAIL;
     }
     ret = EVP_PKEY_CTX_set_hkdf_md(pctx, md);
     if (ret <= 0) {
         COMM_LOGE(COMM_ADAPTER, "EVP_PKEY_CTX_set_hkdf_md fail.");
+        EVP_PKEY_CTX_free(pctx);
         return SOFTBUS_CALC_HKDF_FAIL;
     }
     ret = EVP_PKEY_CTX_set1_hkdf_key(pctx, inData, inLen);

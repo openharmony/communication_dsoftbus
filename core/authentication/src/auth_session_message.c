@@ -245,6 +245,7 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "encrypt device info fail");
         JSON_Free(msg);
         SoftBusFree(compressData);
+        DestroySessionKeyList(&sessionKeyList);
         return SOFTBUS_ENCRYPT_ERR;
     }
     JSON_Free(msg);
