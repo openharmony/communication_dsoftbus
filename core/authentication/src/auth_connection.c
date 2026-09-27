@@ -307,7 +307,9 @@ static void HandleConnConnectTimeout(const void *para)
     ConnRequest *item = FindConnRequestByRequestId(requestId);
     if (item != NULL) {
         ListenerModule module = item->connInfo.type == AUTH_LINK_TYPE_RAW_ENHANCED_P2P ? AUTH_RAW_P2P_SERVER : AUTH;
-        SocketDisconnectDevice(module, item->fd);
+        if (TryDeleteAuthTcpConnFdItemByConnId(item->fd) == SOFTBUS_OK) {
+            SocketDisconnectDevice(module, item->fd);
+        }
         DelConnRequest(item);
     }
     int32_t errCode = SOFTBUS_AUTH_CONN_TIMEOUT;
