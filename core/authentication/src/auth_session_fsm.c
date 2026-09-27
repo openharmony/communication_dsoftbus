@@ -323,7 +323,7 @@ static AuthFsm *CreateAuthFsm(AuthFsmParam *authFsmParam, const AuthConnInfo *co
         fsmNum++;
     }
     if (fsmNum >= AUTH_FSM_MAX_NUM) {
-        AUTH_LOGE(AUTH_FSM, "auth fsm num exceeds limit=%{public}u", AUTH_FSM_MAX_NUM);
+        AUTH_LOGE(AUTH_FSM, "auth fsm num exceeds limit=%{public}d", AUTH_FSM_MAX_NUM);
         return NULL;
     }
     AuthFsm *authFsm = (AuthFsm *)SoftBusCalloc(sizeof(AuthFsm));
