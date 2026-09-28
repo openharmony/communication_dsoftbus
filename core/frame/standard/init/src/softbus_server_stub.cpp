@@ -30,6 +30,7 @@
 #include "softbus_permission.h"
 #include "softbus_server_frame.h"
 #include "softbus_server_ipc_interface_code.h"
+#include "softbus_utils.h"
 #include "syspara/parameters.h"
 #include "tokenid_kit.h"
 #include "trans_channel_common.h"
@@ -408,7 +409,7 @@ int32_t SoftBusServerStub::SoftbusRegisterServiceInner(MessageParcel &data, Mess
         return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
     }
     const char *pkgName = data.ReadCString();
-    if (pkgName == nullptr) {
+    if (!IsValidStringSafe(pkgName, PKG_NAME_SIZE_MAX)) {
         COMM_LOGE(COMM_SVC, "SoftbusRegisterServiceInner read pkgName failed!");
         return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
     }
@@ -596,7 +597,7 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
     uint64_t callingFullTokenId = IPCSkeleton::GetCallingFullTokenID();
 #endif
     const char *pkgName = data.ReadCString();
-    if (pkgName == nullptr) {
+    if (!IsValidStringSafe(pkgName, PKG_NAME_SIZE_MAX)) {
         COMM_LOGE(COMM_SVC, "CreateSessionServerInner read pkgName failed!");
         return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
     }
@@ -646,7 +647,7 @@ int32_t SoftBusServerStub::RemoveSessionServerInner(MessageParcel &data, Message
     pid_t callingPid;
     uint64_t timestamp = 0;
     const char *pkgName = data.ReadCString();
-    if (pkgName == nullptr) {
+    if (!IsValidStringSafe(pkgName, PKG_NAME_SIZE_MAX)) {
         COMM_LOGE(COMM_SVC, "RemoveSessionServerInner read pkgName failed!");
         return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
     }

@@ -26,6 +26,7 @@
 #include "session_set_timer.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_server_ipc_interface_code.h"
+#include "softbus_utils.h"
 
 namespace OHOS {
 static constexpr uint32_t DFX_TIMERS_S = 15;
@@ -101,7 +102,8 @@ int32_t SoftBusClientStub::OnClientPermissionChangeInner(MessageParcel &data, Me
 
     const char *pkgName = data.ReadCString();
     COMM_CHECK_AND_RETURN_RET_LOGE(
-        pkgName != nullptr, SOFTBUS_TRANS_PROXY_READCSTRING_FAILED, COMM_SDK, "read pkgName failed");
+        IsValidStringSafe(pkgName, PKG_NAME_SIZE_MAX),
+        SOFTBUS_TRANS_PROXY_READCSTRING_FAILED, COMM_SDK, "read pkgName failed");
 
     PermissionStateChange(pkgName, state);
     return SOFTBUS_OK;
