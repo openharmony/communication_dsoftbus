@@ -618,10 +618,6 @@ int32_t SoftBusServer::CreateServer(const char *pkgName, const char *name)
         COMM_LOGE(COMM_SVC, "copy pkgName failed");
         return SOFTBUS_STRCPY_ERR;
     }
-    if (strcpy_s(param.name, GENERAL_NAME_LEN, name) != EOK) {
-        COMM_LOGE(COMM_SVC, "copy name failed");
-        return SOFTBUS_STRCPY_ERR;
-    }
     int32_t ret = SOFTBUS_OK;
 #ifdef SUPPORT_BUNDLENAME
     ret = FillBundleName(param.bundleName, BUNDLE_NAME_MAX);

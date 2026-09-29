@@ -294,7 +294,7 @@ int32_t SoftBusSocketFdIsset(int32_t socketFd, SoftBusFdSet *set)
         return 0;
     }
 
-    if (FD_ISSET(socketFd, (fd_set *)set->fdsBits) == true) {
+    if (FD_ISSET(socketFd, (fd_set *)set->fdsBits)) {
         return 1;
     } else {
         return 0;
