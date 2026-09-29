@@ -326,6 +326,30 @@ void PerceptionScanOnBtStateChanged(bool isBtOn)
     LNN_LOGI(LNN_STATE, "perception scan recover on bt on, ret=%{public}d", ret);
 }
 
+void PerceptionMlpsServicesStateChange(bool isStart)
+{
+    if (!isStart) {
+        LNN_LOGI(LNN_STATE, "perception mlps services state change, isStart=false, skip");
+        return;
+    }
+    if (!atomic_load(&g_scanCtx.isScanning)) {
+        LNN_LOGI(LNN_STATE, "perception mlps services state change, not scanning, skip");
+        return;
+    }
+    int32_t *para = (int32_t *)SoftBusCalloc(sizeof(int32_t));
+    if (para == NULL) {
+        LNN_LOGE(LNN_STATE, "perception mlps services state change malloc fail");
+        return;
+    }
+    *para = atomic_load(&g_scanCtx.listenerId);
+    SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
+    int32_t ret = LnnAsyncCallbackDelayHelper(looper, PerceptionSwitchScanToSH, para, 0);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "perception mlps services state change post fail, ret=%{public}d", ret);
+        SoftBusFree(para);
+    }
+}
+
 int32_t PerceptionScannerInit(void)
 {
     if (atomic_load(&g_scanInited)) {

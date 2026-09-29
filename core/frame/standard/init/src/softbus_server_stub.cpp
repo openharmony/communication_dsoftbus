@@ -334,6 +334,12 @@ void SoftBusServerStub::InitMemberConstraintSet()
     memberConstraintSet_.insert(SERVER_SET_DATA_LEVEL);
     memberConstraintSet_.insert(SERVER_TRIGGER_RANGE_FOR_MSDP);
     memberConstraintSet_.insert(SERVER_POST_CONVERSATION_DATA);
+    memberConstraintSet_.insert(SERVER_START_PERCEPTION_ADV);
+    memberConstraintSet_.insert(SERVER_STOP_PERCEPTION_ADV);
+    memberConstraintSet_.insert(SERVER_SET_PERCEPTION_ADV_HIGH_FREQ);
+    memberConstraintSet_.insert(SERVER_START_PERCEPTION_SCAN);
+    memberConstraintSet_.insert(SERVER_STOP_PERCEPTION_SCAN);
+    memberConstraintSet_.insert(SERVER_GET_PERCEPTION_DEVICE_LIST);
 }
 
 int32_t SoftBusServerStub::CheckPermission(uint32_t code)

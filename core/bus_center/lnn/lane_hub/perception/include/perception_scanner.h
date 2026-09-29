@@ -35,6 +35,8 @@ void PerceptionScanOnBtStateChanged(bool isBtOn);
 
 void PerceptionScanOnScreenStateChanged(bool isScreenOn);
 
+void PerceptionMlpsServicesStateChange(bool isStart);
+
 #ifdef __cplusplus
 }
 #endif

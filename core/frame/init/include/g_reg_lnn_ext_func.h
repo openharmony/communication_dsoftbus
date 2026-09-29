@@ -401,6 +401,7 @@ typedef void (*OnRecvCloudQueryInfoFunc)(const char *udid, const char *data, uin
 
 typedef const SoftBusList *(*LnnGetLocalUserLedgerFunc)(void);
 typedef bool (*LnnIsAllMultiScreenOffFunc)(void);
+typedef void (*PerceptionMlpsServicesStateChangeFunc)(bool isStart);
 
 #ifdef __cplusplus
 }
