@@ -14,6 +14,7 @@
  */
 #include "br_proxy_manager.h"
 #include "../proxy_manager.h"
+#include "../far_field/far_field_proxy_manager.h"
 
 #include "securec.h"
 
@@ -235,6 +236,7 @@ static void ProxyChannelRefresh(struct ProxyChannel *channel, uint32_t newReques
 {
     CONN_CHECK_AND_RETURN_LOGE(channel != NULL, CONN_PROXY, "channel is null");
     CONN_CHECK_AND_RETURN_LOGE(callback != NULL, CONN_PROXY, "callback is null");
+    FarFieldProxyRefresh(channel, newRequestId, callback);
     ProxyChannelClose(channel, false);
     ProxyConnectInfo *connectInfo = (ProxyConnectInfo *)SoftBusCalloc(sizeof(ProxyConnectInfo));
     CONN_CHECK_AND_RETURN_LOGE(connectInfo != NULL, CONN_PROXY, "calloc connectInfo failed");
@@ -905,12 +907,7 @@ static void ProxyChannelDisconnectHandler(ProxyChannelNotifyContext *ctx)
     SetProxyChannelState(proxyConnection, PROXY_CHANNEL_DISCONNECTED);
     NotifyDisconnected(&proxyConnection->proxyChannel, reason);
     RemoveProxyChannelByChannelId(channelId);
-    ProxyConnectInfo *reconnectDeviceInfo = GetReconnectDeviceInfoByAddrUnsafe(proxyConnection->brMac);
-    if (reconnectDeviceInfo != NULL && !reconnectDeviceInfo->isSupportFarField) {
-        PostEventByAddr(MSG_OPEN_PROXY_CHANNEL_RETRY, proxyConnection->brMac, RECONNECT_AFTER_DISCONNECT_WAIT_MS);
-        proxyConnection->dereference(proxyConnection);
-        return;
-    }
+    PostEventByAddr(MSG_OPEN_PROXY_CHANNEL_RETRY, proxyConnection->brMac, RECONNECT_AFTER_DISCONNECT_WAIT_MS);
     proxyConnection->dereference(proxyConnection);
 }
 
