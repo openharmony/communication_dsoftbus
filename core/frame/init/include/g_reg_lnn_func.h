@@ -328,6 +328,7 @@ typedef struct TagLnnOpenFuncList {
     LnnNotifyDmHookRegisteredEventFunc lnnNotifyDmHookRegisteredEvent;
     BleGetAdvPowerFunc bleGetAdvPower;
     LnnIsAllMultiScreenOffFunc lnnIsAllMultiScreenOff;
+    PerceptionMlpsServicesStateChangeFunc perceptionMlpsServicesStateChange;
 } LnnOpenFuncList;
 
 #ifdef __cplusplus

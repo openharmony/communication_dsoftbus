@@ -246,6 +246,10 @@ int32_t LnnStopPerceptionScan(const char *pkgName, PerceptionType type)
     if (ret != SOFTBUS_OK) {
         return ret;
     }
+    ret = CheckLocalScanCapability();
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
     return PerceptionScanStop();
 }
 
