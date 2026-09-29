@@ -54,6 +54,8 @@ typedef struct {
 int32_t RegisterFarFieldProxyListener(FarFieldProxyListener *listener);
 int32_t OpenFarFieldProxyChannel(FarFieldProxyParam *param);
 void ClearFarFieldProxy(const char *addr);
+void FarFieldProxyRefresh(struct ProxyChannel *channel, uint32_t newRequestId,
+    const OpenProxyChannelCallback *callback);
 int32_t FarFieldProxyManagerInit(void);
 void FarFieldProxyManagerDeinit(void);
 #ifdef __cplusplus

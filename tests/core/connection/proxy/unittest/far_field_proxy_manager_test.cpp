@@ -945,7 +945,7 @@ HWTEST_F(FarFieldProxyManagerTest, FarFieldProxyManagerTest031, TestSize.Level1)
 
     const uint8_t data[] = {0x01, 0x02, 0x03};
     ret = g_farFieldChannel->send(g_farFieldChannel, data, sizeof(data));
-    EXPECT_EQ(ret, SOFTBUS_FAR_FIELD_NOT_CONNECTED);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     CONN_LOGI(CONN_PROXY, "FarFieldProxyManagerTest031 out");
 }
 

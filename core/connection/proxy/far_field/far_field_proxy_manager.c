@@ -83,8 +83,6 @@ static void FarFieldConnectTimeoutTask(int32_t callId, void *arg);
 static void StateMachineEventHandler(int32_t callId, void *arg);
 static int32_t FarFieldProxySend(struct ProxyChannel *channel, const uint8_t *data, uint32_t dataLen);
 static void FarFieldProxyClose(struct ProxyChannel *channel, bool isClearReconnectEvent);
-static void FarFieldProxyRefresh(struct ProxyChannel *channel, uint32_t newRequestId,
-    const OpenProxyChannelCallback *callback);
 static int32_t ConstructProxyChannel(FarFieldDeviceConnection *conn, uint32_t requestId);
 static void CleanupConnectionResources(FarFieldDeviceConnection *conn);
 static void CancelConnectionTimeout(FarFieldDeviceConnection *conn);
@@ -610,7 +608,7 @@ static int32_t FarFieldProxySend(struct ProxyChannel *channel, const uint8_t *da
     return SOFTBUS_OK;
 }
 
-static void FarFieldProxyRefresh(struct ProxyChannel *channel, uint32_t newRequestId,
+void FarFieldProxyRefresh(struct ProxyChannel *channel, uint32_t newRequestId,
     const OpenProxyChannelCallback *callback)
 {
     CONN_CHECK_AND_RETURN_LOGE(channel != NULL, CONN_PROXY, "channel is NULL");
@@ -865,14 +863,13 @@ static void FarFieldConnectTimeoutTask(int32_t callId, void *arg)
 void ClearFarFieldProxy(const char *addr)
 {
     CONN_CHECK_AND_RETURN_LOGE(addr != NULL, CONN_PROXY, "addr is NULL");
+    char anonymizeAddr[BT_MAC_LEN] = {0};
+    ConvertAnonymizeMacAddress(anonymizeAddr, BT_MAC_LEN, addr, BT_MAC_LEN);
 
     FarFieldDeviceConnection *conn = (FarFieldDeviceConnection *)SoftBusRcGetCommon(
         &g_farFieldManager.connectionList, FarFieldBrMacMatcher, addr);
     CONN_CHECK_AND_RETURN_LOGE(conn != NULL, CONN_PROXY,
-        "Connection not found, addr=%{public}s", addr);
-
-    char anonymizeAddr[BT_MAC_LEN] = {0};
-    ConvertAnonymizeMacAddress(anonymizeAddr, BT_MAC_LEN, conn->device.brMac, BT_MAC_LEN);
+        "Connection not found, addr=%{public}s", anonymizeAddr);
     CONN_LOGI(CONN_PROXY, "Closing far field channel for %{public}s", anonymizeAddr);
     if (GetConnectionState(conn) == P2P_CONNECTED) {
         int32_t ret = FarFieldAdapterCloseP2P(&conn->device, false);
