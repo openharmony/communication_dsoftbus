@@ -1162,7 +1162,7 @@ int32_t LnnSetDLDeviceBroadcastCipherKey(const char *udid, const void *cipherKey
 {
     DoubleHashMap *map = &(LnnGetDistributedNetLedger()->distributedInfo);
     NodeInfo *info = NULL;
-    if (udid == NULL) {
+    if (udid == NULL || cipherKey == NULL) {
         LNN_LOGE(LNN_LEDGER, "param error");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -1191,7 +1191,7 @@ int32_t LnnSetDLDeviceBroadcastCipherIv(const char *udid, const void *cipherIv)
 {
     DoubleHashMap *map = &(LnnGetDistributedNetLedger()->distributedInfo);
     NodeInfo *info = NULL;
-    if (udid == NULL) {
+    if (udid == NULL || cipherIv == NULL) {
         LNN_LOGE(LNN_LEDGER, "param error");
         return SOFTBUS_INVALID_PARAM;
     }
